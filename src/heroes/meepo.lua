@@ -106,8 +106,7 @@ define("hero_meepo", function()
     end
 
     local function level(u, name)
-        local id = A.id(name)
-        return id and GetUnitAbilityLevel(u, id) or 0
+        return A.level(u, name)
     end
 
     ---------------------------------------------------------------- Meepo groups

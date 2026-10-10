@@ -57,8 +57,7 @@ define("hero_morphling", function()
 
     local function id(name) return A.id(name) end
     local function level(u, name)
-        local abil = A.id(name)
-        return abil and GetUnitAbilityLevel(u, abil) or 0
+        return A.level(u, name)
     end
 
     local nameById = nil

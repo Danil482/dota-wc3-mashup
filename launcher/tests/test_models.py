@@ -17,6 +17,7 @@ Never starts Warcraft III, Dota 2 or Steam.
 import argparse
 import io
 import json
+import os
 import shutil
 import struct
 import subprocess
@@ -183,6 +184,32 @@ def test_synthetic(work):
         r = next(iter(rb.values()))
         check("synthetic: mdx-m3-viewer reads it back byte for byte", r["ok"], "; ".join(r["problems"][:3]))
 
+    # The static portrait model of units flagged "portrait" in units.py.
+    pfiles = {}
+    conv = convert.Converter("hero_test", unit, glb, [], {"Stand": "idle", "Walk": "run"}, attach)
+    world = models.texture_namer("hero_test", pfiles)
+    conv.convert(world, models.portrait_namer("hero_test", pfiles, world))
+    portrait = conv.portrait
+    pfiles[models.portrait_path("hero_test")] = writer.write(portrait)
+    check("portrait: one unanimated bone, every vertex group a single bone",
+          len(portrait.bones) == 1 and not portrait.bones[0].tracks
+          and all(len(grp) == 1 for g in portrait.geosets for grp in g.matrix_groups))
+    check("portrait: static Stand, Portrait, Portrait Talk and Death, a Portrait camera, nothing else",
+          [s.name for s in portrait.sequences] == ["Stand", "Portrait", "Portrait Talk", "Death"]
+          and [c.name for c in portrait.cameras] == ["Portrait"] and not portrait.attachments
+          and not portrait.collisions, str([s.name for s in portrait.sequences]))
+    # 'idle' starts at the rest pose, so the baked mesh is the bind mesh.
+    pverts = sorted(v for g in portrait.geosets for v in g.vertices)
+    check("portrait: mesh baked into the first Stand frame", len(pverts) == len(verts) and all(
+        max(abs(a - b) for a, b in zip(p, q)) < 1e-4 for p, q in zip(pverts, verts)))
+    check("portrait: shares the unit's small palette texture",
+          [t.path for t in portrait.textures] == ["war3mapImported\\Dota\\hero_test_body.blp"]
+          and models.blp_info(pfiles["war3mapImported\\Dota\\hero_test_body.blp"])[0] == 1)
+    rb = read_back(pfiles, work)
+    if rb is not None:
+        bad = {Path(f).name: r["problems"][:2] for f, r in rb.items() if not r["ok"]}
+        check("portrait: mdx-m3-viewer reads it back byte for byte", not bad, str(bad))
+
 
 def test_errors(work):
     try:
@@ -202,6 +229,21 @@ def test_errors(work):
     check("errors: no models.json means no models", models.load_keys(work / "absent.json") == [])
 
 
+def test_prune(work):
+    """prune() keeps the folders of a launcher converting at the same time."""
+    root = work / "prune"
+    names = {"keep": "models-3-00000000000000aa", "old": "models-2-00000000000000bb",
+             "busy": "models-work-111", "tmp": "models-3-00000000000000aa.tmp222", "dead": "models-work-333"}
+    for n in names.values():
+        (root / n).mkdir(parents=True)
+    old = time.time() - 7200
+    os.utime(root / names["dead"], (old, old))
+    models.prune(root, names["keep"])
+    left = sorted(d.name for d in root.iterdir())
+    check("prune: other caches and stale work folders go, live work and .tmp folders stay",
+          left == sorted([names["keep"], names["busy"], names["tmp"]]), str(left))
+
+
 def test_units():
     check("units: every Dota clip table names only known sequences",
           all(set(u.get("anims", {})) <= set(units.SEQUENCE_NAMES) | set(units.STRUCTURE_SEQUENCES)
@@ -212,6 +254,17 @@ def test_units():
           all(v["model"] == f"war3mapImported\\Dota\\{k}.mdx" for k, v in data.items()))
     check("models.json scales match the unit table",
           all(abs(v["scale"] - units.resolve(k)["scale"]) < 1e-9 for k, v in data.items()))
+    # "portrait" (tools/gen_objects.py apply_model): the static portrait model of a unit flagged in
+    # units.py, false for the base unit's WC3 portrait, or a WC3 .mdl path.
+    def portrait_ok(k, v):
+        p = v["portrait"]
+        if isinstance(p, str) and p.startswith(models.MAP_DIR):
+            return p == models.portrait_path(k) and bool(units.resolve(k).get("portrait"))
+        return p is False or (isinstance(p, str) and p.lower().endswith(".mdl"))
+    odd = [k for k, v in data.items() if "portrait" in v and not portrait_ok(k, v)]
+    check("models.json portraits are the unit's portrait model, false or a WC3 .mdl path", not odd, str(odd))
+    unset = [k for k in data if units.resolve(k).get("portrait") and data[k].get("portrait") != models.portrait_path(k)]
+    check("every unit with a portrait model points upor at it in models.json", not unset, str(unset))
 
 
 def test_quantize():
@@ -302,6 +355,14 @@ def test_dota(dota, work):
     files = runs[0][0]
     check("Dota: every models.json key has its .mdx",
           all(f"war3mapImported\\Dota\\{k}.mdx" in files for k in keys))
+    # models.json "walk" (uwal) is Dota's ground speed of the walk clip where
+    # the clip has one; a Dota update that changes it shows up here.
+    spec = json.loads((ROOT / "specs" / "models.json").read_text(encoding="utf-8"))
+    info = json.loads(next((work / "dota0").glob(models.CACHE_PREFIX + "*/manifest.json")).read_text(
+        encoding="utf-8"))["units"]
+    stale = {k: (spec[k].get("walk"), info[k]["walk_speed"]) for k in keys
+             if info[k].get("walk_speed") and abs(spec[k].get("walk", 0) - info[k]["walk_speed"]) > 1.0}
+    check("Dota: models.json walk speeds match the walk clips' ground speeds", not stale, str(stale)[:300])
     rb = read_back(files, work)
     if rb is not None:
         bad = {Path(f).name: r["problems"][:2] for f, r in rb.items() if not r["ok"]}
@@ -327,6 +388,7 @@ def main():
     test_kv3_and_clips()
     test_units()
     test_errors(work)
+    test_prune(work)
     test_synthetic(work)
     if args.dota:
         test_dota(args.dota, work)

@@ -16,6 +16,8 @@ Steps:
      all clips are laid out on one timeline as named sequences.
   5. Attachments, a portrait camera and collision shapes are added; extents
      are computed per sequence from per-bone bounding boxes.
+  6. For units flagged "portrait" a second, static model is built for the
+     portrait (upor): see build_portrait.
 
 Everything here is deterministic (see mathutil): the same inputs give the
 same bytes on every PC.
@@ -366,9 +368,12 @@ class Converter:
 
     # ---------------------------------------------------------- main
 
-    def convert(self, texture_path_for):
+    def convert(self, texture_path_for, portrait_texture_for=None):
         """Build the WC3 model. texture_path_for(image path, material) ->
-        (map path of the texture, alpha mode used). Returns (writer.Model, info)."""
+        (map path of the texture, alpha mode used). Returns (writer.Model, info).
+        With portrait_texture_for (same signature) a static portrait model is
+        built too, as self.portrait (see build_portrait)."""
+        self.portrait = None
         self.build_skeleton()
         self.set_space()
         geometry = self.collect_geometry()
@@ -435,12 +440,14 @@ class Converter:
         # Materials, textures, geosets
         tex_index, mat_index = {}, {}
         tri_lists = {}
+        parts = []          # (image, material, glTF alpha mode, filter mode, shading, verts, faces)
         for (src_mat_key, glb, mat, verts, faces) in geometry:
             image = None
             bc = mat.get("pbrMetallicRoughness", {}).get("baseColorTexture")
             if bc is not None:
                 image = glb.texture_path(bc["index"])
             alpha_mode = mat.get("alphaMode", "OPAQUE")
+            gltf_alpha = alpha_mode
             tex_path, alpha_mode = texture_path_for(image, mat, alpha_mode)
             if tex_path not in tex_index:
                 tex_index[tex_path] = len(model.textures)
@@ -454,6 +461,7 @@ class Converter:
                 model.materials.append(writer.Material([writer.Layer(mkey[0], filter_mode, shading)]))
             mi = mat_index[mkey]
             tri_lists.setdefault(mi, []).append((verts, faces))
+            parts.append((image, mat, gltf_alpha, filter_mode, shading, verts, faces))
             for v in verts:
                 p = v["p"]
                 box = _grow(box, p)
@@ -488,6 +496,8 @@ class Converter:
                 seq_box = box
             all_box = _grow(_grow(all_box, seq_box[0]), seq_box[1])
             move = self.move_speed(clip) if name == "Walk" else 0.0
+            if name == "Walk":
+                self.walk = move
             model.sequences.append(writer.Sequence(name, start, end, looping, rarity, move,
                                                    writer.Extent(seq_box[0], seq_box[1])))
             self._bone_keys(clip, start, pivots, bone_keys)
@@ -507,12 +517,20 @@ class Converter:
 
         self.add_attachments(model, attach, index, box)
         self.add_camera_and_collision(model, attach, index, box)
+        if portrait_texture_for is not None:
+            stand = next(c for name, _loop, _rarity, c in clips if name == "Stand")
+            self.portrait = self.build_portrait(parts, stand.mats[0], attach, index, portrait_texture_for)
         info = {"bones": len(keep), "geosets": len(model.geosets),
                 "vertices": sum(len(g.vertices) for g in model.geosets),
                 "triangles": sum(len(g.faces) for g in model.geosets) // 3,
                 "sequences": {s.name: [s.start, s.end] for s in model.sequences},
                 "clips": {name: src for name, src in self.clip_sources.items()},
-                "height": round(box[1][2] - box[0][2], 1), "notes": self.notes}
+                "height": round(box[1][2] - box[0][2], 1), "notes": self.notes,
+                # Dota's ground speed of the walk clip: specs/models.json "walk" (uwal)
+                "walk_speed": round(getattr(self, "walk", 0.0), 1)}
+        if self.portrait is not None:
+            info["portrait"] = {"geosets": len(self.portrait.geosets),
+                                "vertices": sum(len(g.vertices) for g in self.portrait.geosets)}
         return model, info
 
     def _geosets(self, material_id, parts, index):
@@ -608,6 +626,8 @@ class Converter:
     def move_speed(self, clip):
         """Ground speed the clip was animated for (units per second), measured
         before its root motion was removed. 0 if it was in place."""
+        # Planted feet are no substitute: Dota walk cycles slide (Pudge's feet
+        # move back at about 180 units/s in a clip authored for 325).
         return getattr(clip, "speed", 0.0)
 
     def remove_root_motion(self, clip):
@@ -772,26 +792,35 @@ class Converter:
                 parent = index[j] if j >= 0 else -1
             model.attachments.append(writer.Attachment(name, parent, pos, i))
 
-    def add_camera_and_collision(self, model, attach, index, box):
+    def portrait_camera(self, box, head_pos, whole=False):
+        """The Portrait camera: a structure (or, with whole, anything) whole,
+        from above its front; a unit on its head (head_pos, or 80 % up the
+        box without a head)."""
         mn, mx = box
         height = max(1.0, mx[2] - mn[2])
         width = max(mx[0] - mn[0], mx[1] - mn[1])
-        fov = 0.6
         half_tan = 0.30933624960962325      # tan(0.3)
-        if self.kind == units.STRUCTURE:
+        if self.kind == units.STRUCTURE or whole:
             target = ((mn[0] + mx[0]) * 0.5, (mn[1] + mx[1]) * 0.5, mn[2] + height * 0.5)
             span = max(height, width) * 1.15
             dist = span / (2.0 * half_tan)
             position = (target[0] + dist * 0.8, target[1], target[2] + dist * 0.6)
-            model.collisions.append(writer.CollisionShape("Collision Box", -1, target, writer.COLLISION_BOX,
-                                                          (mn, mx)))
         else:
-            head = attach.get("Head Ref")
-            target = head["pos"] if head else (0.0, 0.0, mn[2] + height * 0.8)
+            target = head_pos if head_pos is not None else (0.0, 0.0, mn[2] + height * 0.8)
             target = (target[0], target[1], target[2] - height * 0.08)
             span = height * 0.62
             dist = span / (2.0 * half_tan)
             position = (target[0] + dist, target[1], target[2] + dist * 0.12)
+        return writer.Camera("Portrait", position, target, 0.6, 4.0, dist * 6.0)
+
+    def add_camera_and_collision(self, model, attach, index, box):
+        mn, mx = box
+        height = max(1.0, mx[2] - mn[2])
+        if self.kind == units.STRUCTURE:
+            center = ((mn[0] + mx[0]) * 0.5, (mn[1] + mx[1]) * 0.5, mn[2] + height * 0.5)
+            model.collisions.append(writer.CollisionShape("Collision Box", -1, center, writer.COLLISION_BOX,
+                                                          (mn, mx)))
+        else:
             chest = attach.get("Chest Ref")
             if chest is not None:
                 j = chest["joint"]
@@ -804,4 +833,60 @@ class Converter:
             radius = max(24.0, height * 0.32)
             model.collisions.append(writer.CollisionShape("Collision Sphere", parent, center,
                                                           writer.COLLISION_SPHERE, (center,), radius))
-        model.cameras.append(writer.Camera("Portrait", position, target, fov, 4.0, dist * 6.0))
+        head = attach.get("Head Ref")
+        model.cameras.append(self.portrait_camera(box, head["pos"] if head else None))
+
+    # ---------------------------------------------------------- portrait
+
+    def build_portrait(self, parts, pose, attach, index, texture_path_for):
+        """A conservative model for the unit's portrait (upor): the mesh
+        baked into `pose` (the first Stand frame: one skinning matrix per
+        bone), one unanimated root bone that every vertex follows, the
+        sequences Stand, Portrait, Portrait Talk and Death (all static), the
+        Portrait camera on the posed head, and nothing else: no attachments,
+        collision shapes or emitters."""
+        root = -1                       # the one matrix group: (root,) -> bone 0
+        group_mats = {}
+
+        def matrix(group):
+            # Warcraft III averages the matrices of a vertex group's bones.
+            if group not in group_mats:
+                ms = [pose[index[j]] for j in group]
+                group_mats[group] = tuple(sum(m[k] for m in ms) / len(ms) for k in range(12))
+            return group_mats[group]
+
+        model = writer.Model(self.key + "_portrait")
+        tex_index, mat_index, tri_lists = {}, {}, {}
+        box = EMPTY_BOX
+        for image, mat, alpha_mode, filter_mode, shading, verts, faces in parts:
+            tex_path, _mode = texture_path_for(image, mat, alpha_mode)
+            if tex_path not in tex_index:
+                tex_index[tex_path] = len(model.textures)
+                model.textures.append(writer.Texture(tex_path))
+            mkey = (tex_index[tex_path], filter_mode, shading)
+            if mkey not in mat_index:
+                mat_index[mkey] = len(model.materials)
+                model.materials.append(writer.Material([writer.Layer(mkey[0], filter_mode, shading)]))
+            posed = []
+            for v in verts:
+                m = matrix(v["g"])
+                p = mat_apply(m, v["p"])
+                posed.append({"p": p, "n": normalize(mat_apply_dir(m, v["n"])), "uv": v["uv"], "g": (root,)})
+                box = _grow(box, p)
+            tri_lists.setdefault(mat_index[mkey], []).append((posed, faces))
+        for mi in sorted(tri_lists):
+            model.geosets.extend(self._geosets(mi, tri_lists[mi], {root: 0}))
+        extent = writer.Extent(box[0], box[1])
+        model.extent = extent
+        frame = 0
+        for name in ("Stand", "Portrait", "Portrait Talk", "Death"):
+            model.sequences.append(writer.Sequence(name, frame, frame + 1000, name != "Death", 0.0, 0.0, extent))
+            frame += 1000 + SEQUENCE_GAP_MS
+        for g in model.geosets:
+            g.sequence_extents = [extent] * len(model.sequences)
+        model.bones.append(writer.Bone("Root", -1, (0.0, 0.0, 0.0)))
+        head = attach.get("Head Ref")
+        head_pos = mat_apply(pose[index[head["joint"]]], head["pos"]) if head else None
+        # Without a head (mines, turrets, the dragons) the whole model is framed.
+        model.cameras.append(self.portrait_camera(box, head_pos, whole=head_pos is None))
+        return model

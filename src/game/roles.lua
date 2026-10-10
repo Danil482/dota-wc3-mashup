@@ -89,10 +89,13 @@ define("roles", function()
                 end
             end
         end
-        -- Neutral hostile creeps (jungle, Roshan) fight everyone
+        -- Neutral hostile creeps (jungle, Roshan) fight every player, except the
+        -- owners of towers, buildings and lane creeps: as in Dota, towers and
+        -- lane waves leave the jungle alone and neutrals leave them alone
         for a = 0, PLAYER_COUNT - 1 do
-            SetPlayerAlliance(Player(PLAYER_NEUTRAL_AGGRESSIVE), Player(a), ALLIANCE_PASSIVE, false)
-            SetPlayerAlliance(Player(a), Player(PLAYER_NEUTRAL_AGGRESSIVE), ALLIANCE_PASSIVE, false)
+            local leaveAlone = a == SLOT_ANCIENTS or a == SLOT_HORDE
+            SetPlayerAlliance(Player(PLAYER_NEUTRAL_AGGRESSIVE), Player(a), ALLIANCE_PASSIVE, leaveAlone)
+            SetPlayerAlliance(Player(a), Player(PLAYER_NEUTRAL_AGGRESSIVE), ALLIANCE_PASSIVE, leaveAlone)
         end
     end
 

@@ -1,59 +1,73 @@
 {
  "hero_pudge": {
   "model": "war3mapImported\\Dota\\hero_pudge.mdx",
-  "scale": 0.98
+  "scale": 0.98,
+  "walk": 325
  },
  "hero_meepo": {
   "model": "war3mapImported\\Dota\\hero_meepo.mdx",
-  "scale": 0.93
+  "scale": 0.93,
+  "walk": 350
  },
  "hero_tinker": {
   "model": "war3mapImported\\Dota\\hero_tinker.mdx",
-  "scale": 0.8
+  "scale": 0.8,
+  "walk": 305
  },
  "hero_rubick": {
   "model": "war3mapImported\\Dota\\hero_rubick.mdx",
-  "scale": 0.7
+  "scale": 0.7,
+  "walk": 310
  },
  "hero_morphling": {
   "model": "war3mapImported\\Dota\\hero_morphling.mdx",
-  "scale": 0.88
+  "scale": 0.88,
+  "walk": 285
  },
  "hero_furion": {
   "model": "war3mapImported\\Dota\\hero_furion.mdx",
-  "scale": 0.79
+  "scale": 0.79,
+  "walk": 295
  },
  "hero_chen": {
   "model": "war3mapImported\\Dota\\hero_chen.mdx",
-  "scale": 0.93
+  "scale": 0.93,
+  "walk": 310
  },
  "hero_antimage": {
   "model": "war3mapImported\\Dota\\hero_antimage.mdx",
-  "scale": 0.9
+  "scale": 0.9,
+  "walk": 375
  },
  "hero_techies": {
   "model": "war3mapImported\\Dota\\hero_techies.mdx",
-  "scale": 0.6
+  "scale": 0.6,
+  "walk": 403
  },
  "hero_ogre_magi": {
   "model": "war3mapImported\\Dota\\hero_ogre_magi.mdx",
-  "scale": 0.93
+  "scale": 0.93,
+  "walk": 290
  },
  "hero_nevermore": {
   "model": "war3mapImported\\Dota\\hero_nevermore.mdx",
-  "scale": 0.98
+  "scale": 0.98,
+  "walk": 305
  },
  "dota_melee": {
   "model": "war3mapImported\\Dota\\dota_melee.mdx",
-  "scale": 0.93
+  "scale": 0.93,
+  "walk": 325
  },
  "dota_ranged": {
   "model": "war3mapImported\\Dota\\dota_ranged.mdx",
-  "scale": 0.88
+  "scale": 0.88,
+  "walk": 325
  },
  "dota_siege": {
   "model": "war3mapImported\\Dota\\dota_siege.mdx",
-  "scale": 0.65
+  "scale": 0.65,
+  "walk": 325
  },
  "tower1": {
   "model": "war3mapImported\\Dota\\tower1.mdx",
@@ -86,5 +100,275 @@
  "fountain": {
   "model": "war3mapImported\\Dota\\fountain.mdx",
   "scale": 1.0
+ },
+ "neutral_alpha_wolf": {
+  "model": "war3mapImported\\Dota\\neutral_alpha_wolf.mdx",
+  "scale": 0.9,
+  "walk": 350,
+  "portrait": "war3mapImported\\Dota\\neutral_alpha_wolf_portrait.mdx"
+ },
+ "neutral_big_thunder_lizard": {
+  "model": "war3mapImported\\Dota\\neutral_big_thunder_lizard.mdx",
+  "scale": 0.8,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\neutral_big_thunder_lizard_portrait.mdx"
+ },
+ "neutral_black_dragon": {
+  "model": "war3mapImported\\Dota\\neutral_black_dragon.mdx",
+  "scale": 1.0,
+  "walk": 300,
+  "portrait": "war3mapImported\\Dota\\neutral_black_dragon_portrait.mdx"
+ },
+ "neutral_black_drake": {
+  "model": "war3mapImported\\Dota\\neutral_black_drake.mdx",
+  "scale": 0.6,
+  "walk": 350,
+  "portrait": "war3mapImported\\Dota\\neutral_black_drake_portrait.mdx"
+ },
+ "neutral_centaur_khan": {
+  "model": "war3mapImported\\Dota\\neutral_centaur_khan.mdx",
+  "scale": 1.0,
+  "walk": 320,
+  "portrait": "war3mapImported\\Dota\\neutral_centaur_khan_portrait.mdx"
+ },
+ "neutral_centaur_outrunner": {
+  "model": "war3mapImported\\Dota\\neutral_centaur_outrunner.mdx",
+  "scale": 0.8,
+  "walk": 320,
+  "portrait": "war3mapImported\\Dota\\neutral_centaur_outrunner_portrait.mdx"
+ },
+ "neutral_dark_troll": {
+  "model": "war3mapImported\\Dota\\neutral_dark_troll.mdx",
+  "scale": 0.7,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\neutral_dark_troll_portrait.mdx"
+ },
+ "neutral_dark_troll_warlord": {
+  "model": "war3mapImported\\Dota\\neutral_dark_troll_warlord.mdx",
+  "scale": 0.9,
+  "walk": 300,
+  "portrait": "war3mapImported\\Dota\\neutral_dark_troll_warlord_portrait.mdx"
+ },
+ "neutral_enraged_wildkin": {
+  "model": "war3mapImported\\Dota\\neutral_enraged_wildkin.mdx",
+  "scale": 1.1,
+  "walk": 299,
+  "portrait": "war3mapImported\\Dota\\neutral_enraged_wildkin_portrait.mdx"
+ },
+ "neutral_fel_beast": {
+  "model": "war3mapImported\\Dota\\neutral_fel_beast.mdx",
+  "scale": 0.9,
+  "walk": 350,
+  "portrait": "war3mapImported\\Dota\\neutral_fel_beast_portrait.mdx"
+ },
+ "neutral_forest_troll_berserker": {
+  "model": "war3mapImported\\Dota\\neutral_forest_troll_berserker.mdx",
+  "scale": 0.9,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\neutral_forest_troll_berserker_portrait.mdx"
+ },
+ "neutral_forest_troll_high_priest": {
+  "model": "war3mapImported\\Dota\\neutral_forest_troll_high_priest.mdx",
+  "scale": 0.9,
+  "walk": 459,
+  "portrait": "war3mapImported\\Dota\\neutral_forest_troll_high_priest_portrait.mdx"
+ },
+ "neutral_ghost": {
+  "model": "war3mapImported\\Dota\\neutral_ghost.mdx",
+  "scale": 0.9,
+  "walk": 321,
+  "portrait": "war3mapImported\\Dota\\neutral_ghost_portrait.mdx"
+ },
+ "neutral_giant_wolf": {
+  "model": "war3mapImported\\Dota\\neutral_giant_wolf.mdx",
+  "scale": 0.9,
+  "walk": 350,
+  "portrait": "war3mapImported\\Dota\\neutral_giant_wolf_portrait.mdx"
+ },
+ "neutral_gnoll_assassin": {
+  "model": "war3mapImported\\Dota\\neutral_gnoll_assassin.mdx",
+  "scale": 0.9,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\neutral_gnoll_assassin_portrait.mdx"
+ },
+ "neutral_granite_golem": {
+  "model": "war3mapImported\\Dota\\neutral_granite_golem.mdx",
+  "scale": 1.3,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\neutral_granite_golem_portrait.mdx"
+ },
+ "neutral_harpy_scout": {
+  "model": "war3mapImported\\Dota\\neutral_harpy_scout.mdx",
+  "scale": 0.85,
+  "walk": 280,
+  "portrait": "war3mapImported\\Dota\\neutral_harpy_scout_portrait.mdx"
+ },
+ "neutral_harpy_storm": {
+  "model": "war3mapImported\\Dota\\neutral_harpy_storm.mdx",
+  "scale": 0.925,
+  "walk": 310,
+  "portrait": "war3mapImported\\Dota\\neutral_harpy_storm_portrait.mdx"
+ },
+ "neutral_kobold": {
+  "model": "war3mapImported\\Dota\\neutral_kobold.mdx",
+  "scale": 0.9,
+  "walk": 290,
+  "portrait": "war3mapImported\\Dota\\neutral_kobold_portrait.mdx"
+ },
+ "neutral_kobold_taskmaster": {
+  "model": "war3mapImported\\Dota\\neutral_kobold_taskmaster.mdx",
+  "scale": 1.0,
+  "walk": 330,
+  "portrait": "war3mapImported\\Dota\\neutral_kobold_taskmaster_portrait.mdx"
+ },
+ "neutral_kobold_tunneler": {
+  "model": "war3mapImported\\Dota\\neutral_kobold_tunneler.mdx",
+  "scale": 1.0,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\neutral_kobold_tunneler_portrait.mdx"
+ },
+ "neutral_mud_golem": {
+  "model": "war3mapImported\\Dota\\neutral_mud_golem.mdx",
+  "scale": 1.1,
+  "walk": 273,
+  "portrait": "war3mapImported\\Dota\\neutral_mud_golem_portrait.mdx"
+ },
+ "neutral_ogre_magi": {
+  "model": "war3mapImported\\Dota\\neutral_ogre_magi.mdx",
+  "scale": 0.9,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\neutral_ogre_magi_portrait.mdx"
+ },
+ "neutral_ogre_mauler": {
+  "model": "war3mapImported\\Dota\\neutral_ogre_mauler.mdx",
+  "scale": 0.9,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\neutral_ogre_mauler_portrait.mdx"
+ },
+ "neutral_polar_furbolg_champion": {
+  "model": "war3mapImported\\Dota\\neutral_polar_furbolg_champion.mdx",
+  "scale": 0.8,
+  "walk": 320,
+  "portrait": "war3mapImported\\Dota\\neutral_polar_furbolg_champion_portrait.mdx"
+ },
+ "neutral_polar_furbolg_ursa_warrior": {
+  "model": "war3mapImported\\Dota\\neutral_polar_furbolg_ursa_warrior.mdx",
+  "scale": 0.95,
+  "walk": 319,
+  "portrait": "war3mapImported\\Dota\\neutral_polar_furbolg_ursa_warrior_portrait.mdx"
+ },
+ "neutral_rock_golem": {
+  "model": "war3mapImported\\Dota\\neutral_rock_golem.mdx",
+  "scale": 1.0,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\neutral_rock_golem_portrait.mdx"
+ },
+ "neutral_satyr_hellcaller": {
+  "model": "war3mapImported\\Dota\\neutral_satyr_hellcaller.mdx",
+  "scale": 0.95,
+  "walk": 310,
+  "portrait": "war3mapImported\\Dota\\neutral_satyr_hellcaller_portrait.mdx"
+ },
+ "neutral_satyr_soulstealer": {
+  "model": "war3mapImported\\Dota\\neutral_satyr_soulstealer.mdx",
+  "scale": 0.8,
+  "walk": 310,
+  "portrait": "war3mapImported\\Dota\\neutral_satyr_soulstealer_portrait.mdx"
+ },
+ "neutral_satyr_trickster": {
+  "model": "war3mapImported\\Dota\\neutral_satyr_trickster.mdx",
+  "scale": 0.7,
+  "walk": 300,
+  "portrait": "war3mapImported\\Dota\\neutral_satyr_trickster_portrait.mdx"
+ },
+ "neutral_small_thunder_lizard": {
+  "model": "war3mapImported\\Dota\\neutral_small_thunder_lizard.mdx",
+  "scale": 0.65,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\neutral_small_thunder_lizard_portrait.mdx"
+ },
+ "neutral_wildkin": {
+  "model": "war3mapImported\\Dota\\neutral_wildkin.mdx",
+  "scale": 0.8,
+  "walk": 300,
+  "portrait": "war3mapImported\\Dota\\neutral_wildkin_portrait.mdx"
+ },
+ "roshan": {
+  "model": "war3mapImported\\Dota\\roshan.mdx",
+  "scale": 1.0,
+  "walk": 270,
+  "portrait": "war3mapImported\\Dota\\roshan_portrait.mdx"
+ },
+ "chen_zealot": {
+  "model": "war3mapImported\\Dota\\chen_zealot.mdx",
+  "scale": 1.1,
+  "walk": 325,
+  "portrait": "war3mapImported\\Dota\\chen_zealot_portrait.mdx"
+ },
+ "furion_treant": {
+  "model": "war3mapImported\\Dota\\furion_treant.mdx",
+  "scale": 0.8,
+  "walk": 300,
+  "portrait": "war3mapImported\\Dota\\furion_treant_portrait.mdx"
+ },
+ "techies_mine": {
+  "model": "war3mapImported\\Dota\\techies_mine.mdx",
+  "scale": 1.0,
+  "portrait": "war3mapImported\\Dota\\techies_mine_portrait.mdx"
+ },
+ "tinker_turret": {
+  "model": "war3mapImported\\Dota\\tinker_turret.mdx",
+  "scale": 0.65,
+  "portrait": "war3mapImported\\Dota\\tinker_turret_portrait.mdx"
+ },
+ "tinker_robot": {
+  "model": "war3mapImported\\Dota\\tinker_robot.mdx",
+  "scale": 0.25
+ },
+ "rune_bounty": {
+  "model": "war3mapImported\\Dota\\rune_bounty.mdx",
+  "scale": 1.0
+ },
+ "rune_water": {
+  "model": "war3mapImported\\Dota\\rune_water.mdx",
+  "scale": 1.0
+ },
+ "rune_doubledamage": {
+  "model": "war3mapImported\\Dota\\rune_doubledamage.mdx",
+  "scale": 1.0
+ },
+ "rune_haste": {
+  "model": "war3mapImported\\Dota\\rune_haste.mdx",
+  "scale": 1.0
+ },
+ "rune_illusion": {
+  "model": "war3mapImported\\Dota\\rune_illusion.mdx",
+  "scale": 1.0
+ },
+ "rune_invisibility": {
+  "model": "war3mapImported\\Dota\\rune_invisibility.mdx",
+  "scale": 1.0
+ },
+ "rune_regeneration": {
+  "model": "war3mapImported\\Dota\\rune_regeneration.mdx",
+  "scale": 1.0
+ },
+ "rune_arcane": {
+  "model": "war3mapImported\\Dota\\rune_arcane.mdx",
+  "scale": 1.0
+ },
+ "rune_shield": {
+  "model": "war3mapImported\\Dota\\rune_shield.mdx",
+  "scale": 1.0
+ },
+ "ward_observer": {
+  "model": "war3mapImported\\Dota\\ward_observer.mdx",
+  "scale": 1.0,
+  "portrait": "war3mapImported\\Dota\\ward_observer_portrait.mdx"
+ },
+ "ward_sentry": {
+  "model": "war3mapImported\\Dota\\ward_sentry.mdx",
+  "scale": 1.0,
+  "portrait": "war3mapImported\\Dota\\ward_sentry_portrait.mdx"
  }
 }

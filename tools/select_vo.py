@@ -219,6 +219,8 @@ def main():
     ap.add_argument("--dota", required=True)
     ap.add_argument("--vrf")
     args = ap.parse_args()
+    if args.vrf:
+        args.vrf = os.path.abspath(args.vrf)   # check_mp3 runs VRF from a temp folder
 
     pak = os.path.join(args.dota, "game", "dota", "pak01_dir.vpk")
     files = vpkdir.read_tree(pak, ["sounds/vo/"])

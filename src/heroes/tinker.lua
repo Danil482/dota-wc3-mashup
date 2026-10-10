@@ -23,7 +23,6 @@ define("hero_tinker", function()
         beam = "AFOD",                                                      -- red lightning
         laserHit = "Abilities\\Weapons\\FireBallMissile\\FireBallMissile.mdl",
         blind = "Abilities\\Spells\\Undead\\Curse\\CurseTarget.mdl",
-        robot = "Units\\Creeps\\HeroTinkerRobot\\HeroTinkerRobot.mdl",
         boom = "Abilities\\Weapons\\Mortar\\MortarMissile.mdl",
         crate = "Abilities\\Spells\\Other\\TinkerRocket\\TinkerRocketMissile.mdl",
         impact = "Abilities\\Spells\\Human\\Thunderclap\\ThunderClapCaster.mdl",
@@ -35,6 +34,10 @@ define("hero_tinker", function()
         rearm = "Abilities\\Spells\\Items\\AIlm\\AIlmTarget.mdl",
         rearmDone = "Abilities\\Spells\\Items\\TomeOfRetraining\\TomeOfRetrainingCaster.mdl",
     }
+    -- March robots: Dota's model when the launcher converted it (specs/models.json
+    -- via data.ids), else WC3's clockwork goblin.
+    local ROBOT = (use("data.ids").models or {}).tinker_robot
+        or {model = "Units\\Creeps\\HeroTinkerRobot\\HeroTinkerRobot.mdl", scale = 0.55}
     local TIMED_LIFE = FourCC("BTLF")
 
     local loc = Location(0, 0)
@@ -44,8 +47,7 @@ define("hero_tinker", function()
     end
 
     local function level(u, name)
-        local id = A.id(name)
-        return id and GetUnitAbilityLevel(u, id) or 0
+        return A.level(u, name)
     end
 
     -- Pushes u away from (fx, fy) over `duration` without interrupting orders;
@@ -148,8 +150,8 @@ define("hero_tinker", function()
                     local off = GetRandomReal(-p.radius, p.radius)
                     local x = cx - dirX * p.radius + perpX * off
                     local y = cy - dirY * p.radius + perpY * off
-                    local fx = AddSpecialEffect(FX.robot, x, y)
-                    BlzSetSpecialEffectScale(fx, 0.55)
+                    local fx = AddSpecialEffect(ROBOT.model, x, y)
+                    BlzSetSpecialEffectScale(fx, ROBOT.scale)
                     BlzSetSpecialEffectYaw(fx, ang)
                     BlzPlaySpecialEffect(fx, ANIM_TYPE_WALK)
                     robots[#robots + 1] = {fx = fx, x = x, y = y, t = 0}

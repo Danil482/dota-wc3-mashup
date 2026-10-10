@@ -169,7 +169,7 @@ def vpk_prefixes(manifest, item_icons=(), hud=()):
     every source the voice manifest, items.json and hud_assets.json name."""
     sources = list(manifest["files"].values())
     sources += [s for events in manifest.get("spares", {}).values() for lines in events.values() for s in lines]
-    sources += [s for entry in list(item_icons) + list(hud) for s in entry["sources"]]
+    sources += [s for entry in list(item_icons) + list(hud) for s in entry.get("sources") or []]
     folders = set(SEARCHED_FOLDERS) | {s.rsplit("/", 1)[0] + "/" for s in sources if "/" in s}
     return tuple(sorted(f for f in folders if not any(f != g and f.startswith(g) for g in folders)))
 

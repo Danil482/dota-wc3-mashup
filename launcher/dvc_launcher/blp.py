@@ -40,7 +40,13 @@ def encode(image):
     for w, h in mip_sizes(width, height):
         level = rgba if (w, h) == (width, height) else rgba.resize((w, h), Image.Resampling.BOX)
         levels.append(level)
+    return encode_levels(levels)
 
+
+def encode_levels(levels):
+    """BLP1 bytes from a ready mip chain: RGBA images, top level first, each
+    half the size of the one before (mip_sizes)."""
+    width, height = levels[0].size
     # One palette for all levels, built from the top level's colours.
     palette_image = levels[0].convert("RGB").quantize(
         colors=256, method=Image.Quantize.FASTOCTREE, dither=Image.Dither.NONE)

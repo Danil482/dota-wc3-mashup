@@ -10,4 +10,4 @@
 
 # Bump on any change that alters converted bytes; it is part of the model
 # cache key, so players' caches are rebuilt after a launcher update.
-CONVERTER_VERSION = 3
+CONVERTER_VERSION = 4

@@ -17,7 +17,8 @@ import traceback
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from . import PLAN_VERSION, __version__, assets, installs, models, stormlib, vpkdir, vrf, winapi
+from . import (PLAN_VERSION, __version__, assets, dota_settings, installs, models, stormlib, terrain, vpkdir, vrf,
+               winapi)
 
 APP = "DotaVsCommander"
 TITLE = "Dota vs Commander"
@@ -294,6 +295,35 @@ def prepare_assets(dota, vpk, vrf_exe):
     return files
 
 
+def prepare_terrain(dota, base_map, vrf_exe, stormlib_dll):
+    """Dota's own map layout (terrain package): map files that replace the base
+    map's terrain, trees, start locations and data.mapdata. On any failure the
+    base map's own layout stays, with a warning: it is complete by itself."""
+    t = time.perf_counter()
+    try:
+        out = terrain.prepare(dota, base_map, vrf_exe, stormlib_dll, user_dir() / "cache", log.info)
+    except (terrain.TerrainError, OSError) as e:
+        log.warning(f"terrain: keeping the base map's layout: {e}")
+        return {}
+    except Exception:  # noqa: BLE001 - the base layout is a complete map; never fail the run here
+        log.warning(f"terrain: keeping the base map's layout after an error:\n{traceback.format_exc()}")
+        return {}
+    log.info(f"terrain: Dota's layout, {len(out)} map files in {time.perf_counter() - t:.1f} s")
+    return out
+
+
+def export_settings(dota, vpk):
+    """The player's own Dota keys and settings, next to the map's log in
+    CustomMapData and never inside the map: every player in a lobby needs the
+    same map file. Without them the map uses Dota's defaults."""
+    try:
+        summary = dota_settings.export(dota, vpk, winapi.documents_dir() / "Warcraft III" / "CustomMapData" / APP)
+    except Exception as e:  # noqa: BLE001 - optional; the message may hold the Steam account folder
+        log.warning(f"Dota settings not exported: {getattr(e, 'strerror', None) or type(e).__name__}")
+        return
+    log.info(f"Dota settings: {summary}" if summary else "Dota settings not found; the map uses Dota's defaults")
+
+
 def write_map(base_path, out_path, files, stormlib_dll, work_dir):
     t = time.perf_counter()
     try:
@@ -372,7 +402,9 @@ def run(args):
     log.info(f"dota={dota} game={game} map={base_map} out={out_path} vrf={vrf_exe} stormlib={stormlib_dll}")
 
     files = prepare_assets(dota, vpk, vrf_exe)
+    files.update(prepare_terrain(dota, base_map, vrf_exe, stormlib_dll))
     write_map(base_map, out_path, files, stormlib_dll, user_dir() / "work" / f"map-{os.getpid()}")
+    export_settings(dota, vpk)
     log.info(f"prepared in {time.perf_counter() - t0:.1f} s")
     if args.prepare_only:
         return EXIT_OK

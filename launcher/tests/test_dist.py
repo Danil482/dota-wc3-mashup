@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT / "launcher"))
 import mpyq  # noqa: E402
 from PIL import Image, ImageChops, ImageStat  # noqa: E402
 
-from dvc_launcher import assets, cli, models, stormlib, vrf  # noqa: E402
+from dvc_launcher import assets, blp, cli, models, stormlib, terrain, vrf  # noqa: E402
 
 DIST = ROOT / "dist" / "DotaVsCommander"
 EXE = DIST / "DotaVsCommander.exe"
@@ -128,6 +128,8 @@ def main():
     ap.add_argument("--work", required=True)
     ap.add_argument("--base", default=str(ROOT / "build" / "test" / "DotaVsCommander_test.w3x"))
     args = ap.parse_args()
+    # -I ignores PYTHONIOENCODING: keep the non-ASCII --out path printable on a cp1252 stdout.
+    sys.stdout.reconfigure(errors="backslashreplace")
     work = Path(args.work)
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True)
@@ -198,20 +200,33 @@ def main():
         not_pot = []
         for e in hud:
             head = out_files.get(e["target"], b"")[:20].ljust(20, b"\0")
-            magic, _content, _alpha, w, h = struct.unpack("<4sIIII", head)
-            if magic != b"BLP1" or not w or not h or w & (w - 1) or h & (h - 1):
+            magic, _content, alpha_bits, w, h = struct.unpack("<4sIIII", head)
+            want = tuple(assets.pot_side(min(v, assets.HUD_MAX_SIDE)) for v in e["size"]) if e["size"] else (w, h)
+            if magic != b"BLP1" or alpha_bits != 8 or not w or not h or w & (w - 1) or h & (h - 1) or (w, h) != want:
                 not_pot.append(e["target"])
-        check("every HUD image is a BLP1 with power-of-two sides", not not_pot,
+        check("every HUD image is in the map: BLP1, 8-bit alpha, power-of-two sides, requested size", not not_pot,
               f"{len(hud)} images" + (f", bad {not_pot[:3]}" if not_pot else ""))
+        # The UI script asks for war3mapImported\Hud\<name>.blp through Kit.tex("<name>", fallback).
+        ui_names = sorted({m for f in (ROOT / "src" / "ui").glob("*.lua")
+                           for m in re.findall(r'Kit\.tex\("(\w+)"', f.read_text(encoding="utf-8"))})
+        targets = {e["target"].lower() for e in hud}
+        unlisted = [n for n in ui_names if f"war3mapimported\\hud\\{n}.blp".lower() not in targets]
+        check("every HUD image the UI script names (Kit.tex) is a hud_assets.json target", not unlisted,
+              f"{len(ui_names)} names" + (f", not listed {unlisted[:5]}" if unlisted else ""))
+        results["hud"] = {"files": len(hud), "bytes": sum(len(out_files.get(e["target"], b"")) for e in hud)}
     else:
         print("[SKIP] HUD images: specs/hud_assets.json not present")
     internal = {"(listfile)", "(attributes)", "(signature)"}
-    changed = [n for n, d in base_files.items() if n not in internal and out_files.get(n) != d]
-    check("every base map file is byte-for-byte identical", not changed,
+    # Dota's map layout replaces these (launcher/tests/test_terrain.py checks them).
+    layout = set(terrain.MAP_FILES)
+    changed = [n for n, d in base_files.items() if n not in internal | layout and out_files.get(n) != d]
+    check("every base map file outside the map layout is byte-for-byte identical", not changed,
           f"{len([n for n in base_files if n not in internal])} files" + (f", changed {changed}" if changed else ""))
-    # Unit models: every key of specs/models.json, plus the textures each MDX names.
+    relaid = sorted(n for n in layout if out_files.get(n) != base_files.get(n))
+    check("Dota's map layout replaced the layout files", relaid == sorted(layout), ", ".join(relaid))
+    # Unit models: every key of specs/models.json and its portrait model, plus the textures each MDX names.
     model_keys = models.load_keys(ROOT / "specs" / "models.json")
-    mdx_names = [f"{models.MAP_DIR}{k}.mdx" for k in model_keys]
+    mdx_names = sorted(models.model_files(model_keys))
     missing_mdx = [n for n in mdx_names if n not in out_files]
     check("every unit model of models.json is in the map", not missing_mdx,
           f"{len(mdx_names) - len(missing_mdx)}/{len(mdx_names)}" + (f", missing {missing_mdx[:3]}" if missing_mdx else ""))
@@ -287,6 +302,33 @@ def main():
         check(f"BLP {key} opens in Pillow and matches source", row[0].size == (64, 64) and quality > 30,
               f"PSNR {quality:.1f} dB, Pillow mode {row[0].mode}{pas}")
 
+    # Item icons and HUD images come from Dota images, not placeholders; HUD images keep their alpha.
+    item_plan = [i for i in plan["icons"] if i["kind"] == "item"]
+    no_source = [i["key"] for i in item_plan if not i["sources"]]
+    not_exact = [f"{i['key']} ({i['note']})" for i in item_plan if i["sources"] and i["note"] != "exact"]
+    check("every item icon is converted from a Dota item image (no placeholders)", item_plan and not no_source,
+          f"{len(item_plan) - len(no_source)}/{len(item_plan)}" + (f", placeholders {no_source[:3]}" if no_source else "")
+          + (f", not exact {not_exact[:3]}" if not_exact else ""))
+    hud_bad = []
+    for e in plan.get("hud", []):
+        if not e["sources"]:
+            hud_bad.append(f"{e['target']} (placeholder)")
+            continue
+        got = blp.decode(out_files[e["target"]])
+        want, _ = assets.hud_image(assets.load_rgba((raw_dir / vrf.output_path(e["sources"][0])).read_bytes()),
+                                   e["size"], e["fit"])
+        if got.size != want.size:
+            hud_bad.append(f"{e['target']} ({got.size[0]}x{got.size[1]}, expected {want.size[0]}x{want.size[1]})")
+            continue
+        alpha_diff = ImageChops.difference(got.getchannel("A"), want.getchannel("A")).getextrema()[1]
+        black = Image.new("RGBA", got.size, (0, 0, 0, 255))
+        quality = psnr(Image.alpha_composite(black, got), Image.alpha_composite(black, want))
+        if alpha_diff or quality <= 30:
+            hud_bad.append(f"{e['target']} (alpha diff {alpha_diff}, PSNR {quality:.1f} dB)")
+    if plan.get("hud"):
+        check("every HUD image is converted from its Dota source with its alpha", not hud_bad,
+              f"{len(plan['hud']) - len(hud_bad)}/{len(plan['hud'])}" + (f", bad {hud_bad[:3]}" if hud_bad else ""))
+
     # MP3s
     mp3_dir = work / "mp3"
     mp3_dir.mkdir()
@@ -311,6 +353,12 @@ def main():
           f"{len(manifest['files']) - len(probe_bad)}/{len(manifest['files'])}, {total_s:.0f} s of audio, "
           f"{vo_bytes / 1048576:.1f} MB")
     check("every MP3 decodes without errors (ffmpeg)", not decode_bad, ", ".join(decode_bad[:3]))
+    # Each event keeps its full count of different lines: no silent fallback, no line repeated in place of a missing one.
+    vo_data = [out_files[n] for n in manifest["files"]]
+    silent_n = sum(1 for d in vo_data if d == assets.SILENT_MP3)
+    distinct = len({sha(d) for d in vo_data})
+    check("every voice line is a distinct Dota line (no silent fallbacks, no repeats)",
+          not silent_n and distinct == len(vo_data), f"{distinct}/{len(vo_data)} distinct, {silent_n} silent")
     silent = mp3_dir / "silent.mp3"
     silent.write_bytes(assets.SILENT_MP3)
     d = subprocess.run(["ffmpeg", "-v", "error", "-i", str(silent), "-f", "null", "-"], capture_output=True, text=True)

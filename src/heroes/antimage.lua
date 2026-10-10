@@ -37,8 +37,7 @@ define("hero_antimage", function()
     local TIMED_LIFE = FourCC("BTLF")
 
     local function level(u, name)
-        local id = A.id(name)
-        return id and GetUnitAbilityLevel(u, id) or 0
+        return A.level(u, name)
     end
 
     -- Counterspell passive: magic resistance, switched off while broken.

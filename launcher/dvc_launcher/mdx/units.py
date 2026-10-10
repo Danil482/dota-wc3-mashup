@@ -191,16 +191,21 @@ UNITS = {
 }
 
 
-def _creep(model, scale, anims=None):
+def _creep(model, scale, anims=None, **extra):
     """A unit whose clips are found by Dota activity (anims lists overrides)."""
-    return {"kind": CREEP, "model": model, "items": [], "scale": scale, "anims": anims or {}}
+    return dict({"kind": CREEP, "model": model, "items": [], "scale": scale, "anims": anims or {}}, **extra)
 
 
+# "portrait": True gives a unit a second, static model for its portrait
+# (<key>_portrait.mdx, convert.build_portrait; specs/models.json "portrait"
+# points the unit's upor at it). Clicking neutrals with their animated model as
+# the portrait hung the game now and then (2026-10-10).
 # Neutral creeps (world.json "neutrals", gen_objects key "neutral_<name>") and
 # Roshan: npc_dota_neutral_<name> / npc_dota_roshan models and ModelScale.
 _NEUTRAL = "models/creeps/neutral_creeps/"
 UNITS.update({
-    "neutral_" + name: _creep(_NEUTRAL + path, scale) for name, (path, scale) in {
+    # 256-pixel textures: small creeps, about 3 MB less in the map.
+    "neutral_" + name: _creep(_NEUTRAL + path, scale, max_texture=256, portrait=True) for name, (path, scale) in {
         "kobold": ("n_creep_kobold/kobold_c/n_creep_kobold_c.vmdl", 0.9),
         "kobold_tunneler": ("n_creep_kobold/kobold_b/n_creep_kobold_b.vmdl", 1.0),
         "kobold_taskmaster": ("n_creep_kobold/kobold_a/n_creep_kobold_a.vmdl", 1.0),
@@ -236,13 +241,58 @@ UNITS.update({
     }.items()
 })
 UNITS.update({
-    "roshan": _creep("models/creeps/roshan/roshan.vmdl", 1.0),
+    # Spell is Slam (ACT_DOTA_CAST_ABILITY_3): src/game/world_roshan.lua plays "spell" for it.
+    "roshan": _creep("models/creeps/roshan/roshan.vmdl", 1.0, {
+        "Stand": "roshan_idle", "Stand Ready": "roshan_idle", "Walk": "roshan_run", "Attack": "roshan_attack",
+        "Attack - 2": "roshan_attack2", "Spell": "roshan_slam", "Spell Channel": "roshan_generic_channel",
+        "Death": "roshan_die"}, portrait=True),
     # Hero summons (specs/heroes/*.json "units"): npc_dota_chen_zealot,
     # npc_dota_furion_treant, npc_dota_techies_land_mine, npc_dota_tinker_turret1.
-    "chen_zealot": _creep("models/creeps/lane_creeps/creep_radiant_melee/radiant_melee_mega.vmdl", 1.1),
-    "furion_treant": _creep("models/heroes/furion/treant.vmdl", 0.8),
-    "techies_mine": _creep("models/heroes/techies/fx_techiesfx_mine.vmdl", 1.0),
-    "tinker_turret": _creep("models/heroes/tinker/tinker_turret.vmdl", 0.65),
+    "chen_zealot": _creep("models/creeps/lane_creeps/creep_radiant_melee/radiant_melee_mega.vmdl", 1.1,
+                          portrait=True),
+    "furion_treant": _creep("models/heroes/furion/treant.vmdl", 0.8, portrait=True),
+    "techies_mine": _creep("models/heroes/techies/fx_techiesfx_mine.vmdl", 1.0, portrait=True),
+    "tinker_turret": _creep("models/heroes/tinker/tinker_turret.vmdl", 0.65, portrait=True),
+    # March of the Machines robot: a special effect in src/heroes/tinker.lua, not a unit.
+    # Scale: particles/units/heroes/hero_tinker/tinker_machine.vpcf draws it at its radius, 0.25.
+    "tinker_robot": _creep("models/heroes/tinker/mom.vmdl", 0.25, max_texture=256),
+    # Every Dota shop of the map (gen_objects key "shop"): the Radiant secret shop stall.
+    "shop": {"kind": STRUCTURE, "model": "models/props_structures/secretshop_radiant001.vmdl", "items": [],
+             "scale": 0.6, "anims": {}},
+})
+
+# Rune power-ups (src/game/world_runes.lua; gen_objects item keys "rune_<kind>"):
+# the item model (ifil). Props with one looping idle clip, converted like
+# structures: Stand plays it, the collision box keeps the rune clickable. Dota
+# draws their glow with particles, which are not converted. The bounty rune is
+# rune_goldxp; the wisdom rune (rune_xp) is not in the map.
+UNITS.update({
+    "rune_" + kind: {"kind": STRUCTURE, "model": f"models/props_gameplay/{name}.vmdl", "items": [], "scale": 1.0,
+                     "anims": {"Stand": clip}}
+    for kind, (name, clip) in {
+        "bounty": ("rune_goldxp", "rune_goldxp_anim"),
+        "water": ("rune_water", "rune_arcane_idle"),
+        "doubledamage": ("rune_doubledamage01", "rune_doubledamage_anim"),
+        "haste": ("rune_haste01", "rune_haste_idle"),
+        "illusion": ("rune_illusion01", "rune_illusion_idle"),
+        "invisibility": ("rune_invisibility01", "rune_invisibility_idle"),
+        "regeneration": ("rune_regeneration01", "rune_regeneration_anim"),
+        "arcane": ("rune_arcane", "rune_arcane_idle"),
+        "shield": ("rune_shield01", "rune_invisibility_idle"),
+    }.items()
+})
+
+# Observer and Sentry Wards (gen_objects units "wardobserver"/"wardsentry",
+# placed by the ward items): npc_dota_observer_wards / npc_dota_sentry_wards.
+# Both are default_ward.vmdl; the sentry wears its material group "1"
+# (sentry_ward.vmat), whose colour texture replaces the observer's.
+UNITS.update({
+    "ward_observer": {"kind": STRUCTURE, "model": "models/props_gameplay/default_ward.vmdl", "items": [],
+                      "scale": 1.0, "portrait": True,
+                      "anims": {"Stand": "default_ward_idle", "Death": "default_ward_die",
+                                "Birth": "default_ward_spawn"}},
+    "ward_sentry": {"same_as": "ward_observer", "textures": {
+        "observer_ward": ("materials/models/props_gameplay/sentry_ward_color_psd_e5e79182.vtex", "OPAQUE")}},
 })
 
 # Structure fallbacks differ: they have no Dota clips for most sequences.

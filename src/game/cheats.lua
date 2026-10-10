@@ -73,6 +73,13 @@ define("cheats", function()
                 elseif cmd == "wtf" then
                     C.wtf[hero] = not C.wtf[hero]
                     DisplayTimedTextToPlayer(p, 0, 0, 5, "WTF mode " .. (C.wtf[hero] and "on" or "off"))
+                elseif cmd == "uiprobe" then
+                    -- button variants for the mouse-input probe (created for all players)
+                    local Kit = use("hud_kit")
+                    Kit.probePanel()
+                    if Kit.probeRoot and p == GetLocalPlayer() then
+                        BlzFrameSetVisible(Kit.probeRoot, not BlzFrameIsVisible(Kit.probeRoot))
+                    end
                 elseif cmd == "spells" then
                     local on = use("dummy").toggleSpells()
                     DisplayTimedTextToPlayer(p, 0, 0, 5, "Enemy caster " .. (on and "on: Storm Bolt every 4 s within 700" or "off"))

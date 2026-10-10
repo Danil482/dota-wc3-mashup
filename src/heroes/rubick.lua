@@ -62,8 +62,7 @@ define("hero_rubick", function()
     end
 
     local function level(u, name)
-        local id = A.id(name)
-        return id and GetUnitAbilityLevel(u, id) or 0
+        return A.level(u, name)
     end
 
     local nameById = nil
@@ -115,7 +114,10 @@ define("hero_rubick", function()
         s.done = true
         if lifts[s.caster] == s then
             lifts[s.caster] = nil
-            if s.landId then UnitRemoveAbility(s.caster, s.landId) end
+            if s.landId then
+                UnitRemoveAbility(s.caster, s.landId)
+                BlzUnitHideAbility(s.caster, A.id(TELE), false)
+            end
         end
         local t = s.target
         if not U.alive(t) then return end
@@ -154,10 +156,16 @@ define("hero_rubick", function()
                 props = {stun = true}, effect = FX.lifted, attach = "origin",
                 onRemove = function() land(s) end,
             })
+            -- As in Dota, Land takes Telekinesis' button (Q) while the target is up;
+            -- deferred: hiding an ability inside its own cast event is unsafe.
             local landId = A.id(LAND)
             if landId and U.alive(u) then
-                UnitAddAbility(u, landId)
-                s.landId = landId
+                Timer.after(0, function()
+                    if s.done or lifts[u] ~= s then return end
+                    UnitAddAbility(u, landId)
+                    BlzUnitHideAbility(u, A.id(TELE), true)
+                    s.landId = landId
+                end)
             end
             -- Glide toward the chosen landing point; drop during fall_duration.
             Timer.onFrame(function(dt)
@@ -417,8 +425,8 @@ define("hero_rubick", function()
         else
             local def = s.rec.def
             if def and def.onUnlearn then def.onUnlearn(u, def) end
-            UnitRemoveAbility(u, s.rec.id)
-            moveButton(u, s.rec.id, s.pos[1], s.pos[2])
+            UnitRemoveAbility(u, s.id)
+            if s.pos then moveButton(u, s.id, s.pos[1], s.pos[2]) end
         end
     end
 
@@ -444,11 +452,17 @@ define("hero_rubick", function()
             BlzSetAbilityTooltip(slotId, BlzGetAbilityTooltip(rec.id, li), 0)
             BlzSetAbilityExtendedTooltip(slotId, BlzGetAbilityExtendedTooltip(rec.id, li), 0)
         else
-            if GetUnitAbilityLevel(u, rec.id) == 0 then UnitAddAbility(u, rec.id) end
-            SetUnitAbilityLevel(u, rec.id, rec.level)
-            s.pos = {BlzGetAbilityPosX(rec.id), BlzGetAbilityPosY(rec.id)}
-            moveButton(u, rec.id, 1, 1)
-            BlzSetUnitAbilityCooldown(u, rec.id, li, BlzGetUnitAbilityCooldown(u, rec.id, li) * (1 - cdPct))
+            -- the D-cell copy keeps the spell off Rubick's own hotkeys; a spell
+            -- without a copy only gets its button moved and keeps its hotkey
+            local id = A.copyId(rec.id) or rec.id
+            s.id = id
+            if GetUnitAbilityLevel(u, id) == 0 then UnitAddAbility(u, id) end
+            SetUnitAbilityLevel(u, id, rec.level)
+            if id == rec.id then
+                s.pos = {BlzGetAbilityPosX(id), BlzGetAbilityPosY(id)}
+                moveButton(u, id, 1, 1)
+            end
+            BlzSetUnitAbilityCooldown(u, id, li, BlzGetUnitAbilityCooldown(u, id, li) * (1 - cdPct))
             if rec.def and rec.def.onLearn then rec.def.onLearn(u, rec.level, rec.def) end
         end
         stolen[u] = s

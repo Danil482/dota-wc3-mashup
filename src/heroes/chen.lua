@@ -53,8 +53,7 @@ define("hero_chen", function()
     end
 
     local function level(u, name)
-        local id = A.id(name)
-        return id and GetUnitAbilityLevel(u, id) or 0
+        return A.level(u, name)
     end
 
     -- A homing model from (x, y) to a unit; onHit() on arrival, fizzles if it dies.

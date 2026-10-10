@@ -29,6 +29,8 @@ define("game", function()
         end)
         use("creeps").start(Cmd.raceKey)
         use("world").init()                 -- world clock 0:00; first lane wave at 0:30
+        use("safe").call(function() use("dota_hud").init() end)   -- Dota HUD and shop for hero players
+        use("safe").call(function() use("dota_settings").init() end)   -- Dota players' own keys and settings
         if BUILD_TEST_MODE then
             use("autotest").run()
         end

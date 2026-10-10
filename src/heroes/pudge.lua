@@ -33,8 +33,7 @@ define("hero_pudge", function()
     end
 
     local function level(u, name)
-        local id = A.id(name)
-        return id and GetUnitAbilityLevel(u, id) or 0
+        return A.level(u, name)
     end
 
     local function reveal(owner, x, y, radius, duration)

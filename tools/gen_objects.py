@@ -47,8 +47,27 @@ def apply_model(fields, models, key):
     m = models.get(key)
     if m:
         fields["umdl"] = m["model"]
+        # Units/UnitSkin.txt gives buildings and many creeps their own portrait
+        # model; without upor the portrait keeps showing the base unit.
+        # "portrait" picks another one: the launcher's static <key>_portrait.mdx
+        # (neutrals, Roshan, summons, wards: clicking a neutral with its animated
+        # model as the portrait hung the game now and then), a WC3 model path,
+        # or false for the base unit's own.
+        portrait = m.get("portrait", m["model"])
+        if portrait:
+            fields["upor"] = portrait
+        # The Dota textures carry the colours: drop the base unit's tint
+        # (Satyr Trickster 255/120/255, Gnoll Assassin 100/100/255, ...).
+        fields.update({"uclr": 255, "uclg": 255, "uclb": 255})
+        # No WC3 sound set on Dota neutrals and Roshan: the creep sound sets
+        # carry FaceFX lip-sync for portraits, the suspect in the selection hangs
+        if key.startswith("neutral_") or key == "roshan":
+            fields["usnd"] = ""
         if "scale" in m:
             fields["usca"] = m["scale"]
+        if "walk" in m:
+            fields["uwal"] = m["walk"]      # speed the walk cycle was animated for
+            fields["urun"] = m["walk"]      # WC3 keeps run = walk; the models have no Walk Fast
     return fields
 
 
@@ -240,7 +259,31 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, order_index=None
     elif spec.get("order"):
         ids.out["orders"][ab["name"]] = spec["order"]
     abils.add(base, code, f)
+    if base not in ("ANcl", "AEev"):
+        rubick_copy(abils, ids, code, base, f)
     return code, innate
+
+
+# Spell Steal shows a stolen spell in Dota's D cell. A Channel spell borrows one
+# of Rubick's own D slots; any other spell is added as is, and a button's
+# hotkey can't change at run time, so each of those gets a copy with the D
+# hotkey and cell (src/heroes/rubick.lua, data.ids.rubick_copies).
+D_CELL = {"ahky": "D", "auhk": "D", "abpx": 1, "abpy": 1, "aubx": 1, "auby": 1}
+COMMANDER_RACES = ("human", "orc", "undead", "nightelf")
+
+
+def rubick_copy(abils, ids, code, base, fields):
+    copy = ids.new("A")
+    abils.add(base, copy, dict(fields, **D_CELL))
+    ids.out.setdefault("rubick_copies", {})[code] = copy
+
+
+def commander_spell_copies(abils, ids):
+    """D-cell copies of every hero spell of the commander's races."""
+    rows = w3obj.parse_slk(os.path.join(w3obj.SLK_DIR, "abilitydata.slk"))
+    for r in rows:
+        if str(r.get("hero")) == "1" and r.get("race") in COMMANDER_RACES and str(r.get("useInEditor")) == "1":
+            rubick_copy(abils, ids, r["alias"], r["alias"], {})
 
 
 def heroes(units, abils, buffs, ids, herodata, specs):
@@ -321,7 +364,7 @@ def extras(units, abils, buffs, ids, spec):
     for key, u in (spec.get("units") or {}).items():
         code = ids.new("n")
         ids.out["units"][key] = code
-        units.add(u["base"], code, u.get("fields", {}))
+        units.add(u["base"], code, apply_model(dict(u.get("fields", {})), MODELS, key))
     for key, a in (spec.get("abilities_extra") or {}).items():
         code = ids.new("A")
         ids.out["abilities"][key] = code
@@ -658,6 +701,8 @@ def items(units, abils, ids):
             code = ids.new("A")
             out["item_abilities"][name] = code
             out["orders"][name] = orders[name]
+            # the Dota HUD uses items itself (none / unit / point / tree targets)
+            out.setdefault("item_targets", {})[name] = spec["target"]
             abils.add("ANcl", code, item_active_fields(data[name], spec, orders[name]))
 
     for shop in plan["data"]["shops"]:
@@ -704,8 +749,10 @@ def items(units, abils, ids):
             ("wardsentry", "Sentry Ward", "Apiv,Aeth," + TRUE_SIGHT, 150, (110, 170, 255))):
         code = ids.new("n")
         out["units"][key] = code
-        units.add("oeye", code, dict(ward, unam=title, uabi=abil, usid=sight, usin=sight,
-                                     uclr=tint[0], uclg=tint[1], uclb=tint[2]))
+        # Dota's ward model (models.json ward_observer / ward_sentry) in personalized maps
+        units.add("oeye", code, apply_model(dict(ward, unam=title, uabi=abil, usid=sight, usin=sight,
+                                                 uclr=tint[0], uclg=tint[1], uclb=tint[2]),
+                                            MODELS, "ward_" + key[len("ward"):]))
     code = ids.new("n")
     out["units"]["itemdummy"] = code
     units.add("hfoo", code, {"unam": "Item Dummy", "uabi": "Aloc", "umdl": ".mdl", "usca": 0.01, "ushu": "_",
@@ -773,7 +820,8 @@ def world(units, abils, ids, w3t):
         return {
             "unam": d["title"], "uhpm": int(d["hp"]), "uhpr": float(d["hp_regen"]), "uhrt": "always",
             "umpm": int(d["mana"]), "umpi": int(d["mana"]), "umpr": float(d["mana_regen"] or 0),
-            "udef": int(round(d["armor"])), "udty": "large", "ulev": int(d["level"]),
+            # WC3 caps unit levels at 20 (Roshan is 30 in Dota) and logs every query past it
+            "udef": int(round(d["armor"])), "udty": "large", "ulev": min(20, int(d["level"])),
             "utyp": "ancient" if d["ancient"] else "",
             "ua1b": dmin - 1, "ua1d": 1, "ua1s": max(1, dmax - dmin + 1), "ua1c": float(d["attack_rate"]),
             "ua1r": int(d["range"]), "ua1t": "normal", "umvs": int(d["move_speed"]),
@@ -793,7 +841,7 @@ def world(units, abils, ids, w3t):
             f.update({"umvt": "foot", "utar": "ground", "umvh": float(WORLD_GROUNDED[base])})
         code = ids.new("n")
         out["units"]["neutral_" + name] = code
-        units.add(base, code, f)
+        units.add(base, code, apply_model(f, MODELS, "neutral_" + name))
 
     r = data["roshan"]
     f = creep_fields(r)
@@ -834,9 +882,12 @@ def world(units, abils, ids, w3t):
                                   "ureq": ""}, **fields))
 
     for key, (title, tip, (red, green, blue)) in WORLD_RUNES.items():
-        item("rune_" + key, "rspd", {"unam": title, "utip": title, "utub": tip, "ides": tip, "iico": RUNE_ICON,
-                                     "ifil": RUNE_MODEL, "isca": 1.3, "iclr": red, "iclg": green, "iclb": blue,
-                                     "iabi": "", "iusa": 1, "iper": 1, "ipow": 1, "idro": 1, "idrp": 0})
+        art = {"ifil": RUNE_MODEL, "isca": 1.3, "iclr": red, "iclg": green, "iclb": blue}
+        m = MODELS.get("rune_" + key)
+        if m:       # Dota's own rune model (personalized maps): its texture has the colour, no tint
+            art = {"ifil": m["model"], "isca": m.get("scale", 1.0), "iclr": 255, "iclg": 255, "iclb": 255}
+        item("rune_" + key, "rspd", dict({"unam": title, "utip": title, "utub": tip, "ides": tip, "iico": RUNE_ICON,
+                                          "iabi": "", "iusa": 1, "iper": 1, "ipow": 1, "idro": 1, "idrp": 0}, **art))
     tip = (f"Brings its holder back to life where they fell, {aegis['reincarnate_time']:g} seconds after death, "
            f"with full health and mana. Disappears {aegis['disappear_time'] / 60:g} minutes after it is picked up.")
     item("aegis", "ankh", {"unam": "Aegis of the Immortal", "utip": "Aegis of the Immortal", "utub": tip,
@@ -892,12 +943,16 @@ def main(out_dir=None, standins=False):
     herodata = load("heroes.json")
     specs = load_specs()
     ids = Ids()
+    # The converted Dota models, for Lua that draws one as a special effect
+    # (March of the Machines robots); empty with stand-ins.
+    ids.out["models"] = {k: {"model": m["model"], "scale": m.get("scale", 1.0)} for k, m in MODELS.items()}
     units = w3obj.ObjectFile(U, with_levels=False)
     abils = w3obj.ObjectFile(A, with_levels=True)
     buffs = w3obj.ObjectFile(B, with_levels=False)
     helpers(abils)
     structures(units, ids)
     heroes(units, abils, buffs, ids, herodata, specs)
+    commander_spell_copies(abils, ids)
     item_objects = items(units, abils, ids)
     world(units, abils, ids, item_objects)
     files = {

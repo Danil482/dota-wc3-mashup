@@ -118,10 +118,12 @@ def convert(png_path, alpha_mode, limit=MAX_SIZE, encoding="jpeg"):
         image.putalpha(255)
     levels = mip_levels(image, alpha_mode == "MASK")
     if encoding == "palette":
-        return blp.encode(levels[0])
+        return blp.encode_levels(levels)    # keeps the per-level alpha test of MASK textures
     return encode_jpeg(levels, has_alpha)
 
 
-def placeholder(color=(128, 128, 128)):
+def placeholder(color=(128, 128, 128), encoding="jpeg"):
     image = Image.new("RGBA", (8, 8), color + (255,))
+    if encoding == "palette":
+        return blp.encode_levels(mip_levels(image, False))
     return encode_jpeg(mip_levels(image, False), False)

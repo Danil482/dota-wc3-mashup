@@ -20,6 +20,26 @@ other lazily with `use(name)`. Natives are the ones in `research/jass/common.j` 
 - `use("data.ids")` – generated raw codes: `abilities[name]`, `heroes[hero]`, `heroes[hero .. "_innates"]`,
   `units[key]`, `buffs[key]`, `orders[name]` (order string of Channel-based abilities, for bots/dummies).
 - `use("data.sounds")[hero][event]` – voice-line paths extracted from Dota 2 (`cast_<ability>`, `kill`, ...).
+- `use("data.mapdata")` – every gameplay position: `bounds`, `lanes{top,mid,bot}` (Dota spawn → commander
+  spawn), `dota{fountain, ancient, shop, towers{top,mid,bot,base}, barracks}`, `commander{start, mines,
+  expansions, spawns}`, `roshan`, `runes`, optional `bounty_runes`, `side_shops`, `camps{name = pos}` (a camp's
+  type comes from its name: small, medium, large or ancient). Read positions from here only; never hard-code them.
+
+### Data modules and the launcher (contract)
+`tools/build_lua.py` writes each data module between two marker lines:
+```
+-- @dvc-data-begin data.<name>
+define("data.<name>", function() ... end)
+-- @dvc-data-end data.<name>
+```
+The base map's `data.mapdata` is the hand-made layout from `tools/layout.py`. The launcher
+(`launcher/dvc_launcher/terrain`) replaces the `data.mapdata` block of a personalized map with Dota's own
+layout, read from the player's Dota 2, together with the map's terrain (`war3map.w3e`, `.wpm`, `.doo`,
+`war3mapMap.blp`) and start locations (`war3map.w3i`, `war3mapUnits.doo`). So:
+- keep exactly one marked `data.mapdata` block and its schema (above); new keys must be optional in Lua;
+- the map stays 160 × 160 tiles, centre at the origin, playable area ±9216: the launcher checks the base w3e
+  and keeps the base layout if the size differs;
+- code must work with any positions and counts (Dota has 28 camps and 2 bounty rune spots).
 
 ## Modules
 ### abilities – `use("abilities")`

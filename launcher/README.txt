@@ -22,25 +22,41 @@ REQUIREMENTS
 WHAT THE LAUNCHER DOES
 ----------------------
 1. Reads the Dota 2 build number (steamapps\appmanifest_570.acf).
-2. Exports about 700 icons and voice lines from Dota 2 with the bundled
-   Source 2 Viewer CLI (folder "vrf") into a cache.
+2. Exports about 750 icons, HUD images and voice lines from Dota 2 with the
+   bundled Source 2 Viewer CLI (folder "vrf") into a cache.
 3. Converts the hero, ability and item icons to Warcraft III BLP textures
    (64x64) and the HUD images to BLP (see HUD IMAGES below), and keeps the
    voice lines as MP3 (up to 8 move and attack lines, 4 for kills, deaths,
-   level-ups, laughs and respawns, 3 per spell; about 10 MB in the map).
+   level-ups, laughs and respawns, 3 per spell; about 8.5 MB in the map).
 4. Exports the 11 heroes (with their default items), the Radiant lane creeps,
-   towers, barracks, Ancient and fountain as glTF and converts them to
-   Warcraft III models (MDX, BLP textures, about 12 MB in the map).
-   The first run takes about a minute; later runs reuse the cache (a few
-   seconds) until Dota 2 or the mod updates.
-5. Writes the personal map with StormLib:
+   towers, barracks, Ancient and fountain, the neutral creeps, Roshan, the
+   heroes' summons (Zealot, treants, proximity mines, Keen Cannons), the
+   March of the Machines robots, the runes and the wards as glTF and
+   converts them to Warcraft III models (MDX, BLP textures; 71 models plus
+   39 still portrait models, about 24 MB in the map).
+   The first run takes about a minute and a half; later runs reuse the cache
+   (a few seconds) until Dota 2 or the mod updates.
+5. Lays the map out like Dota's own, read from game\dota\maps\dota.vpk:
+   ground heights as Warcraft III cliffs and ramps, the river, the trees,
+   and the towers, barracks, camps, runes, Roshan and lanes at Dota's spots
+   (the commander takes the Dire base). About 20 seconds the first time,
+   then cached. If this fails, the map keeps its built-in Dota-like layout.
+6. Writes the personal map with StormLib:
      Documents\Warcraft III\Maps\DotaVsCommander\DotaVsCommander.w3x
-6. Starts Warcraft III with that map.
+7. Copies your Dota 2 keys and game settings (ability, item, TP, shop and
+   select-hero keys, quick cast, double-tap self cast, zoom lock, auto
+   attack), read without changes from Steam\userdata\<account>\570, to
+     Documents\Warcraft III\CustomMapData\DotaVsCommander\dota_settings.txt
+   The map applies them when you play a Dota hero. Without the file it uses
+   Dota's default keys.
+8. Starts Warcraft III with that map.
 
 It never writes into the Warcraft III or Dota 2 folders. Files it creates:
   %LOCALAPPDATA%\DotaVsCommander\cache\<Dota build>\   exported files
   %LOCALAPPDATA%\DotaVsCommander\logs\launcher.log    log of every run
   Documents\Warcraft III\Maps\DotaVsCommander\        the personal map
+  Documents\Warcraft III\CustomMapData\DotaVsCommander\dota_settings.txt
+                                                      your Dota keys and settings
 
 
 MULTIPLAYER
@@ -48,7 +64,8 @@ MULTIPLAYER
 Every player builds the map on their own PC. Players with the same Dota 2 build
 and the same version of this mod get byte-identical maps, so Warcraft III sees
 them as the same map. After a Dota 2 update, every player should start the mod
-once so their map is rebuilt.
+once so their map is rebuilt. Your Dota keys are not in the map: they stay in
+your own CustomMapData folder, so every player keeps their own.
 
 
 RUNNING IT BY HAND

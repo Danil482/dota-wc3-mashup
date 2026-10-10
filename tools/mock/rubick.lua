@@ -350,6 +350,7 @@ __mockC.list[#__mockC.list + 1] = {name = "rubick", fn = function(C)
 
     -- Telekinesis: lift, choose the landing point (clamped), land and stun.
     C.cast(rubick, "rubick_telekinesis", foe)
+    C.advance(0.05)
     C.check(Mods.has(foe, "rubick_telekinesis") and GetUnitAbilityLevel(rubick, id("rubick_tk_land")) == 1,
         "rubick telekinesis lifts and grants land")
     C.cast(rubick, "rubick_tk_land", nil, X + 3000, Y)
@@ -386,8 +387,11 @@ __mockC.list[#__mockC.list + 1] = {name = "rubick", fn = function(C)
     C.cast(rubick, "rubick_spell_steal", mk)
     C.advance(1.0)
     GetLocalPlayer = localPlayer
-    C.check(GetUnitAbilityLevel(rubick, STORM) == 2, "rubick stole storm bolt at level 2")
-    C.check(math.abs((rubick.cdBase[STORM] or 0) - 7) < 0.01, "rubick stolen spell cooldown reduced")
+    -- Rubick gets the D-cell copy, so the stolen spell never shares his hotkeys
+    local STORM_D = A.copyId(STORM)
+    C.check(STORM_D ~= nil and GetUnitAbilityLevel(rubick, STORM) == 0 and GetUnitAbilityLevel(rubick, STORM_D) == 2,
+        "rubick stole storm bolt at level 2 as its D-cell copy")
+    C.check(math.abs((rubick.cdBase[STORM_D] or 0) - 7) < 0.01, "rubick stolen spell cooldown reduced")
 
     -- A Lua-driven Dota spell: goes into the unit-target slot, forwards casts.
     local enemyTinker = C.unit(7, ids.heroes.tinker, X + 300, Y + 300, {hero = true})
@@ -400,7 +404,7 @@ __mockC.list[#__mockC.list + 1] = {name = "rubick", fn = function(C)
     C.cast(rubick, "rubick_spell_steal", enemyTinker)
     C.advance(1.0)
     local slot = id("rubick_stolen_unit")
-    C.check(GetUnitAbilityLevel(rubick, STORM) == 0, "rubick previous stolen spell replaced")
+    C.check(GetUnitAbilityLevel(rubick, STORM_D) == 0, "rubick previous stolen spell replaced")
     C.check(GetUnitAbilityLevel(rubick, slot) == 1 and R.stolen(rubick).slotId == slot, "rubick holds laser in a slot")
     local sab = BlzGetUnitAbility(rubick, slot)
     C.check(math.abs(BlzGetAbilityRealLevelField(sab, ABILITY_RLF_CAST_RANGE, 0) - 890) < 1, "rubick slot range")

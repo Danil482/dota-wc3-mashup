@@ -41,6 +41,27 @@ define("abilities", function()
         return code and FourCC(code) or nil
     end
 
+    -- Spell Steal's copy of an ability: same object, D hotkey and cell
+    -- (tools/gen_objects.py rubick_copy). Raw id -> raw id.
+    local copyOf = nil
+    function A.copyId(id)
+        if not copyOf then
+            copyOf = {}
+            for orig, copy in pairs(use("data.ids").rubick_copies or {}) do copyOf[FourCC(orig)] = FourCC(copy) end
+        end
+        return copyOf[id]
+    end
+
+    -- A unit's level in a Dota ability, through its own object or a stolen copy.
+    function A.level(u, name)
+        local id = A.id(name)
+        if not id then return 0 end
+        local lvl = GetUnitAbilityLevel(u, id)
+        local copy = A.copyId(id)
+        if lvl == 0 and copy then lvl = GetUnitAbilityLevel(u, copy) end
+        return lvl
+    end
+
     function A.define(name, def)
         local id = A.id(name)
         if not id then
@@ -49,6 +70,8 @@ define("abilities", function()
         end
         def.name, def.id, def.data = name, id, A.data(name)
         defs[id] = def
+        local copy = A.copyId(id)
+        if copy then defs[copy] = def end
         byName[name] = def
         return def
     end
@@ -66,10 +89,12 @@ define("abilities", function()
         return U.levelValue(raw, math.max(1, level))
     end
 
-    local function context(def, caster, target, x, y)
-        local level = GetUnitAbilityLevel(caster, def.id)
+    -- castId: the object actually cast, the ability's own or Spell Steal's copy.
+    local function context(def, caster, target, x, y, castId)
+        castId = castId or def.id
+        local level = GetUnitAbilityLevel(caster, castId)
         local ctx = {def = def, caster = caster, owner = GetOwningPlayer(caster), level = level,
-                     target = target, x = x, y = y}
+                     target = target, x = x, y = y, castId = castId}
         function ctx.v(key) return A.value(def.name, key, level) end
         return ctx
     end
@@ -105,17 +130,17 @@ define("abilities", function()
     function A.init()
         Events.on("spell_channel", function(caster, abil, target, x, y)
             local d = defs[abil]
-            if d and d.onChannel then d.onChannel(context(d, caster, target, x, y)) end
+            if d and d.onChannel then d.onChannel(context(d, caster, target, x, y, abil)) end
         end)
         Events.on("spell_effect", function(caster, abil, target, x, y)
             local d = defs[abil]
-            if d and d.onCast then d.onCast(context(d, caster, target, x, y)) end
+            if d and d.onCast then d.onCast(context(d, caster, target, x, y, abil)) end
             if d then use("sound").vo(caster, "cast_" .. d.name, 0.6) end
             Events.emit("ability_cast", caster, d, target, x, y)
         end)
         Events.on("spell_endcast", function(caster, abil, target, x, y)
             local d = defs[abil]
-            if d and d.onEndCast then d.onEndCast(context(d, caster, target, x, y)) end
+            if d and d.onEndCast then d.onEndCast(context(d, caster, target, x, y, abil)) end
         end)
         Events.on("hero_skill", function(hero, abil)
             local d = defs[abil]
