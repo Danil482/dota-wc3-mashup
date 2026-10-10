@@ -1,0 +1,103 @@
+{
+ "title": "Morphling",
+ "base": "Hpal",
+ "model": "units\\human\\WaterElemental\\WaterElemental.mdl",
+ "sound": "WaterElemental",
+ "scale": 1.0,
+ "missile": "Abilities\\Weapons\\WaterElementalMissile\\WaterElementalMissile.mdl",
+ "abilities": {
+  "morphling_waveform": {
+   "range": 2000,
+   "desc": "Morphling turns into a wave and surges toward the target point, damaging every enemy in his path once. He cannot be harmed while surging. Clicking beyond the range sends him the full distance."
+  },
+  "morphling_adaptive_strike_agi": {
+   "targets": "air,ground,enemy,neutral",
+   "desc": "Hurls a blast of water at an enemy. Damage grows with Agility, most when Agility clearly exceeds Strength; the stun and knockback grow with Strength the same way."
+  },
+  "morphling_morph_agi": {
+   "desc": "Toggle: steadily moves points from Strength into Agility while it costs mana. Learning it also levels Attribute Shift (Strength Gain)."
+  },
+  "morphling_morph_str": {
+   "kind": "native",
+   "base": "ANms",
+   "order": "manashieldon",
+   "fields": {
+    "Nms1": [0.0, 0.0, 0.0, 0.0],
+    "Nms2": [0.0, 0.0, 0.0, 0.0],
+    "auar": "ReplaceableTextures\\CommandButtons\\BTNDota_morphling_morph_str.blp",
+    "aubx": 1,
+    "auby": 1,
+    "aut1": [
+     "Stop Attribute Shift (Strength Gain) - [|cffffcc00Level 1|r]",
+     "Stop Attribute Shift (Strength Gain) - [|cffffcc00Level 2|r]",
+     "Stop Attribute Shift (Strength Gain) - [|cffffcc00Level 3|r]",
+     "Stop Attribute Shift (Strength Gain) - [|cffffcc00Level 4|r]"
+    ],
+    "auu1": [
+     "Stop moving Agility into Strength.",
+     "Stop moving Agility into Strength.",
+     "Stop moving Agility into Strength.",
+     "Stop moving Agility into Strength."
+    ]
+   },
+   "desc": "Toggle: steadily moves points from Agility into Strength while it costs mana. Learning it also levels Attribute Shift (Agility Gain)."
+  },
+  "morphling_replicate": {
+   "kind": "native",
+   "base": "ANcl",
+   "order": "curse",
+   "fields": {
+    "Ncl1": [0.0, 0.0, 0.0],
+    "Ncl2": [1, 1, 1],
+    "Ncl3": [9, 9, 9],
+    "Ncl4": [0.0, 0.0, 0.0],
+    "Ncl5": [0, 0, 0],
+    "Ncl6": ["curse", "curse", "curse"],
+    "aare": [0.0, 0.0, 0.0],
+    "atar": ["air,ground,friend,enemy,neutral,hero,notself", "air,ground,friend,enemy,neutral,hero,notself",
+             "air,ground,friend,enemy,neutral,hero,notself"],
+    "aani": "spell",
+    "acat": "",
+    "atat": "",
+    "aeat": "",
+    "asat": ""
+   },
+   "desc": "Morphling becomes a copy of another hero, Warcraft heroes included: he takes its look and its basic abilities but keeps his own attributes. Morph Replicate switches between the two forms until the time runs out."
+  },
+  "morphling_ebb_and_flow": {
+   "desc": "Strength gives Morphling bonus cast range and slow resistance; Agility gives bonus attack range and movement speed. The bonuses stay while he is morphed."
+  }
+ },
+ "abilities_extra": {
+  "morphling_morph_swap": {
+   "base": "ANcl",
+   "order": "spiritlink",
+   "fields": {
+    "anam": "Morph Replicate",
+    "aher": 0,
+    "alev": 1,
+    "aart": "ReplaceableTextures\\CommandButtons\\BTNDota_morphling_morph_replicate.blp",
+    "abpx": 3,
+    "abpy": 2,
+    "ahky": "R",
+    "atp1": ["Morph Replicate - [|cffffcc00R|r]"],
+    "aub1": ["Switch between Morphling's own form and the copied hero while Morph lasts."],
+    "Ncl1": [0.0],
+    "Ncl2": [0],
+    "Ncl3": [1],
+    "Ncl4": [0.0],
+    "Ncl5": [0],
+    "Ncl6": ["spiritlink"],
+    "acdn": [2.0],
+    "amcs": [0],
+    "aran": [0.0],
+    "aare": [0.0],
+    "aani": "",
+    "acat": "",
+    "atat": "",
+    "aeat": "",
+    "asat": ""
+   }
+  }
+ }
+}

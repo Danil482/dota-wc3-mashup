@@ -1,0 +1,73 @@
+{
+ "title": "Nature's Prophet",
+ "base": "Ekee",
+ "model": "units\\nightelf\\HeroKeeperoftheGrove\\HeroKeeperoftheGrove.mdl",
+ "sound": "HeroKeeperoftheGrove",
+ "scale": 1.0,
+ "missile": "Abilities\\Weapons\\KeeperGroveMissile\\KeeperGroveMissile.mdl",
+ "abilities": {
+  "furion_sprout": {
+   "target": 3,
+   "order": "entanglingroots",
+   "targets": "air,ground,enemy,neutral,friend,self,nonancient",
+   "desc": "Grows a ring of trees around a unit or a point for a few seconds, trapping whoever is inside, damaging nearby enemies and revealing the area."
+  },
+  "furion_teleportation": {
+   "target": 2,
+   "channel": 2.7,
+   "range": 99999,
+   "order": "massteleport",
+   "desc": "After a long cast, teleports anywhere on the map and arrives with a barrier that absorbs damage. The destination is visible to everyone while casting; an interrupted cast costs nothing."
+  },
+  "furion_force_of_nature": {
+   "target": 2,
+   "order": "forceofnature",
+   "radiusKey": "area_of_effect",
+   "desc": "Turns the trees in the target area into Treants, one per tree up to a cap. Treants are temporary and deal extra damage to heroes."
+  },
+  "furion_curse_of_the_forest": {
+   "target": 0,
+   "order": "howlofterror",
+   "desc": "Curses nearby enemy heroes: they are shown through the fog, and every tree or Treant close to them slows them and burns them each second."
+  },
+  "furion_spirit_of_the_forest": {
+   "desc": "Gains bonus attack damage for every nearby tree and even more for every living Treant. Treants get the same bonus from trees and Treants around them."
+  },
+  "furion_wrath_of_nature": {
+   "target": 3,
+   "range": 99999,
+   "order": "starfall",
+   "targets": "air,ground,enemy,neutral",
+   "desc": "Unleashes energy that jumps across the map between visible enemies, starting near the target. Every enemy struck makes the following strikes stronger."
+  }
+ },
+ "units": {
+  "furion_treant": {
+   "base": "efon",
+   "fields": {
+    "unam": "Treant",
+    "uabi": "",
+    "upgr": "",
+    "uhpm": 450,
+    "udef": 0,
+    "ua1b": 15,
+    "ua1d": 1,
+    "ua1s": 1,
+    "ua1c": 1.6,
+    "ua1r": 100,
+    "uacq": 500,
+    "ua1t": "normal",
+    "udty": "large",
+    "umvs": 300,
+    "uhpr": 2.5,
+    "ulev": 1,
+    "usid": 500,
+    "usin": 500,
+    "ufoo": 0,
+    "ubba": 0,
+    "ubdi": 0,
+    "ubsi": 0
+   }
+  }
+ }
+}

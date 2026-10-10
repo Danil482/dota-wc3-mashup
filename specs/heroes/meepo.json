@@ -1,0 +1,54 @@
+{
+ "title": "Meepo",
+ "base": "Hpal",
+ "model": "units\\creeps\\KoboldGeomancer\\KoboldGeomancer.mdl",
+ "sound": "Kobold",
+ "scale": 1.3,
+ "abilities": {
+  "meepo_earthbind": {
+   "target": 2,
+   "order": "ensnare",
+   "desc": "Throws a net to the target area. It flies at a fixed speed and roots every enemy caught under it when it lands."
+  },
+  "meepo_poof": {
+   "target": 3,
+   "channel": 1.2,
+   "range": 99999,
+   "order": "blink",
+   "targets": "air,ground,friend,self,hero,vuln,invu",
+   "desc": "After a short channel this Meepo jumps to another Meepo (or the Meepo closest to the target point), hurting enemies around both the spot it leaves and the spot it reaches. Target itself to hit the same area twice. Interrupting the channel costs nothing."
+  },
+  "meepo_ransack": {
+   "desc": "Each attack drains extra life from the enemy as pure damage and heals every Meepo by that amount. Weaker against non-heroes."
+  },
+  "meepo_divided_we_stand": {
+   "kind": "native",
+   "base": "AEev",
+   "desc": "Summons an extra Meepo per level. Clones gain the main Meepo's level and skills and send him all their experience. When any Meepo dies, all of them die.",
+   "fields": {
+    "alev": 4,
+    "arlv": 3,
+    "alsk": 7,
+    "Eev1": [0, 0, 0, 0],
+    "acdn": [0, 0, 0, 0],
+    "amcs": [0, 0, 0, 0],
+    "aran": [0, 0, 0, 0],
+    "atp1": [
+     "Divided We Stand - [|cffffcc00Level 1|r]",
+     "Divided We Stand - [|cffffcc00Level 2|r]",
+     "Divided We Stand - [|cffffcc00Level 3|r]",
+     "Divided We Stand - [|cffffcc00Level 4|r]"
+    ],
+    "aub1": [
+     "Summons an extra Meepo per level. Clones gain the main Meepo's level and skills and send him all their experience. When any Meepo dies, all of them die.|nClones: |cffffcc001|r",
+     "Summons an extra Meepo per level. Clones gain the main Meepo's level and skills and send him all their experience. When any Meepo dies, all of them die.|nClones: |cffffcc002|r",
+     "Summons an extra Meepo per level. Clones gain the main Meepo's level and skills and send him all their experience. When any Meepo dies, all of them die.|nClones: |cffffcc003|r",
+     "Summons an extra Meepo per level. Clones gain the main Meepo's level and skills and send him all their experience. When any Meepo dies, all of them die.|nClones: |cffffcc004|r"
+    ]
+   }
+  },
+  "meepo_geomancy": {
+   "desc": "Each Meepo shares a terrain bonus with all Meepos: life regeneration when a tree is nearby, extra movement speed on dry ground, and slowing attacks while standing in water."
+  }
+ }
+}

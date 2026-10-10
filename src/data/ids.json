@@ -1,0 +1,136 @@
+{
+ "abilities": {
+  "antimage_blink": "A012",
+  "antimage_counterspell": "A013",
+  "antimage_mana_break": "A011",
+  "antimage_mana_void": "A015",
+  "antimage_persectur": "A014",
+  "chen_divine_favor": "A00Y",
+  "chen_hand_of_god": "A010",
+  "chen_holy_persuasion": "A00X",
+  "chen_penitence": "A00W",
+  "chen_zealot": "A00Z",
+  "furion_curse_of_the_forest": "A00T",
+  "furion_force_of_nature": "A00S",
+  "furion_spirit_of_the_forest": "A00U",
+  "furion_sprout": "A00Q",
+  "furion_teleportation": "A00R",
+  "furion_wrath_of_nature": "A00V",
+  "meepo_divided_we_stand": "A008",
+  "meepo_earthbind": "A005",
+  "meepo_geomancy": "A009",
+  "meepo_poof": "A006",
+  "meepo_ransack": "A007",
+  "morphling_adaptive_strike_agi": "A00L",
+  "morphling_ebb_and_flow": "A00P",
+  "morphling_morph_agi": "A00M",
+  "morphling_morph_str": "A00N",
+  "morphling_replicate": "A00O",
+  "morphling_waveform": "A00K",
+  "nevermore_dark_lord": "A01K",
+  "nevermore_frenzy": "A01J",
+  "nevermore_necromastery": "A01M",
+  "nevermore_requiem": "A01L",
+  "nevermore_shadowraze1": "A01G",
+  "nevermore_shadowraze2": "A01H",
+  "nevermore_shadowraze3": "A01I",
+  "ogre_magi_bloodlust": "A01D",
+  "ogre_magi_dumb_luck": "A01E",
+  "ogre_magi_fireblast": "A01B",
+  "ogre_magi_ignite": "A01C",
+  "ogre_magi_multicast": "A01F",
+  "pudge_dismember": "A004",
+  "pudge_flesh_heap": "A002",
+  "pudge_innate_graft_flesh": "A003",
+  "pudge_meat_hook": "A000",
+  "pudge_rot": "A001",
+  "rubick_arcane_supremacy": "A00I",
+  "rubick_fade_bolt": "A00H",
+  "rubick_spell_steal": "A00J",
+  "rubick_telekinesis": "A00G",
+  "techies_land_mines": "A01A",
+  "techies_mutually_assured_destruction": "A019",
+  "techies_reactive_tazer": "A017",
+  "techies_sticky_bomb": "A016",
+  "techies_suicide": "A018",
+  "tinker_deploy_turrets": "A00C",
+  "tinker_eureka": "A00F",
+  "tinker_keen_teleport": "A00D",
+  "tinker_laser": "A00A",
+  "tinker_march_of_the_machines": "A00B",
+  "tinker_rearm": "A00E"
+ },
+ "buffs": {},
+ "heroes": {
+  "antimage": "H007",
+  "antimage_innates": [
+   "A014"
+  ],
+  "chen": "H006",
+  "chen_innates": [
+   "A00Z"
+  ],
+  "furion": "H005",
+  "furion_innates": [
+   "A00U"
+  ],
+  "meepo": "H001",
+  "meepo_innates": [
+   "A009"
+  ],
+  "morphling": "H004",
+  "morphling_innates": [
+   "A00P"
+  ],
+  "nevermore": "H00A",
+  "nevermore_innates": [
+   "A01M"
+  ],
+  "ogre_magi": "H009",
+  "ogre_magi_innates": [
+   "A01E"
+  ],
+  "pudge": "H000",
+  "pudge_innates": [
+   "A003"
+  ],
+  "rubick": "H003",
+  "rubick_innates": [],
+  "techies": "H008",
+  "techies_innates": [
+   "A019"
+  ],
+  "tinker": "H002",
+  "tinker_innates": [
+   "A00D",
+   "A00F"
+  ]
+ },
+ "items": {},
+ "units": {
+  "ancient": "h006",
+  "dota_melee": "h009",
+  "dota_ranged": "h00A",
+  "dota_siege": "h00B",
+  "fountain": "h007",
+  "human_melee": "h00C",
+  "human_ranged": "h00D",
+  "human_siege": "h00E",
+  "nightelf_melee": "h00L",
+  "nightelf_ranged": "h00M",
+  "nightelf_siege": "h00N",
+  "orc_melee": "h00F",
+  "orc_ranged": "h00G",
+  "orc_siege": "h00H",
+  "rax_melee": "h004",
+  "rax_ranged": "h005",
+  "shop": "h008",
+  "tower1": "h000",
+  "tower2": "h001",
+  "tower3": "h002",
+  "tower4": "h003",
+  "undead_melee": "h00I",
+  "undead_ranged": "h00J",
+  "undead_siege": "h00K"
+ }
+}

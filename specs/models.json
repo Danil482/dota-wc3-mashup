@@ -1,0 +1,90 @@
+{
+ "hero_pudge": {
+  "model": "war3mapImported\\Dota\\hero_pudge.mdx",
+  "scale": 0.98
+ },
+ "hero_meepo": {
+  "model": "war3mapImported\\Dota\\hero_meepo.mdx",
+  "scale": 0.93
+ },
+ "hero_tinker": {
+  "model": "war3mapImported\\Dota\\hero_tinker.mdx",
+  "scale": 0.8
+ },
+ "hero_rubick": {
+  "model": "war3mapImported\\Dota\\hero_rubick.mdx",
+  "scale": 0.7
+ },
+ "hero_morphling": {
+  "model": "war3mapImported\\Dota\\hero_morphling.mdx",
+  "scale": 0.88
+ },
+ "hero_furion": {
+  "model": "war3mapImported\\Dota\\hero_furion.mdx",
+  "scale": 0.79
+ },
+ "hero_chen": {
+  "model": "war3mapImported\\Dota\\hero_chen.mdx",
+  "scale": 0.93
+ },
+ "hero_antimage": {
+  "model": "war3mapImported\\Dota\\hero_antimage.mdx",
+  "scale": 0.9
+ },
+ "hero_techies": {
+  "model": "war3mapImported\\Dota\\hero_techies.mdx",
+  "scale": 0.6
+ },
+ "hero_ogre_magi": {
+  "model": "war3mapImported\\Dota\\hero_ogre_magi.mdx",
+  "scale": 0.93
+ },
+ "hero_nevermore": {
+  "model": "war3mapImported\\Dota\\hero_nevermore.mdx",
+  "scale": 0.98
+ },
+ "dota_melee": {
+  "model": "war3mapImported\\Dota\\dota_melee.mdx",
+  "scale": 0.93
+ },
+ "dota_ranged": {
+  "model": "war3mapImported\\Dota\\dota_ranged.mdx",
+  "scale": 0.88
+ },
+ "dota_siege": {
+  "model": "war3mapImported\\Dota\\dota_siege.mdx",
+  "scale": 0.65
+ },
+ "tower1": {
+  "model": "war3mapImported\\Dota\\tower1.mdx",
+  "scale": 1.0
+ },
+ "tower2": {
+  "model": "war3mapImported\\Dota\\tower2.mdx",
+  "scale": 1.0
+ },
+ "tower3": {
+  "model": "war3mapImported\\Dota\\tower3.mdx",
+  "scale": 1.0
+ },
+ "tower4": {
+  "model": "war3mapImported\\Dota\\tower4.mdx",
+  "scale": 1.0
+ },
+ "rax_melee": {
+  "model": "war3mapImported\\Dota\\rax_melee.mdx",
+  "scale": 1.0
+ },
+ "rax_ranged": {
+  "model": "war3mapImported\\Dota\\rax_ranged.mdx",
+  "scale": 1.0
+ },
+ "ancient": {
+  "model": "war3mapImported\\Dota\\ancient.mdx",
+  "scale": 1.0
+ },
+ "fountain": {
+  "model": "war3mapImported\\Dota\\fountain.mdx",
+  "scale": 1.0
+ }
+}

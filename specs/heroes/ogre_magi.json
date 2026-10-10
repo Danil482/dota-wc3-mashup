@@ -1,0 +1,77 @@
+{
+ "title": "Ogre Magi",
+ "base": "Hpal",
+ "model": "units\\creeps\\OgreMagi\\OgreMagi.mdl",
+ "sound": "Ogre",
+ "scale": 1.3,
+ "abilities": {
+  "ogre_magi_fireblast": {
+   "kind": "native",
+   "base": "ANcl",
+   "order": "acidbomb",
+   "desc": "Smashes an enemy with a wave of fire, dealing magical damage and stunning it. Multicast repeats it on the same target.",
+   "fields": {
+    "Ncl1": [0, 0, 0, 0],
+    "Ncl2": [1, 1, 1, 1],
+    "Ncl3": [1, 1, 1, 1],
+    "Ncl4": [0, 0, 0, 0],
+    "Ncl5": [0, 0, 0, 0],
+    "Ncl6": ["acidbomb", "acidbomb", "acidbomb", "acidbomb"],
+    "aare": [0, 0, 0, 0],
+    "acas": [0.15, 0.15, 0.15, 0.15],
+    "atar": ["air,ground,enemy,neutral,vuln", "air,ground,enemy,neutral,vuln", "air,ground,enemy,neutral,vuln", "air,ground,enemy,neutral,vuln"],
+    "aani": "spell",
+    "acat": "",
+    "atat": "",
+    "aeat": "",
+    "asat": ""
+   }
+  },
+  "ogre_magi_ignite": {
+   "kind": "native",
+   "base": "ANcl",
+   "order": "ancestralspirit",
+   "desc": "Hurls flaming liquid at an enemy and at one more random enemy nearby. Burning units take magical damage every second and are slowed; repeat hits extend the burn. Multicast throws more at random enemies.",
+   "fields": {
+    "Ncl1": [0, 0, 0, 0],
+    "Ncl2": [1, 1, 1, 1],
+    "Ncl3": [1, 1, 1, 1],
+    "Ncl4": [0, 0, 0, 0],
+    "Ncl5": [0, 0, 0, 0],
+    "Ncl6": ["ancestralspirit", "ancestralspirit", "ancestralspirit", "ancestralspirit"],
+    "aare": [0, 0, 0, 0],
+    "acas": [0.05, 0.05, 0.05, 0.05],
+    "atar": ["air,ground,enemy,neutral,vuln", "air,ground,enemy,neutral,vuln", "air,ground,enemy,neutral,vuln", "air,ground,enemy,neutral,vuln"],
+    "aani": "spell",
+    "acat": "",
+    "atat": "",
+    "aeat": "",
+    "asat": ""
+   }
+  },
+  "ogre_magi_bloodlust": {
+   "kind": "native",
+   "base": "Ablo",
+   "order": "bloodlust",
+   "desc": "Drives a friendly unit or tower into a frenzy, raising its attack and movement speed; Ogre gets a bigger attack speed bonus on himself. Can autocast. Multicast spreads it to random allies nearby.",
+   "fields": {
+    "Blo1": [0, 0, 0, 0],
+    "Blo2": [0, 0, 0, 0],
+    "Blo3": [0.25, 0.25, 0.25, 0.25],
+    "adur": [30, 30, 30, 30],
+    "ahdu": [30, 30, 30, 30],
+    "acas": [0.15, 0.15, 0.15, 0.15],
+    "atar": ["air,ground,friend,self,vuln,invu,structure", "air,ground,friend,self,vuln,invu,structure", "air,ground,friend,self,vuln,invu,structure", "air,ground,friend,self,vuln,invu,structure"],
+    "areq": "",
+    "achd": 0,
+    "auar": "ReplaceableTextures\\CommandButtons\\BTNDota_ogre_magi_bloodlust.blp"
+   }
+  },
+  "ogre_magi_dumb_luck": {
+   "desc": "Ogre never gains Intelligence. Instead his maximum mana and mana regeneration grow with his Strength."
+  },
+  "ogre_magi_multicast": {
+   "desc": "Ogre's targeted spells may fire two, three or four times in a row. Every point of Strength adds a little to the chance."
+  }
+ }
+}

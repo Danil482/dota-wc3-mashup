@@ -1,0 +1,12 @@
+{
+  "name": "dota-wc3-mashup-tools",
+  "private": true,
+  "license": "MIT",
+  "description": "Build tools for the Dota vs Commander Warcraft III map",
+  "dependencies": {
+    "mdx-m3-viewer": "^5.12.0",
+    "puppeteer": "25.11.0",
+    "war3-objectdata": "^0.2.3",
+    "wc3maptranslator": "^5.0.0"
+  }
+}

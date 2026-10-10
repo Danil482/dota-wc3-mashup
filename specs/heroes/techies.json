@@ -1,0 +1,106 @@
+{
+ "title": "Techies",
+ "base": "Hpal",
+ "model": "units\\creeps\\GoblinSapper\\GoblinSapper.mdl",
+ "sound": "GoblinSapper",
+ "scale": 1.3,
+ "missile": "Abilities\\Weapons\\Mortar\\MortarMissile.mdl",
+ "abilities": {
+  "techies_sticky_bomb": {
+   "target": 2,
+   "order": "acidbomb",
+   "desc": "Lobs a bomb at the target area. If an enemy hero is close to where it lands, the bomb chases it, sticks and slows it, then explodes, damaging and slowing everything around."
+  },
+  "techies_reactive_tazer": {
+   "target": 0,
+   "order": "lightningshield",
+   "desc": "Charges Techies: faster movement, and enemies that attack them are shocked, dispelled and disarmed. When the charge runs out or is detonated it explodes, damaging and disarming nearby enemies."
+  },
+  "techies_suicide": {
+   "target": 2,
+   "channel": 0.7,
+   "order": "clusterrockets",
+   "desc": "After a short wind-up Techies leap to the target point and blow up on landing, damaging and stunning enemies and clearing trees. The blast also costs Techies part of their current health but never kills them."
+  },
+  "techies_land_mines": {
+   "target": 2,
+   "order": "flamestrike",
+   "desc": "Plants an invisible mine (charges refill over time). It becomes visible while enemies are near and explodes once one stays in range long enough. Damage falls off with distance, is reduced against buildings, and lowers magic resistance. Mines cannot be planted too close together."
+  },
+  "techies_mutually_assured_destruction": {
+   "desc": "Techies regenerate mana based on their mana pool. On death they leave a barrel that soon explodes, damaging nearby enemies based on their maximum mana."
+  }
+ },
+ "units": {
+  "techies_mine": {
+   "base": "nglm",
+   "fields": {
+    "unam": "Proximity Mine",
+    "uabi": "Apiv",
+    "uhpm": 1,
+    "udef": 0,
+    "umvs": 0,
+    "usid": 64,
+    "usin": 64,
+    "ucol": 0,
+    "ulev": 1,
+    "ufoo": 0,
+    "ubba": 0,
+    "ubdi": 0,
+    "ubsi": 0
+   }
+  }
+ },
+ "abilities_extra": {
+  "techies_tazer_detonate": {
+   "base": "ANcl",
+   "order": "thunderclap",
+   "fields": {
+    "anam": "Detonate Tazer",
+    "aher": 0,
+    "alev": 1,
+    "aart": "ReplaceableTextures\\CommandButtons\\BTNSelfDestructOn.blp",
+    "abpx": 1,
+    "abpy": 2,
+    "ahky": "W",
+    "atp1": [
+     "Detonate Tazer (|cffffcc00W|r)"
+    ],
+    "aub1": [
+     "Sets off every Reactive Tazer charge right away."
+    ],
+    "Ncl1": [
+     0
+    ],
+    "Ncl2": [
+     0
+    ],
+    "Ncl3": [
+     1
+    ],
+    "Ncl4": [
+     0
+    ],
+    "Ncl5": [
+     0
+    ],
+    "Ncl6": [
+     "thunderclap"
+    ],
+    "acdn": [
+     0.5
+    ],
+    "amcs": [
+     0
+    ],
+    "aran": [
+     0
+    ],
+    "aare": [
+     0
+    ],
+    "aani": "spell"
+   }
+  }
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "title": "Pudge",
+ "base": "Hpal",
+ "model": "units\\undead\\Abomination\\Abomination.mdl",
+ "sound": "Abomination",
+ "scale": 1.1,
+ "abilities": {
+  "pudge_meat_hook": {
+   "target": 2,
+   "desc": "Hurls a chained hook along a line. The first unit it catches is dragged back to Pudge: enemy heroes take pure damage, ordinary enemy creeps die on the spot, allies are only pulled. Pudge is locked in the throw for a moment."
+  },
+  "pudge_rot": {
+   "kind": "toggle",
+   "order": "immolation",
+   "radiusKey": "rot_radius",
+   "desc": "Toggle a cloud of rot that burns and slows enemies around Pudge several times a second. It eats at Pudge too, but never kills him."
+  },
+  "pudge_flesh_heap": {
+   "kind": "native",
+   "base": "Absk",
+   "order": "berserk",
+   "desc": "Instantly layers extra flesh on Pudge: for a few seconds every instance of damage he takes is reduced by a flat amount. Usable while channeling Dismember.",
+   "fields": {
+    "bsk1": [0, 0, 0, 0],
+    "bsk2": [0, 0, 0, 0],
+    "bsk3": [0, 0, 0, 0],
+    "adur": [0.01, 0.01, 0.01, 0.01],
+    "ahdu": [0.01, 0.01, 0.01, 0.01]
+   }
+  },
+  "pudge_innate_graft_flesh": {
+   "desc": "Every enemy hero Pudge kills, or that dies close to him, permanently adds Strength."
+  },
+  "pudge_dismember": {
+   "kind": "native",
+   "base": "ANcl",
+   "order": "animatedead",
+   "desc": "Channel: Pudge devours an enemy, holding it helpless and pulling it in while dealing magical damage that grows with his Strength. Pudge heals for all damage dealt. Pierces spell immunity.",
+   "fields": {
+    "Ncl1": [2.75, 2.75, 2.75],
+    "Ncl2": [1, 1, 1],
+    "Ncl3": [9, 9, 9],
+    "Ncl4": [0, 0, 0],
+    "Ncl5": [0, 0, 0],
+    "Ncl6": ["animatedead", "animatedead", "animatedead"],
+    "aare": [0, 0, 0],
+    "atar": ["air,ground,enemy,neutral,vuln", "air,ground,enemy,neutral,vuln", "air,ground,enemy,neutral,vuln"],
+    "aani": "spell,channel",
+    "acat": "",
+    "atat": "",
+    "aeat": "",
+    "asat": ""
+   }
+  }
+ }
+}

@@ -1,0 +1,98 @@
+{
+ "title": "Chen",
+ "base": "Hpal",
+ "model": "units\\human\\Knight\\Knight.mdl",
+ "sound": "Knight",
+ "scale": 1.0,
+ "missile": "Abilities\\Weapons\\PriestMissile\\PriestMissile.mdl",
+ "abilities": {
+  "chen_penitence": {
+   "target": 1,
+   "order": "cripple",
+   "targets": "air,ground,enemy,neutral",
+   "desc": "Hurls a holy bolt that deals pure damage and slows the target. Allies attacking the slowed unit attack faster."
+  },
+  "chen_holy_persuasion": {
+   "target": 1,
+   "order": "charm",
+   "targets": "air,ground,enemy,neutral,friend,nonhero",
+   "desc": "Takes control of a creep up to a level limit and pays Chen part of its bounty. Converted creeps get a health floor, full mana and bonus speed and damage. Over the unit limit the oldest convert dies. Cast on one of your converts that has not been hurt lately to dismiss it with a short cooldown."
+  },
+  "chen_divine_favor": {
+   "target": 1,
+   "order": "innerfire",
+   "targets": "air,ground,friend,self,vuln,invu",
+   "desc": "Passive: nearby allies regenerate health. Active: grants an ally bonus armor and stronger healing for a few seconds; cast on Chen to bless every unit he controls."
+  },
+  "chen_zealot": {
+   "target": 1,
+   "range": 99999,
+   "order": "massteleport",
+   "targets": "air,ground,friend,self,vuln,invu",
+   "desc": "Chen is followed by a Zealot that returns whenever Chen respawns and can sacrifice itself. Use on one of your units to bring it to Chen after a delay, or on Chen to bring all of them. Damage from enemy players breaks the teleport."
+  },
+  "chen_hand_of_god": {
+   "order": "tranquility",
+   "desc": "Instantly heals every allied hero on the map and every unit Chen controls, then keeps healing them for a while."
+  }
+ },
+ "units": {
+  "chen_zealot": {
+   "base": "nfrg",
+   "fields": {
+    "unam": "Zealot",
+    "uabi": "",
+    "upgr": "",
+    "uhpm": 550,
+    "udef": 2,
+    "ua1b": 20,
+    "ua1d": 1,
+    "ua1s": 5,
+    "ua1c": 1.0,
+    "ua1r": 100,
+    "uacq": 500,
+    "ua1t": "normal",
+    "udty": "large",
+    "umvs": 325,
+    "uhpr": 2.5,
+    "umpm": 0,
+    "ulev": 3,
+    "usid": 750,
+    "usin": 750,
+    "ufoo": 0,
+    "ubba": 0,
+    "ubdi": 0,
+    "ubsi": 0
+   }
+  }
+ },
+ "abilities_extra": {
+  "chen_martyrdom": {
+   "base": "ANcl",
+   "order": "deathcoil",
+   "fields": {
+    "anam": "Martyrdom",
+    "aher": 0,
+    "alev": 1,
+    "aart": "ReplaceableTextures\\CommandButtons\\BTNHolyBolt.blp",
+    "abpx": 0,
+    "abpy": 2,
+    "ahky": "Q",
+    "atp1": ["Martyrdom (|cffffcc00Q|r)"],
+    "aub1": ["The Zealot gives up its life: an enemy takes damage based on its remaining health, or an ally is healed for half of that."],
+    "Ncl1": [0],
+    "Ncl2": [1],
+    "Ncl3": [1],
+    "Ncl4": [0],
+    "Ncl5": [0],
+    "Ncl6": ["deathcoil"],
+    "acdn": [0],
+    "amcs": [0],
+    "aran": [500],
+    "aare": [0],
+    "atar": ["air,ground,enemy,neutral,friend,notself"],
+    "aani": "attack"
+   }
+  }
+ }
+}

@@ -1,0 +1,2957 @@
+{
+ "icons": [
+  {
+   "key": "item_tpscroll",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/tpscroll_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_ward_observer",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/ward_observer_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_ward_sentry",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/ward_sentry_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_tango",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/tango_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_flask",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/flask_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_clarity",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/clarity_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_faerie_fire",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/faerie_fire_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_enchanted_mango",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/enchanted_mango_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_dust",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/dust_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_branches",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/branches_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_magic_stick",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/magic_stick_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_gauntlets",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/gauntlets_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_slippers",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/slippers_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_mantle",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/mantle_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_circlet",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/circlet_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_crown",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/crown_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_belt_of_strength",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/belt_of_strength_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_boots_of_elves",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/boots_of_elves_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_robe",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/robe_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_ogre_axe",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/ogre_axe_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_blade_of_alacrity",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/blade_of_alacrity_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_staff_of_wizardry",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/staff_of_wizardry_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_quelling_blade",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/quelling_blade_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_ring_of_protection",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/ring_of_protection_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_blight_stone",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/blight_stone_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_blades_of_attack",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/blades_of_attack_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_gloves",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/gloves_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_chainmail",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/chainmail_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_splintmail",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/splintmail_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_broadsword",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/broadsword_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_claymore",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/claymore_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_javelin",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/javelin_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_mithril_hammer",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/mithril_hammer_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_ring_of_regen",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/ring_of_regen_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_sobi_mask",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/sobi_mask_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_wind_lace",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/wind_lace_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_fluffy_hat",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/fluffy_hat_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_wizard_hat",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/wizard_hat_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_boots",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/boots_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_cloak",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/cloak_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_lifesteal",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/lifesteal_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_chasm_stone",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/chasm_stone_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_blitz_knuckles",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/blitz_knuckles_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_blink",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/blink_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_ring_of_health",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/ring_of_health_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_void_stone",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/void_stone_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_energy_booster",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/energy_booster_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_vitality_booster",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/vitality_booster_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_point_booster",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/point_booster_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_platemail",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/platemail_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_talisman_of_evasion",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/talisman_of_evasion_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_hyperstone",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/hyperstone_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_ring_of_tarrasque",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/ring_of_tarrasque_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_tiara_of_selemene",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/tiara_of_selemene_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_diadem",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/diadem_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_ultimate_orb",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/ultimate_orb_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_demon_edge",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/demon_edge_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_mystic_staff",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/mystic_staff_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_reaver",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/reaver_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_eagle",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/eagle_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_relic",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/relic_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_refresher",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/refresher_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_sheepstick",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/sheepstick_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_magic_wand",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/magic_wand_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_bracer",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/bracer_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_wraith_band",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/wraith_band_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_null_talisman",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/null_talisman_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_power_treads",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/power_treads_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_phase_boots",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/phase_boots_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_pers",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/pers_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_ring_of_basilius",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/ring_of_basilius_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_headdress",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/headdress_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_buckler",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/buckler_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_arcane_boots",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/arcane_boots_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_mekansm",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/mekansm_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_force_staff",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/force_staff_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_cyclone",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/cyclone_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_aether_lens",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/aether_lens_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_dagon",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/dagon_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_kaya",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/kaya_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_hand_of_midas",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/hand_of_midas_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_black_king_bar",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/black_king_bar_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_heart",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/heart_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_assault",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/assault_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_shivas_guard",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/shivas_guard_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_lesser_crit",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/lesser_crit_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_greater_crit",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/greater_crit_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_basher",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/basher_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_monkey_king_bar",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/monkey_king_bar_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_bfury",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/bfury_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_desolator",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/desolator_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_sange",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/sange_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_yasha",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/yasha_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_sange_and_yasha",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/sange_and_yasha_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_manta",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/manta_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_butterfly",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/butterfly_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_radiance",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/radiance_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_satanic",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/satanic_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_recipe",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/recipe_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_power_treads_str",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/power_treads_str_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_power_treads_agi",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/power_treads_agi_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_power_treads_int",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/power_treads_int_png.vtex_c"
+   ]
+  }
+ ],
+ "items": {
+  "item_aether_lens": {
+   "cost": 2275,
+   "desc": "+225 cast range for your hero spells.",
+   "recipe": {
+    "cost": 775,
+    "parts": [
+     [
+      "item_energy_booster",
+      "item_void_stone"
+     ]
+    ],
+    "scroll": "item_recipe_aether_lens"
+   },
+   "shop": "magical",
+   "stats": {
+    "cast_range": 225,
+    "mana_regen": 2.5,
+    "max_mana": 300
+   },
+   "title": "Aether Lens",
+   "values": {
+    "bonus_mana": "300",
+    "bonus_mana_regen": "2.5",
+    "cast_range_bonus": "225"
+   }
+  },
+  "item_arcane_boots": {
+   "cooldown": 55,
+   "cost": 1500,
+   "desc": "Use to restore 150 mana to allies within 1200. Allies nearby regenerate 1 extra mana per second.",
+   "recipe": {
+    "cost": 325,
+    "parts": [
+     [
+      "item_boots",
+      "item_ring_of_basilius",
+      "item_wizard_hat"
+     ]
+    ],
+    "scroll": "item_recipe_arcane_boots"
+   },
+   "shop": "support",
+   "stats": {
+    "boots_ms": 45,
+    "mana_regen": 0.25,
+    "max_mana": 125
+   },
+   "title": "Arcane Boots",
+   "values": {
+    "aura_mana_regen": "1",
+    "aura_radius": "1200",
+    "bonus_mana": "125",
+    "bonus_movement": "45",
+    "mana_regen": "0.25",
+    "replenish_amount": "150",
+    "replenish_radius": "1200"
+   }
+  },
+  "item_assault": {
+   "cost": 5125,
+   "desc": "Allies and buildings within 1200 gain 30 attack speed and 5 armor; enemies there lose 5 armor.",
+   "range": 1200,
+   "recipe": {
+    "cost": 1300,
+    "parts": [
+     [
+      "item_buckler",
+      "item_hyperstone",
+      "item_platemail"
+     ]
+    ],
+    "scroll": "item_recipe_assault"
+   },
+   "shop": "armor",
+   "stats": {
+    "armor": 10,
+    "attack_speed": 30
+   },
+   "title": "Assault Cuirass",
+   "values": {
+    "aura_attack_speed": "30",
+    "aura_negative_armor": "-5",
+    "aura_positive_armor": "5",
+    "aura_radius": "1200",
+    "bonus_armor": "10",
+    "bonus_attack_speed": "30"
+   }
+  },
+  "item_basher": {
+   "cooldown": 2.3,
+   "cost": 2875,
+   "desc": "Attacks have a 25% chance (10% ranged) to stun for 1.2 seconds and deal 100 extra damage. Once per 2.3 seconds.",
+   "recipe": {
+    "cost": 825,
+    "parts": [
+     [
+      "item_mithril_hammer",
+      "item_belt_of_strength"
+     ]
+    ],
+    "scroll": "item_recipe_basher"
+   },
+   "shop": "weapons",
+   "stats": {
+    "damage": 30,
+    "str": 10
+   },
+   "title": "Skull Basher",
+   "values": {
+    "bash_chance_melee": "25",
+    "bash_chance_ranged": "10",
+    "bash_cooldown": "2.3",
+    "bash_duration": "1.2",
+    "bonus_chance_damage": "100",
+    "bonus_damage": "30",
+    "bonus_strength": "10"
+   }
+  },
+  "item_belt_of_strength": {
+   "cost": 450,
+   "shop": "attributes",
+   "stats": {
+    "str": 6
+   },
+   "title": "Belt of Strength",
+   "values": {
+    "bonus_strength": "6"
+   }
+  },
+  "item_bfury": {
+   "cooldown": 3,
+   "cost": 3900,
+   "desc": "Melee attacks cleave 60% damage (40% to creeps) in a cone behind the target. +10 damage against non-heroes. Use on a tree to cut it.",
+   "range": 350,
+   "recipe": {
+    "cost": 400,
+    "parts": [
+     [
+      "item_pers",
+      "item_broadsword",
+      "item_broadsword",
+      "item_quelling_blade"
+     ]
+    ],
+    "scroll": "item_recipe_bfury"
+   },
+   "shop": "weapons",
+   "stats": {
+    "damage": 50,
+    "hp_regen": 7.5,
+    "mana_regen": 2.75
+   },
+   "title": "Battle Fury",
+   "values": {
+    "bonus_damage": "50",
+    "bonus_health_regen": "7.5",
+    "bonus_mana_regen": "2.75",
+    "cleave_damage_percent": "60",
+    "cleave_damage_percent_creep": "40",
+    "cleave_distance": "650",
+    "cleave_ending_width": "360",
+    "cleave_starting_width": "150",
+    "quelling_bonus": "10",
+    "quelling_bonus_ranged": "5",
+    "upgraded_cleave_bonus": "25",
+    "upgraded_damage_bonus": "15"
+   }
+  },
+  "item_black_king_bar": {
+   "cooldown": 95,
+   "cost": 4050,
+   "desc": "Use to become immune to magic and drop most debuffs for 9 seconds; each use lasts one second less, down to 7.",
+   "mana": 50,
+   "recipe": {
+    "cost": 1450,
+    "parts": [
+     [
+      "item_mithril_hammer",
+      "item_ogre_axe"
+     ]
+    ],
+    "scroll": "item_recipe_black_king_bar"
+   },
+   "shop": "armor",
+   "stats": {
+    "damage": 24,
+    "str": 10
+   },
+   "title": "Black King Bar",
+   "values": {
+    "bonus_damage": "24",
+    "bonus_strength": "10",
+    "duration": "9 8 7",
+    "max_level": "3",
+    "model_scale": "30",
+    "spell_reduce": "60"
+   }
+  },
+  "item_blade_of_alacrity": {
+   "cost": 1000,
+   "shop": "attributes",
+   "stats": {
+    "agi": 10
+   },
+   "title": "Blade of Alacrity",
+   "values": {
+    "bonus_agility": "10"
+   }
+  },
+  "item_blades_of_attack": {
+   "cost": 450,
+   "shop": "equipment",
+   "stats": {
+    "damage": 9
+   },
+   "title": "Blades of Attack",
+   "values": {
+    "bonus_damage": "9"
+   }
+  },
+  "item_blight_stone": {
+   "cost": 300,
+   "desc": "Attacks strip 2 armor from the target for 3 seconds.",
+   "shop": "equipment",
+   "title": "Orb of Blight",
+   "values": {
+    "corruption_armor": "-2",
+    "corruption_duration": "3.0"
+   }
+  },
+  "item_blink": {
+   "cooldown": 15,
+   "cost": 2250,
+   "desc": "Teleports you up to 1200 away; farther targets land you 960 away. Locked for 3 seconds after an enemy hero damages you.",
+   "range": 1200,
+   "shop": "misc",
+   "title": "Blink Dagger",
+   "values": {
+    "blink_damage_cooldown": "3.0",
+    "blink_range": "1200",
+    "blink_range_clamp": "960"
+   }
+  },
+  "item_blitz_knuckles": {
+   "cost": 1000,
+   "shop": "misc",
+   "stats": {
+    "attack_speed": 35
+   },
+   "title": "Blitz Knuckles",
+   "values": {
+    "bonus_attack_speed": "35"
+   }
+  },
+  "item_boots": {
+   "cost": 500,
+   "desc": "Pairs of boots do not add up: only the fastest counts.",
+   "shop": "misc",
+   "stats": {
+    "boots_ms": 45
+   },
+   "title": "Boots of Speed",
+   "values": {
+    "bonus_movement_speed": "45"
+   }
+  },
+  "item_boots_of_elves": {
+   "cost": 450,
+   "shop": "attributes",
+   "stats": {
+    "agi": 6
+   },
+   "title": "Band of Elvenskin",
+   "values": {
+    "bonus_agility": "6"
+   }
+  },
+  "item_bracer": {
+   "cost": 505,
+   "recipe": {
+    "cost": 210,
+    "parts": [
+     [
+      "item_circlet",
+      "item_gauntlets"
+     ]
+    ],
+    "scroll": "item_recipe_bracer"
+   },
+   "shop": "accessories",
+   "stats": {
+    "agi": 2,
+    "hp_regen": 0.75,
+    "int": 2,
+    "max_hp": 50,
+    "str": 5
+   },
+   "title": "Bracer",
+   "values": {
+    "bonus_agility": "2",
+    "bonus_damage": "0",
+    "bonus_health": "50",
+    "bonus_health_regen": "0.75",
+    "bonus_intellect": "2",
+    "bonus_strength": "5"
+   }
+  },
+  "item_branches": {
+   "cost": 55,
+   "desc": "A cheap twig with a little of every attribute.",
+   "range": 400,
+   "shop": "consumables",
+   "stats": {
+    "agi": 1,
+    "int": 1,
+    "str": 1
+   },
+   "title": "Iron Branch",
+   "values": {
+    "bonus_all_stats": "1",
+    "tree_duration": "20"
+   }
+  },
+  "item_broadsword": {
+   "cost": 1000,
+   "shop": "equipment",
+   "stats": {
+    "damage": 15
+   },
+   "title": "Broadsword",
+   "values": {
+    "bonus_damage": "15"
+   }
+  },
+  "item_buckler": {
+   "cost": 425,
+   "desc": "Allies within 1200 gain 2 armor.",
+   "range": 1200,
+   "recipe": {
+    "cost": 250,
+    "parts": [
+     [
+      "item_ring_of_protection"
+     ]
+    ],
+    "scroll": "item_recipe_buckler"
+   },
+   "shop": "support",
+   "stats": {
+    "armor": 1
+   },
+   "title": "Buckler",
+   "values": {
+    "armor": "1",
+    "bonus_aoe_armor": "2",
+    "bonus_aoe_radius": "1200"
+   }
+  },
+  "item_butterfly": {
+   "cost": 5450,
+   "desc": "35% evasion and 20% more attack speed.",
+   "recipe": {
+    "cost": 0,
+    "parts": [
+     [
+      "item_eagle",
+      "item_claymore",
+      "item_talisman_of_evasion"
+     ]
+    ]
+   },
+   "shop": "artifacts",
+   "stats": {
+    "agi": 30,
+    "attack_speed_pct": 0.2,
+    "damage": 30,
+    "evasion": 0.35
+   },
+   "title": "Butterfly",
+   "values": {
+    "bonus_agility": "30",
+    "bonus_attack_speed_pct": "20",
+    "bonus_damage": "30",
+    "bonus_evasion": "35"
+   }
+  },
+  "item_chainmail": {
+   "cost": 500,
+   "shop": "equipment",
+   "stats": {
+    "armor": 4
+   },
+   "title": "Chainmail",
+   "values": {
+    "bonus_armor": "4"
+   }
+  },
+  "item_chasm_stone": {
+   "cost": 900,
+   "desc": "Component of Shiva's Guard. Its area bonus is not modelled in this map.",
+   "shop": "misc",
+   "title": "Chasm Stone",
+   "values": {
+    "aoe_bonus": "40",
+    "bonus_health": "0"
+   }
+  },
+  "item_circlet": {
+   "cost": 155,
+   "shop": "attributes",
+   "stats": {
+    "agi": 2,
+    "int": 2,
+    "str": 2
+   },
+   "title": "Circlet",
+   "values": {
+    "bonus_all_stats": "2"
+   }
+  },
+  "item_clarity": {
+   "charges": 1,
+   "consumable": true,
+   "cost": 60,
+   "desc": "Regenerates 6 mana per second for 25 seconds. Damage from an enemy hero ends it.",
+   "range": 250,
+   "shop": "consumables",
+   "stack": true,
+   "stock": {
+    "initial": 5,
+    "max": 5,
+    "time": 120
+   },
+   "title": "Clarity",
+   "values": {
+    "buff_duration": "25",
+    "mana_regen": "6"
+   }
+  },
+  "item_claymore": {
+   "cost": 1350,
+   "shop": "equipment",
+   "stats": {
+    "damage": 20
+   },
+   "title": "Claymore",
+   "values": {
+    "bonus_damage": "20"
+   }
+  },
+  "item_cloak": {
+   "cost": 900,
+   "desc": "Shrugs off part of all magic damage.",
+   "shop": "misc",
+   "stats": {
+    "magic_resist": 0.18
+   },
+   "title": "Cloak",
+   "values": {
+    "bonus_magical_armor": "18",
+    "tooltip_resist": "18"
+   }
+  },
+  "item_crown": {
+   "cost": 450,
+   "shop": "attributes",
+   "stats": {
+    "agi": 4,
+    "int": 4,
+    "str": 4
+   },
+   "title": "Crown",
+   "values": {
+    "bonus_all_stats": "4"
+   }
+  },
+  "item_cyclone": {
+   "cooldown": 23,
+   "cost": 2600,
+   "desc": "Use on an enemy or yourself: the target is lifted for 2.5 seconds and can neither act nor be hurt. Enemies take 50 magic damage on landing.",
+   "mana": 175,
+   "range": 550,
+   "recipe": {
+    "cost": 675,
+    "parts": [
+     [
+      "item_staff_of_wizardry",
+      "item_void_stone",
+      "item_wind_lace"
+     ]
+    ],
+    "scroll": "item_recipe_cyclone"
+   },
+   "shop": "magical",
+   "stats": {
+    "int": 10,
+    "lace_ms": 20,
+    "mana_regen": 2.5
+   },
+   "title": "Eul's Scepter of Divinity",
+   "values": {
+    "bonus_intellect": "10",
+    "bonus_mana_regen": "2.5",
+    "bonus_movement_speed": "20",
+    "cyclone_duration": "2.5",
+    "tooltip_drop_damage": "50"
+   }
+  },
+  "item_dagon": {
+   "cooldown": 27,
+   "cost": 3000,
+   "desc": "Use to blast an enemy for 400 magic damage.",
+   "mana": 120,
+   "range": 640,
+   "recipe": {
+    "cost": 1100,
+    "parts": [
+     [
+      "item_point_booster",
+      "item_crown",
+      "item_wizard_hat"
+     ]
+    ],
+    "scroll": "item_recipe_dagon"
+   },
+   "shop": "magical",
+   "stats": {
+    "agi": 6,
+    "cast_range": 60,
+    "int": 6,
+    "max_hp": 200,
+    "max_mana": 350,
+    "str": 6
+   },
+   "title": "Dagon",
+   "values": {
+    "bonus_all_stats": "6 7 8 9 10",
+    "bonus_health": "200 210 220 230 240",
+    "bonus_mana": "350 375 400 425 450",
+    "cast_range_bonus": "60 90 120 150 180",
+    "damage": "400 500 600 700 800",
+    "damage_delay": "0",
+    "mana_cost_tooltip": "120 140 160 180 200"
+   }
+  },
+  "item_demon_edge": {
+   "cost": 2200,
+   "shop": "relics",
+   "stats": {
+    "damage": 40
+   },
+   "title": "Demon Edge",
+   "values": {
+    "bonus_damage": "40"
+   }
+  },
+  "item_desolator": {
+   "cost": 3500,
+   "desc": "Attacks strip 6 armor for 7 seconds. Gains 2 damage per hero kill, up to 30.",
+   "recipe": {
+    "cost": 0,
+    "parts": [
+     [
+      "item_mithril_hammer",
+      "item_mithril_hammer",
+      "item_blight_stone"
+     ]
+    ]
+   },
+   "shop": "weapons",
+   "stats": {
+    "damage": 55
+   },
+   "title": "Desolator",
+   "values": {
+    "bonus_damage": "55",
+    "bonus_damage_per_assist": "1",
+    "bonus_damage_per_kill": "2",
+    "corruption_armor": "-6",
+    "corruption_duration": "7.0",
+    "max_damage": "30"
+   }
+  },
+  "item_diadem": {
+   "cost": 1000,
+   "shop": "secret",
+   "stats": {
+    "agi": 6,
+    "int": 6,
+    "str": 6
+   },
+   "title": "Diadem",
+   "values": {
+    "bonus_all_stats": "6"
+   }
+  },
+  "item_dust": {
+   "charges": 1,
+   "consumable": true,
+   "cooldown": 30,
+   "cost": 80,
+   "desc": "Exposes and slows (20%) invisible enemy heroes within 1050 of where you stand for 12 seconds.",
+   "range": 1050,
+   "shop": "consumables",
+   "stack": true,
+   "title": "Dust of Appearance",
+   "values": {
+    "damage": "25",
+    "duration": "12",
+    "linger_duration": "8",
+    "movespeed": "-20",
+    "radius": "1050"
+   }
+  },
+  "item_eagle": {
+   "cost": 2800,
+   "shop": "relics",
+   "stats": {
+    "agi": 25
+   },
+   "title": "Eaglesong",
+   "values": {
+    "bonus_agility": "25"
+   }
+  },
+  "item_enchanted_mango": {
+   "charges": 1,
+   "consumable": true,
+   "cost": 65,
+   "desc": "Use to restore 100 mana at once.",
+   "range": 400,
+   "shop": "consumables",
+   "stack": true,
+   "stats": {
+    "hp_regen": 0.4
+   },
+   "stock": {
+    "initial": 4,
+    "max": 4,
+    "time": 120
+   },
+   "title": "Enchanted Mango",
+   "values": {
+    "hp_regen": "0.4",
+    "replenish_amount": "100"
+   }
+  },
+  "item_energy_booster": {
+   "cost": 800,
+   "shop": "secret",
+   "stats": {
+    "max_mana": 250
+   },
+   "title": "Energy Booster",
+   "values": {
+    "bonus_mana": "250"
+   }
+  },
+  "item_faerie_fire": {
+   "charges": 1,
+   "consumable": true,
+   "cooldown": 5,
+   "cost": 65,
+   "desc": "Use to heal 85 health at once.",
+   "shop": "consumables",
+   "stack": false,
+   "stats": {
+    "damage": 2
+   },
+   "title": "Faerie Fire",
+   "values": {
+    "bonus_damage": "2",
+    "hp_restore": "85"
+   }
+  },
+  "item_flask": {
+   "charges": 1,
+   "consumable": true,
+   "cost": 100,
+   "desc": "Regenerates 30 health per second for 13 seconds (half on an ally). Damage from an enemy hero ends it.",
+   "range": 250,
+   "shop": "consumables",
+   "stack": true,
+   "stock": {
+    "initial": 5,
+    "max": 5,
+    "time": 120
+   },
+   "title": "Healing Salve",
+   "values": {
+    "break_on_hero_damage": "1",
+    "buff_duration": "13",
+    "health_regen": "30"
+   }
+  },
+  "item_fluffy_hat": {
+   "cost": 250,
+   "shop": "misc",
+   "stats": {
+    "max_hp": 125
+   },
+   "title": "Fluffy Hat",
+   "values": {
+    "bonus_health": "125"
+   }
+  },
+  "item_force_staff": {
+   "cooldown": 19,
+   "cost": 2200,
+   "desc": "Use to shove any unit 600 units in the direction it faces.",
+   "mana": 150,
+   "range": 550,
+   "recipe": {
+    "cost": 950,
+    "parts": [
+     [
+      "item_staff_of_wizardry",
+      "item_fluffy_hat"
+     ]
+    ],
+    "scroll": "item_recipe_force_staff"
+   },
+   "shop": "magical",
+   "stats": {
+    "int": 10,
+    "max_hp": 175
+   },
+   "title": "Force Staff",
+   "values": {
+    "bonus_health": "175",
+    "bonus_intellect": "10",
+    "enemy_cast_range": "850",
+    "push_length": "600",
+    "push_time": "0.5"
+   }
+  },
+  "item_gauntlets": {
+   "cost": 140,
+   "shop": "attributes",
+   "stats": {
+    "str": 3
+   },
+   "title": "Gauntlets of Strength",
+   "values": {
+    "bonus_strength": "3"
+   }
+  },
+  "item_gloves": {
+   "cost": 450,
+   "shop": "equipment",
+   "stats": {
+    "attack_speed": 20
+   },
+   "title": "Gloves of Haste",
+   "values": {
+    "bonus_attack_speed": "20"
+   }
+  },
+  "item_greater_crit": {
+   "cost": 5200,
+   "desc": "Attacks have a 30% chance to hit for 225% damage.",
+   "recipe": {
+    "cost": 1000,
+    "parts": [
+     [
+      "item_lesser_crit",
+      "item_demon_edge"
+     ]
+    ],
+    "scroll": "item_recipe_greater_crit"
+   },
+   "shop": "weapons",
+   "stats": {
+    "damage": 88
+   },
+   "title": "Daedalus",
+   "values": {
+    "bonus_damage": "88",
+    "crit_chance": "30",
+    "crit_multiplier": "225"
+   }
+  },
+  "item_hand_of_midas": {
+   "cost": 2200,
+   "desc": "Use on a non-hero, non-ancient enemy to turn it into 160 gold. Holds up to 2 charges; one returns every 90 seconds.",
+   "range": 600,
+   "recipe": {
+    "cost": 1750,
+    "parts": [
+     [
+      "item_gloves"
+     ]
+    ],
+    "scroll": "item_recipe_hand_of_midas"
+   },
+   "shop": "armor",
+   "stats": {
+    "attack_speed": 40
+   },
+   "title": "Hand of Midas",
+   "values": {
+    "bonus_attack_speed": "40",
+    "bonus_gold": "160",
+    "charge_restore": "90",
+    "charges_max": "2"
+   }
+  },
+  "item_headdress": {
+   "cost": 425,
+   "desc": "Allies within 1200 regenerate 2 extra health per second.",
+   "range": 1200,
+   "recipe": {
+    "cost": 250,
+    "parts": [
+     [
+      "item_ring_of_regen"
+     ]
+    ],
+    "scroll": "item_recipe_headdress"
+   },
+   "shop": "support",
+   "stats": {
+    "hp_regen": 0.5
+   },
+   "title": "Headdress",
+   "values": {
+    "aura_health_regen": "2.0",
+    "aura_radius": "1200",
+    "health_regen": "0.5"
+   }
+  },
+  "item_heart": {
+   "cost": 5300,
+   "desc": "Regenerates 1% of maximum health plus 1.5% of missing health every second.",
+   "recipe": {
+    "cost": 800,
+    "parts": [
+     [
+      "item_reaver",
+      "item_ring_of_tarrasque"
+     ]
+    ],
+    "scroll": "item_recipe_heart"
+   },
+   "shop": "armor",
+   "stats": {
+    "str": 40
+   },
+   "title": "Heart of Tarrasque",
+   "values": {
+    "bonus_strength": "40",
+    "hp_regen": "1",
+    "missing_health_regen": "1.5"
+   }
+  },
+  "item_hyperstone": {
+   "cost": 2000,
+   "shop": "secret",
+   "stats": {
+    "attack_speed": 60
+   },
+   "title": "Hyperstone",
+   "values": {
+    "bonus_attack_speed": "60"
+   }
+  },
+  "item_javelin": {
+   "cost": 900,
+   "desc": "Attacks have a 25% chance to deal 60 extra magic damage and cannot be evaded when that happens.",
+   "shop": "equipment",
+   "title": "Javelin",
+   "values": {
+    "bonus_chance": "25",
+    "bonus_chance_damage": "60"
+   }
+  },
+  "item_kaya": {
+   "cost": 2100,
+   "desc": "10% more spell damage and 20% stronger mana regeneration.",
+   "recipe": {
+    "cost": 650,
+    "parts": [
+     [
+      "item_staff_of_wizardry",
+      "item_robe"
+     ]
+    ],
+    "scroll": "item_recipe_kaya"
+   },
+   "shop": "magical",
+   "stats": {
+    "int": 16,
+    "mana_regen_amp": 0.2,
+    "spell_amp": 0.1
+   },
+   "title": "Kaya",
+   "values": {
+    "bonus_intellect": "16",
+    "mana_regen_multiplier": "20",
+    "spell_amp": "10"
+   }
+  },
+  "item_lesser_crit": {
+   "cost": 2000,
+   "desc": "Attacks have a 30% chance to hit for 160% damage.",
+   "recipe": {
+    "cost": 200,
+    "parts": [
+     [
+      "item_claymore",
+      "item_blades_of_attack"
+     ]
+    ],
+    "scroll": "item_recipe_lesser_crit"
+   },
+   "shop": "weapons",
+   "stats": {
+    "damage": 32
+   },
+   "title": "Crystalys",
+   "values": {
+    "bonus_damage": "32",
+    "crit_chance": "30",
+    "crit_multiplier": "160",
+    "tooltip_crit_damage": "60"
+   }
+  },
+  "item_lifesteal": {
+   "cost": 900,
+   "desc": "Attacks heal you for part of the damage they deal.",
+   "shop": "misc",
+   "stats": {
+    "lifesteal": 0.18
+   },
+   "title": "Morbid Mask",
+   "values": {
+    "lifesteal_percent": "18"
+   }
+  },
+  "item_magic_stick": {
+   "cooldown": 17,
+   "cost": 200,
+   "desc": "Gains a charge (up to 10) when a visible enemy hero within 1200 casts a spell. Use to restore 15 health and mana per charge.",
+   "shop": "consumables",
+   "title": "Magic Stick",
+   "values": {
+    "charge_radius": "1200",
+    "max_charges": "10",
+    "restore_per_charge": "15"
+   }
+  },
+  "item_magic_wand": {
+   "cooldown": 15,
+   "cost": 460,
+   "desc": "Gains a charge (up to 20) when a visible enemy hero within 1200 casts a spell. Use to restore 15 health and mana per charge.",
+   "recipe": {
+    "cost": 150,
+    "parts": [
+     [
+      "item_magic_stick",
+      "item_branches",
+      "item_branches"
+     ]
+    ],
+    "scroll": "item_recipe_magic_wand"
+   },
+   "shop": "accessories",
+   "stats": {
+    "agi": 3,
+    "int": 3,
+    "str": 3
+   },
+   "title": "Magic Wand",
+   "values": {
+    "bonus_all_stats": "3",
+    "charge_radius": "1200",
+    "max_charges": "20",
+    "restore_per_charge": "15"
+   }
+  },
+  "item_manta": {
+   "cooldown": 34,
+   "cost": 4650,
+   "desc": "Use to split into 2 illusions for 18 seconds and drop most debuffs. Illusions deal 33% damage (25% ranged) and take 300% damage.",
+   "mana": 125,
+   "recipe": {
+    "cost": 1550,
+    "parts": [
+     [
+      "item_yasha",
+      "item_diadem"
+     ]
+    ],
+    "scroll": "item_recipe_manta"
+   },
+   "shop": "artifacts",
+   "stats": {
+    "agi": 26,
+    "attack_speed": 15,
+    "int": 10,
+    "str": 10,
+    "yasha_pct": 0.1
+   },
+   "title": "Manta Style",
+   "values": {
+    "bonus_agility": "26",
+    "bonus_attack_speed": "15",
+    "bonus_intellect": "10",
+    "bonus_movement_speed": "10",
+    "bonus_strength": "10",
+    "illusion_duration": "18",
+    "images_count": "2",
+    "images_do_damage_percent_melee": "-67",
+    "images_do_damage_percent_ranged": "-75",
+    "images_take_damage_percent": "200",
+    "invuln_duration": "0.1",
+    "tooltip_damage_incoming_total_pct": "300",
+    "tooltip_damage_outgoing_melee": "33",
+    "tooltip_damage_outgoing_ranged": "25",
+    "vision_radius": "1000"
+   }
+  },
+  "item_mantle": {
+   "cost": 140,
+   "shop": "attributes",
+   "stats": {
+    "int": 3
+   },
+   "title": "Mantle of Intelligence",
+   "values": {
+    "bonus_intellect": "3"
+   }
+  },
+  "item_mekansm": {
+   "cooldown": 50,
+   "cost": 1775,
+   "desc": "Use to heal allied units within 1200 for 250. Allies nearby regenerate 2.5 extra health per second.",
+   "mana": 100,
+   "range": 1200,
+   "recipe": {
+    "cost": 850,
+    "parts": [
+     [
+      "item_headdress",
+      "item_chainmail"
+     ]
+    ],
+    "scroll": "item_recipe_mekansm"
+   },
+   "shop": "support",
+   "stats": {
+    "armor": 5
+   },
+   "title": "Mekansm",
+   "values": {
+    "aura_health_regen": "2.5",
+    "aura_radius": "1200",
+    "bonus_armor": "5",
+    "heal_amount": "250",
+    "heal_radius": "1200"
+   }
+  },
+  "item_mithril_hammer": {
+   "cost": 1600,
+   "shop": "equipment",
+   "stats": {
+    "damage": 24
+   },
+   "title": "Mithril Hammer",
+   "values": {
+    "bonus_damage": "24"
+   }
+  },
+  "item_monkey_king_bar": {
+   "cost": 5000,
+   "desc": "Attacks have an 80% chance to deal 70 extra magic damage and cannot be evaded when that happens.",
+   "recipe": {
+    "cost": 900,
+    "parts": [
+     [
+      "item_demon_edge",
+      "item_blitz_knuckles",
+      "item_javelin"
+     ]
+    ],
+    "scroll": "item_recipe_monkey_king_bar"
+   },
+   "shop": "weapons",
+   "stats": {
+    "attack_speed": 50,
+    "damage": 50
+   },
+   "title": "Monkey King Bar",
+   "values": {
+    "bonus_attack_speed": "50",
+    "bonus_chance": "80",
+    "bonus_chance_damage": "70",
+    "bonus_damage": "50",
+    "melee_attack_range": "50"
+   }
+  },
+  "item_mystic_staff": {
+   "cost": 2800,
+   "shop": "relics",
+   "stats": {
+    "int": 25
+   },
+   "title": "Mystic Staff",
+   "values": {
+    "bonus_intellect": "25"
+   }
+  },
+  "item_null_talisman": {
+   "cost": 505,
+   "desc": "Also raises maximum mana by 3%.",
+   "recipe": {
+    "cost": 210,
+    "parts": [
+     [
+      "item_circlet",
+      "item_mantle"
+     ]
+    ],
+    "scroll": "item_recipe_null_talisman"
+   },
+   "shop": "accessories",
+   "stats": {
+    "agi": 2,
+    "int": 5,
+    "mana_regen": 1,
+    "max_mana_pct": 0.03,
+    "str": 2
+   },
+   "title": "Null Talisman",
+   "values": {
+    "bonus_agility": "2",
+    "bonus_intellect": "5",
+    "bonus_mana_regen": "1.0",
+    "bonus_max_mana_percentage": "3",
+    "bonus_strength": "2"
+   }
+  },
+  "item_ogre_axe": {
+   "cost": 1000,
+   "shop": "attributes",
+   "stats": {
+    "str": 10
+   },
+   "title": "Ogre Axe",
+   "values": {
+    "bonus_strength": "10"
+   }
+  },
+  "item_pers": {
+   "cost": 1400,
+   "recipe": {
+    "cost": 0,
+    "parts": [
+     [
+      "item_ring_of_health",
+      "item_void_stone"
+     ]
+    ]
+   },
+   "shop": "accessories",
+   "stats": {
+    "hp_regen": 5.5,
+    "mana_regen": 2.25
+   },
+   "title": "Perseverance",
+   "values": {
+    "bonus_health_regen": "5.5",
+    "bonus_mana_regen": "2.25"
+   }
+  },
+  "item_phase_boots": {
+   "cooldown": 8,
+   "cost": 1450,
+   "desc": "Use for 20% more speed (10% ranged) and to walk through units for 3 seconds. Pairs of boots do not add up.",
+   "recipe": {
+    "cost": 0,
+    "parts": [
+     [
+      "item_boots",
+      "item_chainmail",
+      "item_blades_of_attack"
+     ]
+    ]
+   },
+   "shop": "accessories",
+   "stats": {
+    "armor": 4,
+    "boots_ms": 50,
+    "damage_melee": 18,
+    "damage_ranged": 12
+   },
+   "title": "Phase Boots",
+   "values": {
+    "bonus_armor": "4",
+    "bonus_attack_speed": "0",
+    "bonus_damage_melee": "18",
+    "bonus_damage_range": "12",
+    "bonus_movement_speed": "50",
+    "phase_duration": "3.0",
+    "phase_movement_speed": "20",
+    "phase_movement_speed_range": "10"
+   }
+  },
+  "item_platemail": {
+   "cost": 1400,
+   "shop": "secret",
+   "stats": {
+    "armor": 10
+   },
+   "title": "Platemail",
+   "values": {
+    "bonus_armor": "10"
+   }
+  },
+  "item_point_booster": {
+   "cost": 1200,
+   "shop": "secret",
+   "stats": {
+    "max_hp": 175,
+    "max_mana": 175
+   },
+   "title": "Point Booster",
+   "values": {
+    "bonus_health": "175",
+    "bonus_mana": "175"
+   }
+  },
+  "item_power_treads": {
+   "cost": 1400,
+   "desc": "Use to move the +10 attribute between Strength, Intelligence and Agility. Pairs of boots do not add up.",
+   "recipe": {
+    "cost": 0,
+    "parts": [
+     [
+      "item_boots",
+      "item_gloves",
+      "item_belt_of_strength"
+     ],
+     [
+      "item_boots",
+      "item_gloves",
+      "item_robe"
+     ],
+     [
+      "item_boots",
+      "item_gloves",
+      "item_boots_of_elves"
+     ]
+    ]
+   },
+   "shop": "accessories",
+   "stats": {
+    "attack_speed": 25,
+    "boots_ms": 45,
+    "boots_ms_melee": 55
+   },
+   "title": "Power Treads",
+   "values": {
+    "bonus_attack_speed": "25",
+    "bonus_damage": "0",
+    "bonus_movement_speed_melee": "55",
+    "bonus_movement_speed_ranged": "45",
+    "bonus_stat": "10"
+   }
+  },
+  "item_quelling_blade": {
+   "cooldown": 4,
+   "cost": 100,
+   "desc": "+8 attack damage against non-hero units (4 for ranged heroes). Use on a tree to cut it down.",
+   "range": 350,
+   "shop": "equipment",
+   "title": "Quelling Blade",
+   "values": {
+    "damage_bonus": "8",
+    "damage_bonus_ranged": "4",
+    "quelling_range_tooltip": "350"
+   }
+  },
+  "item_radiance": {
+   "cost": 4700,
+   "desc": "Burns enemies within 650 for 60 magic damage per second (always on).",
+   "recipe": {
+    "cost": 0,
+    "parts": [
+     [
+      "item_relic",
+      "item_talisman_of_evasion"
+     ]
+    ]
+   },
+   "shop": "artifacts",
+   "stats": {
+    "damage": 55,
+    "evasion": 0.25
+   },
+   "title": "Radiance",
+   "values": {
+    "aura_damage": "60",
+    "aura_damage_illusions": "35",
+    "aura_radius": "650",
+    "blind_pct": "0",
+    "bonus_damage": "55",
+    "evasion": "25",
+    "illusion_multiplier_pct": "100",
+    "upgrade_day_vision": "250"
+   }
+  },
+  "item_reaver": {
+   "cost": 2800,
+   "shop": "relics",
+   "stats": {
+    "str": 25
+   },
+   "title": "Reaver",
+   "values": {
+    "bonus_strength": "25"
+   }
+  },
+  "item_recipe_aether_lens": {
+   "cost": 775,
+   "result": "item_aether_lens",
+   "shop": "magical",
+   "title": "Recipe: Aether Lens"
+  },
+  "item_recipe_arcane_boots": {
+   "cost": 325,
+   "result": "item_arcane_boots",
+   "shop": "support",
+   "title": "Recipe: Arcane Boots"
+  },
+  "item_recipe_assault": {
+   "cost": 1300,
+   "result": "item_assault",
+   "shop": "armor",
+   "title": "Recipe: Assault Cuirass"
+  },
+  "item_recipe_basher": {
+   "cost": 825,
+   "result": "item_basher",
+   "shop": "weapons",
+   "title": "Recipe: Skull Basher"
+  },
+  "item_recipe_bfury": {
+   "cost": 400,
+   "result": "item_bfury",
+   "shop": "weapons",
+   "title": "Recipe: Battle Fury"
+  },
+  "item_recipe_black_king_bar": {
+   "cost": 1450,
+   "result": "item_black_king_bar",
+   "shop": "armor",
+   "title": "Recipe: Black King Bar"
+  },
+  "item_recipe_bracer": {
+   "cost": 210,
+   "result": "item_bracer",
+   "shop": "accessories",
+   "title": "Recipe: Bracer"
+  },
+  "item_recipe_buckler": {
+   "cost": 250,
+   "result": "item_buckler",
+   "shop": "support",
+   "title": "Recipe: Buckler"
+  },
+  "item_recipe_cyclone": {
+   "cost": 675,
+   "result": "item_cyclone",
+   "shop": "magical",
+   "title": "Recipe: Eul's Scepter of Divinity"
+  },
+  "item_recipe_dagon": {
+   "cost": 1100,
+   "result": "item_dagon",
+   "shop": "magical",
+   "title": "Recipe: Dagon"
+  },
+  "item_recipe_force_staff": {
+   "cost": 950,
+   "result": "item_force_staff",
+   "shop": "magical",
+   "title": "Recipe: Force Staff"
+  },
+  "item_recipe_greater_crit": {
+   "cost": 1000,
+   "result": "item_greater_crit",
+   "shop": "weapons",
+   "title": "Recipe: Daedalus"
+  },
+  "item_recipe_hand_of_midas": {
+   "cost": 1750,
+   "result": "item_hand_of_midas",
+   "shop": "armor",
+   "title": "Recipe: Hand of Midas"
+  },
+  "item_recipe_headdress": {
+   "cost": 250,
+   "result": "item_headdress",
+   "shop": "support",
+   "title": "Recipe: Headdress"
+  },
+  "item_recipe_heart": {
+   "cost": 800,
+   "result": "item_heart",
+   "shop": "armor",
+   "title": "Recipe: Heart of Tarrasque"
+  },
+  "item_recipe_kaya": {
+   "cost": 650,
+   "result": "item_kaya",
+   "shop": "magical",
+   "title": "Recipe: Kaya"
+  },
+  "item_recipe_lesser_crit": {
+   "cost": 200,
+   "result": "item_lesser_crit",
+   "shop": "weapons",
+   "title": "Recipe: Crystalys"
+  },
+  "item_recipe_magic_wand": {
+   "cost": 150,
+   "result": "item_magic_wand",
+   "shop": "accessories",
+   "title": "Recipe: Magic Wand"
+  },
+  "item_recipe_manta": {
+   "cost": 1550,
+   "result": "item_manta",
+   "shop": "artifacts",
+   "title": "Recipe: Manta Style"
+  },
+  "item_recipe_mekansm": {
+   "cost": 850,
+   "result": "item_mekansm",
+   "shop": "support",
+   "title": "Recipe: Mekansm"
+  },
+  "item_recipe_monkey_king_bar": {
+   "cost": 900,
+   "result": "item_monkey_king_bar",
+   "shop": "weapons",
+   "title": "Recipe: Monkey King Bar"
+  },
+  "item_recipe_null_talisman": {
+   "cost": 210,
+   "result": "item_null_talisman",
+   "shop": "accessories",
+   "title": "Recipe: Null Talisman"
+  },
+  "item_recipe_refresher": {
+   "cost": 1600,
+   "result": "item_refresher",
+   "shop": "relics",
+   "title": "Recipe: Refresher Orb"
+  },
+  "item_recipe_ring_of_basilius": {
+   "cost": 250,
+   "result": "item_ring_of_basilius",
+   "shop": "support",
+   "title": "Recipe: Ring of Basilius"
+  },
+  "item_recipe_sange": {
+   "cost": 650,
+   "result": "item_sange",
+   "shop": "artifacts",
+   "title": "Recipe: Sange"
+  },
+  "item_recipe_sheepstick": {
+   "cost": 700,
+   "result": "item_sheepstick",
+   "shop": "relics",
+   "title": "Recipe: Scythe of Vyse"
+  },
+  "item_recipe_shivas_guard": {
+   "cost": 1250,
+   "result": "item_shivas_guard",
+   "shop": "armor",
+   "title": "Recipe: Shiva's Guard"
+  },
+  "item_recipe_wraith_band": {
+   "cost": 210,
+   "result": "item_wraith_band",
+   "shop": "accessories",
+   "title": "Recipe: Wraith Band"
+  },
+  "item_recipe_yasha": {
+   "cost": 650,
+   "result": "item_yasha",
+   "shop": "artifacts",
+   "title": "Recipe: Yasha"
+  },
+  "item_refresher": {
+   "cooldown": 180,
+   "cost": 5000,
+   "desc": "Use to reset the cooldowns of your hero abilities. Items keep their cooldowns.",
+   "mana": 325,
+   "recipe": {
+    "cost": 1600,
+    "parts": [
+     [
+      "item_ring_of_tarrasque",
+      "item_tiara_of_selemene"
+     ]
+    ],
+    "scroll": "item_recipe_refresher"
+   },
+   "shop": "relics",
+   "stats": {
+    "hp_regen": 14,
+    "mana_regen": 7
+   },
+   "title": "Refresher Orb",
+   "values": {
+    "bonus_damage": "0",
+    "bonus_health_regen": "14",
+    "bonus_mana_regen": "7.0",
+    "cooldown_duration": "180",
+    "max_level": "1",
+    "refresh_items": "0"
+   }
+  },
+  "item_relic": {
+   "cost": 3400,
+   "shop": "relics",
+   "stats": {
+    "damage": 55
+   },
+   "title": "Sacred Relic",
+   "values": {
+    "bonus_damage": "55"
+   }
+  },
+  "item_ring_of_basilius": {
+   "cost": 425,
+   "desc": "Allies within 1200 regenerate 1 extra mana per second.",
+   "range": 1200,
+   "recipe": {
+    "cost": 250,
+    "parts": [
+     [
+      "item_sobi_mask"
+     ]
+    ],
+    "scroll": "item_recipe_ring_of_basilius"
+   },
+   "shop": "support",
+   "stats": {
+    "mana_regen": 0.25
+   },
+   "title": "Ring of Basilius",
+   "values": {
+    "aura_mana_regen": "1.0",
+    "aura_radius": "1200",
+    "mana_regen": "0.25"
+   }
+  },
+  "item_ring_of_health": {
+   "cost": 700,
+   "shop": "secret",
+   "stats": {
+    "hp_regen": 4.5
+   },
+   "title": "Ring of Health",
+   "values": {
+    "bonus_health_regen": "4.5"
+   }
+  },
+  "item_ring_of_protection": {
+   "cost": 175,
+   "shop": "equipment",
+   "stats": {
+    "armor": 2
+   },
+   "title": "Ring of Protection",
+   "values": {
+    "bonus_armor": "2"
+   }
+  },
+  "item_ring_of_regen": {
+   "cost": 175,
+   "shop": "misc",
+   "stats": {
+    "hp_regen": 1.25
+   },
+   "title": "Ring of Regen",
+   "values": {
+    "bonus_health_regen": "1.25"
+   }
+  },
+  "item_ring_of_tarrasque": {
+   "cost": 1700,
+   "shop": "secret",
+   "stats": {
+    "hp_regen": 12
+   },
+   "title": "Ring of Tarrasque",
+   "values": {
+    "bonus_health_regen": "12"
+   }
+  },
+  "item_robe": {
+   "cost": 450,
+   "shop": "attributes",
+   "stats": {
+    "int": 6
+   },
+   "title": "Robe of the Magi",
+   "values": {
+    "bonus_intellect": "6"
+   }
+  },
+  "item_sange": {
+   "cost": 2100,
+   "desc": "Strength and 12% stronger health regeneration.",
+   "recipe": {
+    "cost": 650,
+    "parts": [
+     [
+      "item_ogre_axe",
+      "item_belt_of_strength"
+     ]
+    ],
+    "scroll": "item_recipe_sange"
+   },
+   "shop": "artifacts",
+   "stats": {
+    "hp_regen_amp": 0.12,
+    "str": 16
+   },
+   "title": "Sange",
+   "values": {
+    "bonus_strength": "16",
+    "hp_regen_amp": "12",
+    "slow_resistance": "25"
+   }
+  },
+  "item_sange_and_yasha": {
+   "cost": 4200,
+   "desc": "Strength, agility, attack speed, 12% movement speed and 16% stronger health regeneration.",
+   "recipe": {
+    "cost": 0,
+    "parts": [
+     [
+      "item_sange",
+      "item_yasha"
+     ]
+    ]
+   },
+   "shop": "artifacts",
+   "stats": {
+    "agi": 16,
+    "attack_speed": 20,
+    "hp_regen_amp": 0.16,
+    "str": 16,
+    "yasha_pct": 0.12
+   },
+   "title": "Sange and Yasha",
+   "values": {
+    "bonus_agility": "16",
+    "bonus_attack_speed": "20",
+    "bonus_strength": "16",
+    "hp_regen_amp": "16",
+    "movement_speed_percent_bonus": "12",
+    "movement_speed_percent_bonus_melee": "12",
+    "slow_resistance": "30",
+    "status_resistance": "16"
+   }
+  },
+  "item_satanic": {
+   "cooldown": 40,
+   "cost": 5050,
+   "desc": "Use to raise lifesteal to 175% for 6 seconds and drop most debuffs.",
+   "recipe": {
+    "cost": 0,
+    "parts": [
+     [
+      "item_reaver",
+      "item_claymore",
+      "item_lifesteal"
+     ]
+    ]
+   },
+   "shop": "artifacts",
+   "stats": {
+    "damage": 25,
+    "lifesteal": 0.25,
+    "str": 25
+   },
+   "title": "Satanic",
+   "values": {
+    "bonus_damage": "25",
+    "bonus_strength": "25",
+    "lifesteal_percent": "25",
+    "unholy_duration": "6.0",
+    "unholy_lifesteal_percent": "145",
+    "unholy_lifesteal_total_tooltip": "175"
+   }
+  },
+  "item_sheepstick": {
+   "cooldown": 20,
+   "cost": 5200,
+   "desc": "Use to turn an enemy into a harmless critter for 2.8 seconds.",
+   "mana": 250,
+   "range": 800,
+   "recipe": {
+    "cost": 700,
+    "parts": [
+     [
+      "item_mystic_staff",
+      "item_tiara_of_selemene"
+     ]
+    ],
+    "scroll": "item_recipe_sheepstick"
+   },
+   "shop": "relics",
+   "stats": {
+    "int": 30,
+    "mana_regen": 8.5
+   },
+   "title": "Scythe of Vyse",
+   "values": {
+    "bonus_intellect": "30",
+    "bonus_mana_regen": "8.5",
+    "sheep_duration": "2.8",
+    "sheep_movement_speed": "140",
+    "upgrade_radius": "200"
+   }
+  },
+  "item_shivas_guard": {
+   "cooldown": 27,
+   "cost": 4500,
+   "desc": "Use to send out a frost wave (825 radius) that deals 225 magic damage and slows by 40% for 4 seconds. Enemies within 1200 lose 40 attack speed.",
+   "mana": 75,
+   "recipe": {
+    "cost": 1250,
+    "parts": [
+     [
+      "item_platemail",
+      "item_splintmail",
+      "item_chasm_stone"
+     ]
+    ],
+    "scroll": "item_recipe_shivas_guard"
+   },
+   "shop": "armor",
+   "stats": {
+    "armor": 17
+   },
+   "title": "Shiva's Guard",
+   "values": {
+    "aura_attack_speed": "-40",
+    "aura_radius": "1200",
+    "blast_damage": "225",
+    "blast_debuff_duration": "4.0",
+    "blast_movement_speed": "-40",
+    "blast_radius": "825",
+    "blast_speed": "400",
+    "bonus_aoe": "75",
+    "bonus_armor": "17",
+    "bonus_hp_regen": "0"
+   }
+  },
+  "item_slippers": {
+   "cost": 140,
+   "shop": "attributes",
+   "stats": {
+    "agi": 3
+   },
+   "title": "Slippers of Agility",
+   "values": {
+    "bonus_agility": "3"
+   }
+  },
+  "item_sobi_mask": {
+   "cost": 175,
+   "shop": "misc",
+   "stats": {
+    "mana_regen": 0.7
+   },
+   "title": "Sage's Mask",
+   "values": {
+    "bonus_mana_regen": "0.7"
+   }
+  },
+  "item_splintmail": {
+   "cost": 950,
+   "shop": "equipment",
+   "stats": {
+    "armor": 7
+   },
+   "title": "Splintmail",
+   "values": {
+    "bonus_armor": "7"
+   }
+  },
+  "item_staff_of_wizardry": {
+   "cost": 1000,
+   "shop": "attributes",
+   "stats": {
+    "int": 10
+   },
+   "title": "Staff of Wizardry",
+   "values": {
+    "bonus_intellect": "10"
+   }
+  },
+  "item_talisman_of_evasion": {
+   "cost": 1300,
+   "desc": "Gives a chance to dodge attacks.",
+   "shop": "secret",
+   "stats": {
+    "evasion": 0.15
+   },
+   "title": "Talisman of Evasion",
+   "values": {
+    "bonus_evasion": "15"
+   }
+  },
+  "item_tango": {
+   "charges": 3,
+   "consumable": true,
+   "cost": 90,
+   "desc": "Eat a tree to regenerate 7 health per second for 16 seconds.",
+   "range": 165,
+   "shop": "consumables",
+   "stack": true,
+   "stock": {
+    "initial": 10,
+    "max": 10,
+    "time": 120
+   },
+   "title": "Tango",
+   "values": {
+    "buff_duration": "16.0",
+    "health_regen": "7.0",
+    "tooltip_charges": "3"
+   }
+  },
+  "item_tiara_of_selemene": {
+   "cost": 1700,
+   "shop": "secret",
+   "stats": {
+    "mana_regen": 6
+   },
+   "title": "Tiara of Selemene",
+   "values": {
+    "bonus_mana_regen": "6"
+   }
+  },
+  "item_tpscroll": {
+   "channel": 3,
+   "charges": 1,
+   "consumable": true,
+   "cooldown": 80,
+   "cost": 100,
+   "desc": "Channel for 3 seconds, then teleport next to the friendly building nearest to the target point.",
+   "mana": 75,
+   "shop": "consumables",
+   "stack": true,
+   "title": "Town Portal Scroll",
+   "values": {
+    "AbilityChannelTime": "3.0",
+    "maximum_distance": "800",
+    "minimum_distance": "70",
+    "tooltip_channel_time": "3.0",
+    "vision_radius": "200"
+   }
+  },
+  "item_ultimate_orb": {
+   "cost": 2800,
+   "shop": "relics",
+   "stats": {
+    "agi": 15,
+    "int": 15,
+    "str": 15
+   },
+   "title": "Ultimate Orb",
+   "values": {
+    "bonus_all_stats": "15"
+   }
+  },
+  "item_vitality_booster": {
+   "cost": 1000,
+   "shop": "secret",
+   "stats": {
+    "max_hp": 250
+   },
+   "title": "Vitality Booster",
+   "values": {
+    "bonus_health": "250"
+   }
+  },
+  "item_void_stone": {
+   "cost": 700,
+   "shop": "secret",
+   "stats": {
+    "mana_regen": 1.75
+   },
+   "title": "Void Stone",
+   "values": {
+    "bonus_mana_regen": "1.75"
+   }
+  },
+  "item_ward_observer": {
+   "charges": 1,
+   "consumable": true,
+   "cooldown": 1,
+   "cost": 0,
+   "desc": "Plants an invisible ward that watches a 1600 radius for 360 seconds.",
+   "range": 500,
+   "shop": "consumables",
+   "stack": true,
+   "stock": {
+    "initial": 2,
+    "max": 4,
+    "time": 135
+   },
+   "title": "Observer Ward",
+   "values": {
+    "duration_minutes_tooltip": "6",
+    "health": "200",
+    "lifetime": "360",
+    "vision_range_tooltip": "1600"
+   }
+  },
+  "item_ward_sentry": {
+   "charges": 1,
+   "consumable": true,
+   "cooldown": 1,
+   "cost": 50,
+   "desc": "Plants an invisible ward that exposes invisible enemies within 1050 for 420 seconds. It gives no vision by itself.",
+   "range": 500,
+   "shop": "consumables",
+   "stack": true,
+   "stock": {
+    "initial": 3,
+    "max": 8,
+    "time": 70
+   },
+   "title": "Sentry Ward",
+   "values": {
+    "duration_minutes_tooltip": "7",
+    "health": "200",
+    "lifetime": "420",
+    "true_sight_range": "1050",
+    "vision_range": "0"
+   }
+  },
+  "item_wind_lace": {
+   "cost": 225,
+   "desc": "Light shoes that stack with boots but not with Eul's Scepter.",
+   "shop": "misc",
+   "stats": {
+    "lace_ms": 15
+   },
+   "title": "Wind Lace",
+   "values": {
+    "movement_speed": "15"
+   }
+  },
+  "item_wizard_hat": {
+   "cost": 250,
+   "shop": "misc",
+   "stats": {
+    "max_mana": 125
+   },
+   "title": "Wizard Hat",
+   "values": {
+    "bonus_mana": "125"
+   }
+  },
+  "item_wraith_band": {
+   "cost": 505,
+   "recipe": {
+    "cost": 210,
+    "parts": [
+     [
+      "item_circlet",
+      "item_slippers"
+     ]
+    ],
+    "scroll": "item_recipe_wraith_band"
+   },
+   "shop": "accessories",
+   "stats": {
+    "agi": 5,
+    "armor": 1.75,
+    "attack_speed": 6,
+    "int": 2,
+    "str": 2
+   },
+   "title": "Wraith Band",
+   "values": {
+    "bonus_agility": "5",
+    "bonus_armor": "1.75",
+    "bonus_attack_speed": "6",
+    "bonus_intellect": "2",
+    "bonus_strength": "2"
+   }
+  },
+  "item_yasha": {
+   "cost": 2100,
+   "desc": "Agility, attack speed and 10% movement speed (Yasha items do not add up).",
+   "recipe": {
+    "cost": 650,
+    "parts": [
+     [
+      "item_blade_of_alacrity",
+      "item_boots_of_elves"
+     ]
+    ],
+    "scroll": "item_recipe_yasha"
+   },
+   "shop": "artifacts",
+   "stats": {
+    "agi": 16,
+    "attack_speed": 15,
+    "yasha_pct": 0.1
+   },
+   "title": "Yasha",
+   "values": {
+    "bonus_agility": "16",
+    "bonus_attack_speed": "15",
+    "movement_speed_percent_bonus": "10"
+   }
+  }
+ },
+ "notes": {
+  "patch": "All 78 requested items exist in the installed patch. Recipes follow it: Arcane Boots use Ring of Basilius + Wizard Hat, Shiva's Guard uses Splintmail + Chasm Stone, Refresher Orb uses Ring of Tarrasque + Tiara of Selemene, Manta uses Diadem, Dagon uses Crown + Wizard Hat. Their components are sold too.",
+  "simplified": "Radiance burns permanently (no toggle). BKB gives full magic immunity (the patch gives 60% magic resistance plus debuff immunity). Status resistance, slow resistance, Chasm Stone area bonus, Monkey King Bar melee range and Iron Branch tree planting are not modelled. Items are always bought at the fountain shops (no secret or side shop) and the 6 WC3 inventory slots are the only storage (no backpack or stash)."
+ },
+ "shops": [
+  {
+   "items": [
+    "item_tpscroll",
+    "item_ward_observer",
+    "item_ward_sentry",
+    "item_tango",
+    "item_flask",
+    "item_clarity",
+    "item_faerie_fire",
+    "item_enchanted_mango",
+    "item_dust",
+    "item_branches",
+    "item_magic_stick"
+   ],
+   "key": "consumables",
+   "title": "Consumables"
+  },
+  {
+   "items": [
+    "item_gauntlets",
+    "item_slippers",
+    "item_mantle",
+    "item_circlet",
+    "item_crown",
+    "item_belt_of_strength",
+    "item_boots_of_elves",
+    "item_robe",
+    "item_ogre_axe",
+    "item_blade_of_alacrity",
+    "item_staff_of_wizardry"
+   ],
+   "key": "attributes",
+   "title": "Attributes"
+  },
+  {
+   "items": [
+    "item_quelling_blade",
+    "item_ring_of_protection",
+    "item_blight_stone",
+    "item_blades_of_attack",
+    "item_gloves",
+    "item_chainmail",
+    "item_splintmail",
+    "item_broadsword",
+    "item_claymore",
+    "item_javelin",
+    "item_mithril_hammer"
+   ],
+   "key": "equipment",
+   "title": "Equipment"
+  },
+  {
+   "items": [
+    "item_ring_of_regen",
+    "item_sobi_mask",
+    "item_wind_lace",
+    "item_fluffy_hat",
+    "item_wizard_hat",
+    "item_boots",
+    "item_cloak",
+    "item_lifesteal",
+    "item_chasm_stone",
+    "item_blitz_knuckles",
+    "item_blink"
+   ],
+   "key": "misc",
+   "title": "Miscellaneous"
+  },
+  {
+   "items": [
+    "item_ring_of_health",
+    "item_void_stone",
+    "item_energy_booster",
+    "item_vitality_booster",
+    "item_point_booster",
+    "item_platemail",
+    "item_talisman_of_evasion",
+    "item_hyperstone",
+    "item_ring_of_tarrasque",
+    "item_tiara_of_selemene",
+    "item_diadem"
+   ],
+   "key": "secret",
+   "title": "Secret Shop"
+  },
+  {
+   "items": [
+    "item_ultimate_orb",
+    "item_demon_edge",
+    "item_mystic_staff",
+    "item_reaver",
+    "item_eagle",
+    "item_relic",
+    "item_refresher",
+    "item_recipe_refresher",
+    "item_sheepstick",
+    "item_recipe_sheepstick"
+   ],
+   "key": "relics",
+   "title": "Relics"
+  },
+  {
+   "items": [
+    "item_magic_wand",
+    "item_recipe_magic_wand",
+    "item_bracer",
+    "item_recipe_bracer",
+    "item_wraith_band",
+    "item_recipe_wraith_band",
+    "item_null_talisman",
+    "item_recipe_null_talisman",
+    "item_power_treads",
+    "item_phase_boots",
+    "item_pers"
+   ],
+   "key": "accessories",
+   "title": "Accessories"
+  },
+  {
+   "items": [
+    "item_ring_of_basilius",
+    "item_recipe_ring_of_basilius",
+    "item_headdress",
+    "item_recipe_headdress",
+    "item_buckler",
+    "item_recipe_buckler",
+    "item_arcane_boots",
+    "item_recipe_arcane_boots",
+    "item_mekansm",
+    "item_recipe_mekansm"
+   ],
+   "key": "support",
+   "title": "Support"
+  },
+  {
+   "items": [
+    "item_force_staff",
+    "item_recipe_force_staff",
+    "item_cyclone",
+    "item_recipe_cyclone",
+    "item_aether_lens",
+    "item_recipe_aether_lens",
+    "item_dagon",
+    "item_recipe_dagon",
+    "item_kaya",
+    "item_recipe_kaya"
+   ],
+   "key": "magical",
+   "title": "Magical"
+  },
+  {
+   "items": [
+    "item_hand_of_midas",
+    "item_recipe_hand_of_midas",
+    "item_black_king_bar",
+    "item_recipe_black_king_bar",
+    "item_heart",
+    "item_recipe_heart",
+    "item_assault",
+    "item_recipe_assault",
+    "item_shivas_guard",
+    "item_recipe_shivas_guard"
+   ],
+   "key": "armor",
+   "title": "Armor"
+  },
+  {
+   "items": [
+    "item_lesser_crit",
+    "item_recipe_lesser_crit",
+    "item_greater_crit",
+    "item_recipe_greater_crit",
+    "item_basher",
+    "item_recipe_basher",
+    "item_monkey_king_bar",
+    "item_recipe_monkey_king_bar",
+    "item_bfury",
+    "item_recipe_bfury",
+    "item_desolator"
+   ],
+   "key": "weapons",
+   "title": "Weapons"
+  },
+  {
+   "items": [
+    "item_sange",
+    "item_recipe_sange",
+    "item_yasha",
+    "item_recipe_yasha",
+    "item_sange_and_yasha",
+    "item_manta",
+    "item_recipe_manta",
+    "item_butterfly",
+    "item_radiance",
+    "item_satanic"
+   ],
+   "key": "artifacts",
+   "title": "Artifacts"
+  }
+ ]
+}

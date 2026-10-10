@@ -1,0 +1,81 @@
+{
+ "title": "Anti-Mage",
+ "base": "Edem",
+ "model": "units\\nightelf\\HeroDemonHunter\\HeroDemonHunter.mdl",
+ "sound": "HeroDemonHunter",
+ "scale": 1.0,
+ "abilities": {
+  "antimage_mana_break": {
+   "desc": "Each attack burns a flat amount plus a share of the target's maximum mana and deals part of the burned mana as extra physical damage."
+  },
+  "antimage_blink": {
+   "kind": "native",
+   "base": "AEbl",
+   "order": "blink",
+   "range": 99999,
+   "desc": "Teleports Anti-Mage toward the target point; clicking past the maximum range blinks the full distance. Cannot be used while rooted.",
+   "fields": {
+    "Ebl1": [875, 950, 1025, 1100],
+    "Ebl2": [200, 200, 200, 200]
+   }
+  },
+  "antimage_counterspell": {
+   "kind": "native",
+   "base": "Absk",
+   "order": "berserk",
+   "desc": "Passively grants magic resistance. Activate for a brief anti-magic shell that blocks enemy spells aimed at Anti-Mage and casts them back at their owner. Instant.",
+   "fields": {
+    "bsk1": [0, 0, 0, 0],
+    "bsk2": [0, 0, 0, 0],
+    "bsk3": [0, 0, 0, 0],
+    "adur": [0.01, 0.01, 0.01, 0.01],
+    "ahdu": [0.01, 0.01, 0.01, 0.01]
+   }
+  },
+  "antimage_persectur": {
+   "desc": "Anti-Mage's attacks slow enemies that are low on mana; the emptier their mana pool, the harder the slow."
+  },
+  "antimage_mana_void": {
+   "targets": "air,ground,enemy,neutral,vuln",
+   "radiusKey": "mana_void_aoe_radius",
+   "desc": "Punishes an enemy for the mana it lacks: every missing point of its mana becomes magical damage to it and to enemies around it. The target is briefly stunned."
+  }
+ },
+ "units": {
+  "antimage_reflector": {
+   "base": "hfoo",
+   "fields": {
+    "unam": "Counterspell Reflection",
+    "umdl": "Doodads\\Terrain\\LOSBlocker\\IntentionallyLeftBlank.mdl",
+    "uabi": "Aloc",
+    "ucol": 0,
+    "umvt": "fly",
+    "umvs": 300,
+    "umvr": 3.0,
+    "uprw": 0,
+    "ucpt": 0,
+    "ucbs": 0,
+    "usid": 200,
+    "usin": 200,
+    "uhpm": 100,
+    "umpm": 10000,
+    "umpi": 10000,
+    "uaen": 0,
+    "ufoo": 0,
+    "ugol": 0,
+    "ulum": 0,
+    "ushu": "_",
+    "uhom": 1
+   }
+  }
+ },
+ "abilities_extra": {
+  "antimage_spell_shield": {
+   "base": "ANss",
+   "fields": {
+    "anam": "Counterspell Shell",
+    "acdn": [0]
+   }
+  }
+ }
+}

@@ -1,0 +1,746 @@
+{
+ "antimage": {
+  "attack": [
+   "Sound\\Dota\\antimage\\attack_1.mp3",
+   "Sound\\Dota\\antimage\\attack_2.mp3",
+   "Sound\\Dota\\antimage\\attack_3.mp3",
+   "Sound\\Dota\\antimage\\attack_4.mp3",
+   "Sound\\Dota\\antimage\\attack_5.mp3",
+   "Sound\\Dota\\antimage\\attack_6.mp3",
+   "Sound\\Dota\\antimage\\attack_7.mp3",
+   "Sound\\Dota\\antimage\\attack_8.mp3"
+  ],
+  "cast_antimage_mana_void": [
+   "Sound\\Dota\\antimage\\cast_antimage_mana_void_1.mp3",
+   "Sound\\Dota\\antimage\\cast_antimage_mana_void_2.mp3",
+   "Sound\\Dota\\antimage\\cast_antimage_mana_void_3.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\antimage\\death_1.mp3",
+   "Sound\\Dota\\antimage\\death_2.mp3",
+   "Sound\\Dota\\antimage\\death_3.mp3",
+   "Sound\\Dota\\antimage\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\antimage\\kill_1.mp3",
+   "Sound\\Dota\\antimage\\kill_2.mp3",
+   "Sound\\Dota\\antimage\\kill_3.mp3",
+   "Sound\\Dota\\antimage\\kill_4.mp3"
+  ],
+  "laugh": [
+   "Sound\\Dota\\antimage\\laugh_1.mp3",
+   "Sound\\Dota\\antimage\\laugh_2.mp3",
+   "Sound\\Dota\\antimage\\laugh_3.mp3",
+   "Sound\\Dota\\antimage\\laugh_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\antimage\\levelup_1.mp3",
+   "Sound\\Dota\\antimage\\levelup_2.mp3",
+   "Sound\\Dota\\antimage\\levelup_3.mp3",
+   "Sound\\Dota\\antimage\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\antimage\\move_1.mp3",
+   "Sound\\Dota\\antimage\\move_2.mp3",
+   "Sound\\Dota\\antimage\\move_3.mp3",
+   "Sound\\Dota\\antimage\\move_4.mp3",
+   "Sound\\Dota\\antimage\\move_5.mp3",
+   "Sound\\Dota\\antimage\\move_6.mp3",
+   "Sound\\Dota\\antimage\\move_7.mp3",
+   "Sound\\Dota\\antimage\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\antimage\\spawn_1.mp3",
+   "Sound\\Dota\\antimage\\spawn_2.mp3",
+   "Sound\\Dota\\antimage\\spawn_3.mp3",
+   "Sound\\Dota\\antimage\\spawn_4.mp3"
+  ]
+ },
+ "chen": {
+  "attack": [
+   "Sound\\Dota\\chen\\attack_1.mp3",
+   "Sound\\Dota\\chen\\attack_2.mp3",
+   "Sound\\Dota\\chen\\attack_3.mp3",
+   "Sound\\Dota\\chen\\attack_4.mp3",
+   "Sound\\Dota\\chen\\attack_5.mp3",
+   "Sound\\Dota\\chen\\attack_6.mp3",
+   "Sound\\Dota\\chen\\attack_7.mp3",
+   "Sound\\Dota\\chen\\attack_8.mp3"
+  ],
+  "cast_chen_hand_of_god": [
+   "Sound\\Dota\\chen\\cast_chen_hand_of_god_1.mp3",
+   "Sound\\Dota\\chen\\cast_chen_hand_of_god_2.mp3",
+   "Sound\\Dota\\chen\\cast_chen_hand_of_god_3.mp3"
+  ],
+  "cast_chen_holy_persuasion": [
+   "Sound\\Dota\\chen\\cast_chen_holy_persuasion_1.mp3",
+   "Sound\\Dota\\chen\\cast_chen_holy_persuasion_2.mp3",
+   "Sound\\Dota\\chen\\cast_chen_holy_persuasion_3.mp3"
+  ],
+  "cast_chen_penitence": [
+   "Sound\\Dota\\chen\\cast_chen_penitence_1.mp3",
+   "Sound\\Dota\\chen\\cast_chen_penitence_2.mp3",
+   "Sound\\Dota\\chen\\cast_chen_penitence_3.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\chen\\death_1.mp3",
+   "Sound\\Dota\\chen\\death_2.mp3",
+   "Sound\\Dota\\chen\\death_3.mp3",
+   "Sound\\Dota\\chen\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\chen\\kill_1.mp3",
+   "Sound\\Dota\\chen\\kill_2.mp3",
+   "Sound\\Dota\\chen\\kill_3.mp3",
+   "Sound\\Dota\\chen\\kill_4.mp3"
+  ],
+  "laugh": [
+   "Sound\\Dota\\chen\\laugh_1.mp3",
+   "Sound\\Dota\\chen\\laugh_2.mp3",
+   "Sound\\Dota\\chen\\laugh_3.mp3",
+   "Sound\\Dota\\chen\\laugh_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\chen\\levelup_1.mp3",
+   "Sound\\Dota\\chen\\levelup_2.mp3",
+   "Sound\\Dota\\chen\\levelup_3.mp3",
+   "Sound\\Dota\\chen\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\chen\\move_1.mp3",
+   "Sound\\Dota\\chen\\move_2.mp3",
+   "Sound\\Dota\\chen\\move_3.mp3",
+   "Sound\\Dota\\chen\\move_4.mp3",
+   "Sound\\Dota\\chen\\move_5.mp3",
+   "Sound\\Dota\\chen\\move_6.mp3",
+   "Sound\\Dota\\chen\\move_7.mp3",
+   "Sound\\Dota\\chen\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\chen\\spawn_1.mp3",
+   "Sound\\Dota\\chen\\spawn_2.mp3",
+   "Sound\\Dota\\chen\\spawn_3.mp3",
+   "Sound\\Dota\\chen\\spawn_4.mp3"
+  ]
+ },
+ "furion": {
+  "attack": [
+   "Sound\\Dota\\furion\\attack_1.mp3",
+   "Sound\\Dota\\furion\\attack_2.mp3",
+   "Sound\\Dota\\furion\\attack_3.mp3",
+   "Sound\\Dota\\furion\\attack_4.mp3",
+   "Sound\\Dota\\furion\\attack_5.mp3",
+   "Sound\\Dota\\furion\\attack_6.mp3",
+   "Sound\\Dota\\furion\\attack_7.mp3",
+   "Sound\\Dota\\furion\\attack_8.mp3"
+  ],
+  "cast_furion_force_of_nature": [
+   "Sound\\Dota\\furion\\cast_furion_force_of_nature_1.mp3",
+   "Sound\\Dota\\furion\\cast_furion_force_of_nature_2.mp3",
+   "Sound\\Dota\\furion\\cast_furion_force_of_nature_3.mp3"
+  ],
+  "cast_furion_sprout": [
+   "Sound\\Dota\\furion\\cast_furion_sprout_1.mp3",
+   "Sound\\Dota\\furion\\cast_furion_sprout_2.mp3",
+   "Sound\\Dota\\furion\\cast_furion_sprout_3.mp3"
+  ],
+  "cast_furion_teleportation": [
+   "Sound\\Dota\\furion\\cast_furion_teleportation_1.mp3",
+   "Sound\\Dota\\furion\\cast_furion_teleportation_2.mp3",
+   "Sound\\Dota\\furion\\cast_furion_teleportation_3.mp3"
+  ],
+  "cast_furion_wrath_of_nature": [
+   "Sound\\Dota\\furion\\cast_furion_wrath_of_nature_1.mp3",
+   "Sound\\Dota\\furion\\cast_furion_wrath_of_nature_2.mp3",
+   "Sound\\Dota\\furion\\cast_furion_wrath_of_nature_3.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\furion\\death_1.mp3",
+   "Sound\\Dota\\furion\\death_2.mp3",
+   "Sound\\Dota\\furion\\death_3.mp3",
+   "Sound\\Dota\\furion\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\furion\\kill_1.mp3",
+   "Sound\\Dota\\furion\\kill_2.mp3",
+   "Sound\\Dota\\furion\\kill_3.mp3",
+   "Sound\\Dota\\furion\\kill_4.mp3"
+  ],
+  "laugh": [
+   "Sound\\Dota\\furion\\laugh_1.mp3",
+   "Sound\\Dota\\furion\\laugh_2.mp3",
+   "Sound\\Dota\\furion\\laugh_3.mp3",
+   "Sound\\Dota\\furion\\laugh_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\furion\\levelup_1.mp3",
+   "Sound\\Dota\\furion\\levelup_2.mp3",
+   "Sound\\Dota\\furion\\levelup_3.mp3",
+   "Sound\\Dota\\furion\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\furion\\move_1.mp3",
+   "Sound\\Dota\\furion\\move_2.mp3",
+   "Sound\\Dota\\furion\\move_3.mp3",
+   "Sound\\Dota\\furion\\move_4.mp3",
+   "Sound\\Dota\\furion\\move_5.mp3",
+   "Sound\\Dota\\furion\\move_6.mp3",
+   "Sound\\Dota\\furion\\move_7.mp3",
+   "Sound\\Dota\\furion\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\furion\\spawn_1.mp3",
+   "Sound\\Dota\\furion\\spawn_2.mp3",
+   "Sound\\Dota\\furion\\spawn_3.mp3"
+  ]
+ },
+ "meepo": {
+  "attack": [
+   "Sound\\Dota\\meepo\\attack_1.mp3",
+   "Sound\\Dota\\meepo\\attack_2.mp3",
+   "Sound\\Dota\\meepo\\attack_3.mp3",
+   "Sound\\Dota\\meepo\\attack_4.mp3",
+   "Sound\\Dota\\meepo\\attack_5.mp3",
+   "Sound\\Dota\\meepo\\attack_6.mp3",
+   "Sound\\Dota\\meepo\\attack_7.mp3",
+   "Sound\\Dota\\meepo\\attack_8.mp3"
+  ],
+  "cast_meepo_divided_we_stand": [
+   "Sound\\Dota\\meepo\\cast_meepo_divided_we_stand_1.mp3",
+   "Sound\\Dota\\meepo\\cast_meepo_divided_we_stand_2.mp3",
+   "Sound\\Dota\\meepo\\cast_meepo_divided_we_stand_3.mp3"
+  ],
+  "cast_meepo_earthbind": [
+   "Sound\\Dota\\meepo\\cast_meepo_earthbind_1.mp3",
+   "Sound\\Dota\\meepo\\cast_meepo_earthbind_2.mp3",
+   "Sound\\Dota\\meepo\\cast_meepo_earthbind_3.mp3"
+  ],
+  "cast_meepo_poof": [
+   "Sound\\Dota\\meepo\\cast_meepo_poof_1.mp3",
+   "Sound\\Dota\\meepo\\cast_meepo_poof_2.mp3",
+   "Sound\\Dota\\meepo\\cast_meepo_poof_3.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\meepo\\death_1.mp3",
+   "Sound\\Dota\\meepo\\death_2.mp3",
+   "Sound\\Dota\\meepo\\death_3.mp3",
+   "Sound\\Dota\\meepo\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\meepo\\kill_1.mp3",
+   "Sound\\Dota\\meepo\\kill_2.mp3",
+   "Sound\\Dota\\meepo\\kill_3.mp3",
+   "Sound\\Dota\\meepo\\kill_4.mp3"
+  ],
+  "laugh": [
+   "Sound\\Dota\\meepo\\laugh_1.mp3",
+   "Sound\\Dota\\meepo\\laugh_2.mp3",
+   "Sound\\Dota\\meepo\\laugh_3.mp3",
+   "Sound\\Dota\\meepo\\laugh_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\meepo\\levelup_1.mp3",
+   "Sound\\Dota\\meepo\\levelup_2.mp3",
+   "Sound\\Dota\\meepo\\levelup_3.mp3",
+   "Sound\\Dota\\meepo\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\meepo\\move_1.mp3",
+   "Sound\\Dota\\meepo\\move_2.mp3",
+   "Sound\\Dota\\meepo\\move_3.mp3",
+   "Sound\\Dota\\meepo\\move_4.mp3",
+   "Sound\\Dota\\meepo\\move_5.mp3",
+   "Sound\\Dota\\meepo\\move_6.mp3",
+   "Sound\\Dota\\meepo\\move_7.mp3",
+   "Sound\\Dota\\meepo\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\meepo\\spawn_1.mp3",
+   "Sound\\Dota\\meepo\\spawn_2.mp3",
+   "Sound\\Dota\\meepo\\spawn_3.mp3",
+   "Sound\\Dota\\meepo\\spawn_4.mp3"
+  ]
+ },
+ "morphling": {
+  "attack": [
+   "Sound\\Dota\\morphling\\attack_1.mp3",
+   "Sound\\Dota\\morphling\\attack_2.mp3",
+   "Sound\\Dota\\morphling\\attack_3.mp3",
+   "Sound\\Dota\\morphling\\attack_4.mp3",
+   "Sound\\Dota\\morphling\\attack_5.mp3",
+   "Sound\\Dota\\morphling\\attack_6.mp3",
+   "Sound\\Dota\\morphling\\attack_7.mp3",
+   "Sound\\Dota\\morphling\\attack_8.mp3"
+  ],
+  "cast_morphling_morph_replicate": [
+   "Sound\\Dota\\morphling\\cast_morphling_morph_replicate_1.mp3"
+  ],
+  "cast_morphling_replicate": [
+   "Sound\\Dota\\morphling\\cast_morphling_replicate_1.mp3",
+   "Sound\\Dota\\morphling\\cast_morphling_replicate_2.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\morphling\\death_1.mp3",
+   "Sound\\Dota\\morphling\\death_2.mp3",
+   "Sound\\Dota\\morphling\\death_3.mp3",
+   "Sound\\Dota\\morphling\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\morphling\\kill_1.mp3",
+   "Sound\\Dota\\morphling\\kill_2.mp3",
+   "Sound\\Dota\\morphling\\kill_3.mp3",
+   "Sound\\Dota\\morphling\\kill_4.mp3"
+  ],
+  "laugh": [
+   "Sound\\Dota\\morphling\\laugh_1.mp3",
+   "Sound\\Dota\\morphling\\laugh_2.mp3",
+   "Sound\\Dota\\morphling\\laugh_3.mp3",
+   "Sound\\Dota\\morphling\\laugh_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\morphling\\levelup_1.mp3",
+   "Sound\\Dota\\morphling\\levelup_2.mp3",
+   "Sound\\Dota\\morphling\\levelup_3.mp3",
+   "Sound\\Dota\\morphling\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\morphling\\move_1.mp3",
+   "Sound\\Dota\\morphling\\move_2.mp3",
+   "Sound\\Dota\\morphling\\move_3.mp3",
+   "Sound\\Dota\\morphling\\move_4.mp3",
+   "Sound\\Dota\\morphling\\move_5.mp3",
+   "Sound\\Dota\\morphling\\move_6.mp3",
+   "Sound\\Dota\\morphling\\move_7.mp3",
+   "Sound\\Dota\\morphling\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\morphling\\spawn_1.mp3",
+   "Sound\\Dota\\morphling\\spawn_2.mp3",
+   "Sound\\Dota\\morphling\\spawn_3.mp3",
+   "Sound\\Dota\\morphling\\spawn_4.mp3"
+  ]
+ },
+ "nevermore": {
+  "attack": [
+   "Sound\\Dota\\nevermore\\attack_1.mp3",
+   "Sound\\Dota\\nevermore\\attack_2.mp3",
+   "Sound\\Dota\\nevermore\\attack_3.mp3",
+   "Sound\\Dota\\nevermore\\attack_4.mp3",
+   "Sound\\Dota\\nevermore\\attack_5.mp3",
+   "Sound\\Dota\\nevermore\\attack_6.mp3",
+   "Sound\\Dota\\nevermore\\attack_7.mp3",
+   "Sound\\Dota\\nevermore\\attack_8.mp3"
+  ],
+  "cast_nevermore_dark_lord": [
+   "Sound\\Dota\\nevermore\\cast_nevermore_dark_lord_1.mp3",
+   "Sound\\Dota\\nevermore\\cast_nevermore_dark_lord_2.mp3",
+   "Sound\\Dota\\nevermore\\cast_nevermore_dark_lord_3.mp3"
+  ],
+  "cast_nevermore_necromastery": [
+   "Sound\\Dota\\nevermore\\cast_nevermore_necromastery_1.mp3"
+  ],
+  "cast_nevermore_requiem": [
+   "Sound\\Dota\\nevermore\\cast_nevermore_requiem_1.mp3",
+   "Sound\\Dota\\nevermore\\cast_nevermore_requiem_2.mp3",
+   "Sound\\Dota\\nevermore\\cast_nevermore_requiem_3.mp3"
+  ],
+  "cast_nevermore_shadowraze1": [
+   "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze1_1.mp3",
+   "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze1_2.mp3",
+   "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze1_3.mp3"
+  ],
+  "cast_nevermore_shadowraze2": [
+   "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze2_1.mp3",
+   "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze2_2.mp3",
+   "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze2_3.mp3"
+  ],
+  "cast_nevermore_shadowraze3": [
+   "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze3_1.mp3",
+   "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze3_2.mp3",
+   "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze3_3.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\nevermore\\death_1.mp3",
+   "Sound\\Dota\\nevermore\\death_2.mp3",
+   "Sound\\Dota\\nevermore\\death_3.mp3",
+   "Sound\\Dota\\nevermore\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\nevermore\\kill_1.mp3",
+   "Sound\\Dota\\nevermore\\kill_2.mp3",
+   "Sound\\Dota\\nevermore\\kill_3.mp3",
+   "Sound\\Dota\\nevermore\\kill_4.mp3"
+  ],
+  "laugh": [
+   "Sound\\Dota\\nevermore\\laugh_1.mp3",
+   "Sound\\Dota\\nevermore\\laugh_2.mp3",
+   "Sound\\Dota\\nevermore\\laugh_3.mp3",
+   "Sound\\Dota\\nevermore\\laugh_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\nevermore\\levelup_1.mp3",
+   "Sound\\Dota\\nevermore\\levelup_2.mp3",
+   "Sound\\Dota\\nevermore\\levelup_3.mp3",
+   "Sound\\Dota\\nevermore\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\nevermore\\move_1.mp3",
+   "Sound\\Dota\\nevermore\\move_2.mp3",
+   "Sound\\Dota\\nevermore\\move_3.mp3",
+   "Sound\\Dota\\nevermore\\move_4.mp3",
+   "Sound\\Dota\\nevermore\\move_5.mp3",
+   "Sound\\Dota\\nevermore\\move_6.mp3",
+   "Sound\\Dota\\nevermore\\move_7.mp3",
+   "Sound\\Dota\\nevermore\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\nevermore\\spawn_1.mp3",
+   "Sound\\Dota\\nevermore\\spawn_2.mp3",
+   "Sound\\Dota\\nevermore\\spawn_3.mp3",
+   "Sound\\Dota\\nevermore\\spawn_4.mp3"
+  ]
+ },
+ "ogre_magi": {
+  "attack": [
+   "Sound\\Dota\\ogre_magi\\attack_1.mp3",
+   "Sound\\Dota\\ogre_magi\\attack_2.mp3",
+   "Sound\\Dota\\ogre_magi\\attack_3.mp3",
+   "Sound\\Dota\\ogre_magi\\attack_4.mp3",
+   "Sound\\Dota\\ogre_magi\\attack_5.mp3",
+   "Sound\\Dota\\ogre_magi\\attack_6.mp3",
+   "Sound\\Dota\\ogre_magi\\attack_7.mp3",
+   "Sound\\Dota\\ogre_magi\\attack_8.mp3"
+  ],
+  "cast_ogre_magi_bloodlust": [
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_bloodlust_1.mp3",
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_bloodlust_2.mp3",
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_bloodlust_3.mp3"
+  ],
+  "cast_ogre_magi_fireblast": [
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_fireblast_1.mp3",
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_fireblast_2.mp3",
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_fireblast_3.mp3"
+  ],
+  "cast_ogre_magi_ignite": [
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_ignite_1.mp3",
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_ignite_2.mp3",
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_ignite_3.mp3"
+  ],
+  "cast_ogre_magi_multicast": [
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_multicast_1.mp3",
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_multicast_2.mp3",
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_multicast_3.mp3"
+  ],
+  "cast_ogre_magi_unrefined_fireblast": [
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_unrefined_fireblast_1.mp3",
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_unrefined_fireblast_2.mp3",
+   "Sound\\Dota\\ogre_magi\\cast_ogre_magi_unrefined_fireblast_3.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\ogre_magi\\death_1.mp3",
+   "Sound\\Dota\\ogre_magi\\death_2.mp3",
+   "Sound\\Dota\\ogre_magi\\death_3.mp3",
+   "Sound\\Dota\\ogre_magi\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\ogre_magi\\kill_1.mp3",
+   "Sound\\Dota\\ogre_magi\\kill_2.mp3",
+   "Sound\\Dota\\ogre_magi\\kill_3.mp3",
+   "Sound\\Dota\\ogre_magi\\kill_4.mp3"
+  ],
+  "laugh": [
+   "Sound\\Dota\\ogre_magi\\laugh_1.mp3",
+   "Sound\\Dota\\ogre_magi\\laugh_2.mp3",
+   "Sound\\Dota\\ogre_magi\\laugh_3.mp3",
+   "Sound\\Dota\\ogre_magi\\laugh_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\ogre_magi\\levelup_1.mp3",
+   "Sound\\Dota\\ogre_magi\\levelup_2.mp3",
+   "Sound\\Dota\\ogre_magi\\levelup_3.mp3",
+   "Sound\\Dota\\ogre_magi\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\ogre_magi\\move_1.mp3",
+   "Sound\\Dota\\ogre_magi\\move_2.mp3",
+   "Sound\\Dota\\ogre_magi\\move_3.mp3",
+   "Sound\\Dota\\ogre_magi\\move_4.mp3",
+   "Sound\\Dota\\ogre_magi\\move_5.mp3",
+   "Sound\\Dota\\ogre_magi\\move_6.mp3",
+   "Sound\\Dota\\ogre_magi\\move_7.mp3",
+   "Sound\\Dota\\ogre_magi\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\ogre_magi\\spawn_1.mp3",
+   "Sound\\Dota\\ogre_magi\\spawn_2.mp3",
+   "Sound\\Dota\\ogre_magi\\spawn_3.mp3",
+   "Sound\\Dota\\ogre_magi\\spawn_4.mp3"
+  ]
+ },
+ "pudge": {
+  "attack": [
+   "Sound\\Dota\\pudge\\attack_1.mp3",
+   "Sound\\Dota\\pudge\\attack_2.mp3",
+   "Sound\\Dota\\pudge\\attack_3.mp3",
+   "Sound\\Dota\\pudge\\attack_4.mp3",
+   "Sound\\Dota\\pudge\\attack_5.mp3",
+   "Sound\\Dota\\pudge\\attack_6.mp3",
+   "Sound\\Dota\\pudge\\attack_7.mp3",
+   "Sound\\Dota\\pudge\\attack_8.mp3"
+  ],
+  "cast_pudge_dismember": [
+   "Sound\\Dota\\pudge\\cast_pudge_dismember_1.mp3",
+   "Sound\\Dota\\pudge\\cast_pudge_dismember_2.mp3",
+   "Sound\\Dota\\pudge\\cast_pudge_dismember_3.mp3"
+  ],
+  "cast_pudge_flesh_heap": [
+   "Sound\\Dota\\pudge\\cast_pudge_flesh_heap_1.mp3",
+   "Sound\\Dota\\pudge\\cast_pudge_flesh_heap_2.mp3"
+  ],
+  "cast_pudge_meat_hook": [
+   "Sound\\Dota\\pudge\\cast_pudge_meat_hook_1.mp3",
+   "Sound\\Dota\\pudge\\cast_pudge_meat_hook_2.mp3",
+   "Sound\\Dota\\pudge\\cast_pudge_meat_hook_3.mp3"
+  ],
+  "cast_pudge_rot": [
+   "Sound\\Dota\\pudge\\cast_pudge_rot_1.mp3",
+   "Sound\\Dota\\pudge\\cast_pudge_rot_2.mp3",
+   "Sound\\Dota\\pudge\\cast_pudge_rot_3.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\pudge\\death_1.mp3",
+   "Sound\\Dota\\pudge\\death_2.mp3",
+   "Sound\\Dota\\pudge\\death_3.mp3",
+   "Sound\\Dota\\pudge\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\pudge\\kill_1.mp3",
+   "Sound\\Dota\\pudge\\kill_2.mp3",
+   "Sound\\Dota\\pudge\\kill_3.mp3",
+   "Sound\\Dota\\pudge\\kill_4.mp3"
+  ],
+  "laugh": [
+   "Sound\\Dota\\pudge\\laugh_1.mp3",
+   "Sound\\Dota\\pudge\\laugh_2.mp3",
+   "Sound\\Dota\\pudge\\laugh_3.mp3",
+   "Sound\\Dota\\pudge\\laugh_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\pudge\\levelup_1.mp3",
+   "Sound\\Dota\\pudge\\levelup_2.mp3",
+   "Sound\\Dota\\pudge\\levelup_3.mp3",
+   "Sound\\Dota\\pudge\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\pudge\\move_1.mp3",
+   "Sound\\Dota\\pudge\\move_2.mp3",
+   "Sound\\Dota\\pudge\\move_3.mp3",
+   "Sound\\Dota\\pudge\\move_4.mp3",
+   "Sound\\Dota\\pudge\\move_5.mp3",
+   "Sound\\Dota\\pudge\\move_6.mp3",
+   "Sound\\Dota\\pudge\\move_7.mp3",
+   "Sound\\Dota\\pudge\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\pudge\\spawn_1.mp3",
+   "Sound\\Dota\\pudge\\spawn_2.mp3",
+   "Sound\\Dota\\pudge\\spawn_3.mp3",
+   "Sound\\Dota\\pudge\\spawn_4.mp3"
+  ]
+ },
+ "rubick": {
+  "attack": [
+   "Sound\\Dota\\rubick\\attack_1.mp3",
+   "Sound\\Dota\\rubick\\attack_2.mp3",
+   "Sound\\Dota\\rubick\\attack_3.mp3",
+   "Sound\\Dota\\rubick\\attack_4.mp3",
+   "Sound\\Dota\\rubick\\attack_5.mp3",
+   "Sound\\Dota\\rubick\\attack_6.mp3",
+   "Sound\\Dota\\rubick\\attack_7.mp3",
+   "Sound\\Dota\\rubick\\attack_8.mp3"
+  ],
+  "cast_rubick_fade_bolt": [
+   "Sound\\Dota\\rubick\\cast_rubick_fade_bolt_1.mp3",
+   "Sound\\Dota\\rubick\\cast_rubick_fade_bolt_2.mp3",
+   "Sound\\Dota\\rubick\\cast_rubick_fade_bolt_3.mp3"
+  ],
+  "cast_rubick_spell_steal": [
+   "Sound\\Dota\\rubick\\cast_rubick_spell_steal_1.mp3",
+   "Sound\\Dota\\rubick\\cast_rubick_spell_steal_2.mp3",
+   "Sound\\Dota\\rubick\\cast_rubick_spell_steal_3.mp3"
+  ],
+  "cast_rubick_telekinesis": [
+   "Sound\\Dota\\rubick\\cast_rubick_telekinesis_1.mp3",
+   "Sound\\Dota\\rubick\\cast_rubick_telekinesis_2.mp3",
+   "Sound\\Dota\\rubick\\cast_rubick_telekinesis_3.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\rubick\\death_1.mp3",
+   "Sound\\Dota\\rubick\\death_2.mp3",
+   "Sound\\Dota\\rubick\\death_3.mp3",
+   "Sound\\Dota\\rubick\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\rubick\\kill_1.mp3",
+   "Sound\\Dota\\rubick\\kill_2.mp3",
+   "Sound\\Dota\\rubick\\kill_3.mp3",
+   "Sound\\Dota\\rubick\\kill_4.mp3"
+  ],
+  "laugh": [
+   "Sound\\Dota\\rubick\\laugh_1.mp3",
+   "Sound\\Dota\\rubick\\laugh_2.mp3",
+   "Sound\\Dota\\rubick\\laugh_3.mp3",
+   "Sound\\Dota\\rubick\\laugh_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\rubick\\levelup_1.mp3",
+   "Sound\\Dota\\rubick\\levelup_2.mp3",
+   "Sound\\Dota\\rubick\\levelup_3.mp3",
+   "Sound\\Dota\\rubick\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\rubick\\move_1.mp3",
+   "Sound\\Dota\\rubick\\move_2.mp3",
+   "Sound\\Dota\\rubick\\move_3.mp3",
+   "Sound\\Dota\\rubick\\move_4.mp3",
+   "Sound\\Dota\\rubick\\move_5.mp3",
+   "Sound\\Dota\\rubick\\move_6.mp3",
+   "Sound\\Dota\\rubick\\move_7.mp3",
+   "Sound\\Dota\\rubick\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\rubick\\spawn_1.mp3",
+   "Sound\\Dota\\rubick\\spawn_2.mp3",
+   "Sound\\Dota\\rubick\\spawn_3.mp3",
+   "Sound\\Dota\\rubick\\spawn_4.mp3"
+  ]
+ },
+ "techies": {
+  "attack": [
+   "Sound\\Dota\\techies\\attack_1.mp3",
+   "Sound\\Dota\\techies\\attack_2.mp3",
+   "Sound\\Dota\\techies\\attack_3.mp3",
+   "Sound\\Dota\\techies\\attack_4.mp3",
+   "Sound\\Dota\\techies\\attack_5.mp3",
+   "Sound\\Dota\\techies\\attack_6.mp3",
+   "Sound\\Dota\\techies\\attack_7.mp3",
+   "Sound\\Dota\\techies\\attack_8.mp3"
+  ],
+  "cast_techies_focused_detonate": [
+   "Sound\\Dota\\techies\\cast_techies_focused_detonate_1.mp3",
+   "Sound\\Dota\\techies\\cast_techies_focused_detonate_2.mp3",
+   "Sound\\Dota\\techies\\cast_techies_focused_detonate_3.mp3"
+  ],
+  "cast_techies_land_mines": [
+   "Sound\\Dota\\techies\\cast_techies_land_mines_1.mp3",
+   "Sound\\Dota\\techies\\cast_techies_land_mines_2.mp3",
+   "Sound\\Dota\\techies\\cast_techies_land_mines_3.mp3"
+  ],
+  "cast_techies_suicide": [
+   "Sound\\Dota\\techies\\cast_techies_suicide_1.mp3",
+   "Sound\\Dota\\techies\\cast_techies_suicide_2.mp3",
+   "Sound\\Dota\\techies\\cast_techies_suicide_3.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\techies\\death_1.mp3",
+   "Sound\\Dota\\techies\\death_2.mp3",
+   "Sound\\Dota\\techies\\death_3.mp3",
+   "Sound\\Dota\\techies\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\techies\\kill_1.mp3",
+   "Sound\\Dota\\techies\\kill_2.mp3",
+   "Sound\\Dota\\techies\\kill_3.mp3",
+   "Sound\\Dota\\techies\\kill_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\techies\\levelup_1.mp3",
+   "Sound\\Dota\\techies\\levelup_2.mp3",
+   "Sound\\Dota\\techies\\levelup_3.mp3",
+   "Sound\\Dota\\techies\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\techies\\move_1.mp3",
+   "Sound\\Dota\\techies\\move_2.mp3",
+   "Sound\\Dota\\techies\\move_3.mp3",
+   "Sound\\Dota\\techies\\move_4.mp3",
+   "Sound\\Dota\\techies\\move_5.mp3",
+   "Sound\\Dota\\techies\\move_6.mp3",
+   "Sound\\Dota\\techies\\move_7.mp3",
+   "Sound\\Dota\\techies\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\techies\\spawn_1.mp3",
+   "Sound\\Dota\\techies\\spawn_2.mp3",
+   "Sound\\Dota\\techies\\spawn_3.mp3",
+   "Sound\\Dota\\techies\\spawn_4.mp3"
+  ]
+ },
+ "tinker": {
+  "attack": [
+   "Sound\\Dota\\tinker\\attack_1.mp3",
+   "Sound\\Dota\\tinker\\attack_2.mp3",
+   "Sound\\Dota\\tinker\\attack_3.mp3",
+   "Sound\\Dota\\tinker\\attack_4.mp3",
+   "Sound\\Dota\\tinker\\attack_5.mp3",
+   "Sound\\Dota\\tinker\\attack_6.mp3",
+   "Sound\\Dota\\tinker\\attack_7.mp3",
+   "Sound\\Dota\\tinker\\attack_8.mp3"
+  ],
+  "cast_tinker_laser": [
+   "Sound\\Dota\\tinker\\cast_tinker_laser_1.mp3",
+   "Sound\\Dota\\tinker\\cast_tinker_laser_2.mp3",
+   "Sound\\Dota\\tinker\\cast_tinker_laser_3.mp3"
+  ],
+  "cast_tinker_march_of_the_machines": [
+   "Sound\\Dota\\tinker\\cast_tinker_march_of_the_machines_1.mp3",
+   "Sound\\Dota\\tinker\\cast_tinker_march_of_the_machines_2.mp3",
+   "Sound\\Dota\\tinker\\cast_tinker_march_of_the_machines_3.mp3"
+  ],
+  "cast_tinker_rearm": [
+   "Sound\\Dota\\tinker\\cast_tinker_rearm_1.mp3",
+   "Sound\\Dota\\tinker\\cast_tinker_rearm_2.mp3",
+   "Sound\\Dota\\tinker\\cast_tinker_rearm_3.mp3"
+  ],
+  "death": [
+   "Sound\\Dota\\tinker\\death_1.mp3",
+   "Sound\\Dota\\tinker\\death_2.mp3",
+   "Sound\\Dota\\tinker\\death_3.mp3",
+   "Sound\\Dota\\tinker\\death_4.mp3"
+  ],
+  "kill": [
+   "Sound\\Dota\\tinker\\kill_1.mp3",
+   "Sound\\Dota\\tinker\\kill_2.mp3",
+   "Sound\\Dota\\tinker\\kill_3.mp3",
+   "Sound\\Dota\\tinker\\kill_4.mp3"
+  ],
+  "laugh": [
+   "Sound\\Dota\\tinker\\laugh_1.mp3",
+   "Sound\\Dota\\tinker\\laugh_2.mp3",
+   "Sound\\Dota\\tinker\\laugh_3.mp3",
+   "Sound\\Dota\\tinker\\laugh_4.mp3"
+  ],
+  "levelup": [
+   "Sound\\Dota\\tinker\\levelup_1.mp3",
+   "Sound\\Dota\\tinker\\levelup_2.mp3",
+   "Sound\\Dota\\tinker\\levelup_3.mp3",
+   "Sound\\Dota\\tinker\\levelup_4.mp3"
+  ],
+  "move": [
+   "Sound\\Dota\\tinker\\move_1.mp3",
+   "Sound\\Dota\\tinker\\move_2.mp3",
+   "Sound\\Dota\\tinker\\move_3.mp3",
+   "Sound\\Dota\\tinker\\move_4.mp3",
+   "Sound\\Dota\\tinker\\move_5.mp3",
+   "Sound\\Dota\\tinker\\move_6.mp3",
+   "Sound\\Dota\\tinker\\move_7.mp3",
+   "Sound\\Dota\\tinker\\move_8.mp3"
+  ],
+  "spawn": [
+   "Sound\\Dota\\tinker\\spawn_1.mp3",
+   "Sound\\Dota\\tinker\\spawn_2.mp3",
+   "Sound\\Dota\\tinker\\spawn_3.mp3",
+   "Sound\\Dota\\tinker\\spawn_4.mp3"
+  ]
+ }
+}

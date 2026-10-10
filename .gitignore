@@ -1,0 +1,11 @@
+.venv/
+research/
+build/
+dist/
+launcher/vendor/
+*.log
+__pycache__/
+tools/vendor/
+node_modules/
+.idea/
+.obsidian/

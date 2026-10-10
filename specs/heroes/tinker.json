@@ -1,0 +1,73 @@
+{
+ "title": "Tinker",
+ "base": "Ntin",
+ "model": "Units\\Creeps\\HeroTinker\\HeroTinker.mdl",
+ "sound": "HeroTinker",
+ "scale": 1.0,
+ "missile": "Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl",
+ "abilities": {
+  "tinker_laser": {
+   "targets": "air,ground,enemy,neutral",
+   "desc": "Fires a laser at an enemy unit. It takes pure damage and is blinded, so its attacks miss for a few seconds."
+  },
+  "tinker_march_of_the_machines": {
+   "radiusKey": "collision_radius",
+   "desc": "Tinker calls in a stream of small robots that march through a large square centred on him, in the direction of the target point. A robot explodes on the first enemy it touches and damages enemies around it."
+  },
+  "tinker_deploy_turrets": {
+   "radiusKey": "drop_aoe_radius",
+   "order": "raisedead",
+   "desc": "Drops a crate of three uncontrollable turrets at the target point. The impact damages enemies and pushes them away; Tinker is pushed too if he stands in the blast. Each turret fires rockets toward the nearest enemy hero until it expires."
+  },
+  "tinker_keen_teleport": {
+   "include": true,
+   "innateActive": true,
+   "cell": [1, 1],
+   "order": "sentinel",
+   "range": 99999,
+   "desc": "Channel, then teleport next to the friendly structure closest to the target point. The level follows Rearm: level 2 also allows allied units, level 3 allied heroes."
+  },
+  "tinker_rearm": {
+   "order": "replenish",
+   "desc": "Channel to reset the cooldowns of Tinker's abilities and of the items he carries."
+  },
+  "tinker_eureka": {
+   "kind": "native",
+   "base": "AEev",
+   "fields": {
+    "Eev1": [0],
+    "abpx": 2,
+    "abpy": 1,
+    "ahky": "F"
+   },
+   "desc": "Intelligence shortens item cooldowns: 1% per 3 Intelligence, up to 60%."
+  }
+ },
+ "units": {
+  "tinker_turret": {
+   "base": "ninc",
+   "fields": {
+    "unam": "Keen Cannon",
+    "uhpm": 160,
+    "uhpr": 0.0,
+    "umpm": 0,
+    "udef": 0,
+    "umvs": 0,
+    "uaen": 0,
+    "uabi": "",
+    "usca": 0.55,
+    "ubba": 4,
+    "ubdi": 1,
+    "ubsi": 1,
+    "ufoo": 0,
+    "ugol": 0,
+    "ulum": 0,
+    "upgr": "",
+    "usid": 800,
+    "usin": 800,
+    "utip": "Keen Cannon",
+    "utub": "An uncontrollable turret deployed by Tinker."
+   }
+  }
+ }
+}

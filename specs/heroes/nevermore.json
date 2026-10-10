@@ -1,0 +1,331 @@
+{
+ "title": "Shadow Fiend",
+ "base": "Udre",
+ "model": "units\\undead\\HeroDreadLord\\HeroDreadLord.mdl",
+ "sound": "HeroDreadLord",
+ "scale": 1.0,
+ "missile": "Abilities\\Weapons\\AvengerMissile\\AvengerMissile.mdl",
+ "abilities": {
+  "nevermore_shadowraze1": {
+   "kind": "native",
+   "base": "ANcl",
+   "order": "acidbomb",
+   "title": "Shadowraze (Near)",
+   "desc": "Blasts the ground just in front of Shadow Fiend. Enemies hit take magical damage, more for every soul he holds, and each raze marks them to take extra damage from the next one.",
+   "fields": {
+    "Ncl1": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl2": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl3": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "Ncl4": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl5": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl6": [
+     "acidbomb",
+     "acidbomb",
+     "acidbomb",
+     "acidbomb"
+    ],
+    "aare": [
+     250,
+     250,
+     250,
+     250
+    ],
+    "acas": [
+     0.25,
+     0.25,
+     0.25,
+     0.25
+    ],
+    "aani": "spell",
+    "acat": "",
+    "atat": "",
+    "aeat": "",
+    "asat": ""
+   },
+   "cell": [
+    0,
+    2
+   ],
+   "learnCell": [
+    0,
+    0
+   ]
+  },
+  "nevermore_shadowraze2": {
+   "kind": "native",
+   "base": "ANcl",
+   "order": "ancestralspirit",
+   "title": "Shadowraze (Medium)",
+   "desc": "Blasts the ground a short distance in front of Shadow Fiend. Enemies hit take magical damage, more for every soul he holds, and each raze marks them to take extra damage from the next one.",
+   "fields": {
+    "Ncl1": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl2": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl3": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "Ncl4": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl5": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl6": [
+     "ancestralspirit",
+     "ancestralspirit",
+     "ancestralspirit",
+     "ancestralspirit"
+    ],
+    "aare": [
+     250,
+     250,
+     250,
+     250
+    ],
+    "acas": [
+     0.25,
+     0.25,
+     0.25,
+     0.25
+    ],
+    "aani": "spell",
+    "acat": "",
+    "atat": "",
+    "aeat": "",
+    "asat": ""
+   },
+   "cell": [
+    1,
+    2
+   ],
+   "innateActive": true
+  },
+  "nevermore_shadowraze3": {
+   "kind": "native",
+   "base": "ANcl",
+   "order": "animatedead",
+   "title": "Shadowraze (Far)",
+   "desc": "Blasts the ground far in front of Shadow Fiend. Enemies hit take magical damage, more for every soul he holds, and each raze marks them to take extra damage from the next one.",
+   "fields": {
+    "Ncl1": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl2": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl3": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "Ncl4": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl5": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "Ncl6": [
+     "animatedead",
+     "animatedead",
+     "animatedead",
+     "animatedead"
+    ],
+    "aare": [
+     250,
+     250,
+     250,
+     250
+    ],
+    "acas": [
+     0.25,
+     0.25,
+     0.25,
+     0.25
+    ],
+    "aani": "spell",
+    "acat": "",
+    "atat": "",
+    "aeat": "",
+    "asat": ""
+   },
+   "cell": [
+    2,
+    2
+   ],
+   "innateActive": true
+  },
+  "nevermore_frenzy": {
+   "kind": "native",
+   "base": "Absk",
+   "order": "berserk",
+   "desc": "Instantly gains attack and movement speed. While it lasts Shadow Fiend rips souls from nearby enemies (more from heroes, once per enemy); afterwards he keeps only the souls of those that died, and only for a while.",
+   "fields": {
+    "bsk1": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "bsk2": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "bsk3": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "adur": [
+     0.01,
+     0.01,
+     0.01,
+     0.01
+    ],
+    "ahdu": [
+     0.01,
+     0.01,
+     0.01,
+     0.01
+    ]
+   },
+   "cell": [
+    1,
+    1
+   ],
+   "learnCell": [
+    1,
+    0
+   ]
+  },
+  "nevermore_dark_lord": {
+   "desc": "Aura: enemies near Shadow Fiend lose armor.",
+   "cell": [
+    2,
+    1
+   ],
+   "learnCell": [
+    2,
+    0
+   ]
+  },
+  "nevermore_requiem": {
+   "kind": "native",
+   "base": "ANcl",
+   "order": "breathoffire",
+   "desc": "After a long wind-up Shadow Fiend unleashes one line of demonic energy per soul he holds. Every line deals magical damage; enemies hit are feared, slowed and lose magic resistance, longer for each line. Also released on death, without the fear.",
+   "fields": {
+    "Ncl1": [
+     0,
+     0,
+     0
+    ],
+    "Ncl2": [
+     0,
+     0,
+     0
+    ],
+    "Ncl3": [
+     1,
+     1,
+     1
+    ],
+    "Ncl4": [
+     0,
+     0,
+     0
+    ],
+    "Ncl5": [
+     0,
+     0,
+     0
+    ],
+    "Ncl6": [
+     "breathoffire",
+     "breathoffire",
+     "breathoffire"
+    ],
+    "aare": [
+     1000,
+     1000,
+     1000
+    ],
+    "acas": [
+     1.37,
+     1.37,
+     1.37
+    ],
+    "aani": "spell",
+    "acat": "",
+    "atat": "",
+    "aeat": "",
+    "asat": ""
+   }
+  },
+  "nevermore_necromastery": {
+   "desc": "Shadow Fiend takes the soul of every unit he kills (several from heroes); each soul adds attack damage. He loses part of them when he dies.",
+   "cell": [
+    0,
+    1
+   ]
+  }
+ }
+}

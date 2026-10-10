@@ -1,0 +1,6 @@
+# Build dependencies of DotaVsCommander.exe, pinned: Pillow's resampling and
+# quantization feed the map bytes, so every launcher build must use the same
+# version for players' maps to match.
+pillow==12.3.0
+pyinstaller==6.22.3
+pyinstaller-hooks-contrib==2026.8

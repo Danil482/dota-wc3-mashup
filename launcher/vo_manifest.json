@@ -1,0 +1,1095 @@
+{
+ "format": 1,
+ "selected_from_build": "25845666",
+ "max_lines_per_event": {
+  "move": 8,
+  "attack": 8,
+  "kill": 4,
+  "death": 4,
+  "spawn": 4,
+  "levelup": 4,
+  "laugh": 4,
+  "cast": 3
+ },
+ "max_lines_per_hero": 64,
+ "files": {
+  "Sound\\Dota\\antimage\\attack_1.mp3": "sounds/vo/antimage/anti_attack_01.vsnd_c",
+  "Sound\\Dota\\antimage\\attack_2.mp3": "sounds/vo/antimage/anti_attack_02.vsnd_c",
+  "Sound\\Dota\\antimage\\attack_3.mp3": "sounds/vo/antimage/anti_attack_03.vsnd_c",
+  "Sound\\Dota\\antimage\\attack_4.mp3": "sounds/vo/antimage/anti_attack_04.vsnd_c",
+  "Sound\\Dota\\antimage\\attack_5.mp3": "sounds/vo/antimage/anti_attack_05.vsnd_c",
+  "Sound\\Dota\\antimage\\attack_6.mp3": "sounds/vo/antimage/anti_attack_06.vsnd_c",
+  "Sound\\Dota\\antimage\\attack_7.mp3": "sounds/vo/antimage/anti_attack_07.vsnd_c",
+  "Sound\\Dota\\antimage\\attack_8.mp3": "sounds/vo/antimage/anti_attack_08.vsnd_c",
+  "Sound\\Dota\\antimage\\cast_antimage_mana_void_1.mp3": "sounds/vo/antimage/anti_ability_manavoid_01.vsnd_c",
+  "Sound\\Dota\\antimage\\cast_antimage_mana_void_2.mp3": "sounds/vo/antimage/anti_ability_manavoid_02.vsnd_c",
+  "Sound\\Dota\\antimage\\cast_antimage_mana_void_3.mp3": "sounds/vo/antimage/anti_ability_manavoid_03.vsnd_c",
+  "Sound\\Dota\\antimage\\death_1.mp3": "sounds/vo/antimage/anti_death_01.vsnd_c",
+  "Sound\\Dota\\antimage\\death_2.mp3": "sounds/vo/antimage/anti_death_02.vsnd_c",
+  "Sound\\Dota\\antimage\\death_3.mp3": "sounds/vo/antimage/anti_death_03.vsnd_c",
+  "Sound\\Dota\\antimage\\death_4.mp3": "sounds/vo/antimage/anti_death_04.vsnd_c",
+  "Sound\\Dota\\antimage\\kill_1.mp3": "sounds/vo/antimage/anti_kill_01.vsnd_c",
+  "Sound\\Dota\\antimage\\kill_2.mp3": "sounds/vo/antimage/anti_kill_02.vsnd_c",
+  "Sound\\Dota\\antimage\\kill_3.mp3": "sounds/vo/antimage/anti_kill_03.vsnd_c",
+  "Sound\\Dota\\antimage\\kill_4.mp3": "sounds/vo/antimage/anti_kill_04.vsnd_c",
+  "Sound\\Dota\\antimage\\laugh_1.mp3": "sounds/vo/antimage/anti_laugh_01.vsnd_c",
+  "Sound\\Dota\\antimage\\laugh_2.mp3": "sounds/vo/antimage/anti_laugh_02.vsnd_c",
+  "Sound\\Dota\\antimage\\laugh_3.mp3": "sounds/vo/antimage/anti_laugh_03.vsnd_c",
+  "Sound\\Dota\\antimage\\laugh_4.mp3": "sounds/vo/antimage/anti_laugh_04.vsnd_c",
+  "Sound\\Dota\\antimage\\levelup_1.mp3": "sounds/vo/antimage/anti_level_01.vsnd_c",
+  "Sound\\Dota\\antimage\\levelup_2.mp3": "sounds/vo/antimage/anti_level_02.vsnd_c",
+  "Sound\\Dota\\antimage\\levelup_3.mp3": "sounds/vo/antimage/anti_level_03.vsnd_c",
+  "Sound\\Dota\\antimage\\levelup_4.mp3": "sounds/vo/antimage/anti_level_04.vsnd_c",
+  "Sound\\Dota\\antimage\\move_1.mp3": "sounds/vo/antimage/anti_move_01.vsnd_c",
+  "Sound\\Dota\\antimage\\move_2.mp3": "sounds/vo/antimage/anti_move_02.vsnd_c",
+  "Sound\\Dota\\antimage\\move_3.mp3": "sounds/vo/antimage/anti_move_03.vsnd_c",
+  "Sound\\Dota\\antimage\\move_4.mp3": "sounds/vo/antimage/anti_move_04.vsnd_c",
+  "Sound\\Dota\\antimage\\move_5.mp3": "sounds/vo/antimage/anti_move_05.vsnd_c",
+  "Sound\\Dota\\antimage\\move_6.mp3": "sounds/vo/antimage/anti_move_06.vsnd_c",
+  "Sound\\Dota\\antimage\\move_7.mp3": "sounds/vo/antimage/anti_move_07.vsnd_c",
+  "Sound\\Dota\\antimage\\move_8.mp3": "sounds/vo/antimage/anti_move_08.vsnd_c",
+  "Sound\\Dota\\antimage\\spawn_1.mp3": "sounds/vo/antimage/anti_spawn_01.vsnd_c",
+  "Sound\\Dota\\antimage\\spawn_2.mp3": "sounds/vo/antimage/anti_spawn_02.vsnd_c",
+  "Sound\\Dota\\antimage\\spawn_3.mp3": "sounds/vo/antimage/anti_spawn_03.vsnd_c",
+  "Sound\\Dota\\antimage\\spawn_4.mp3": "sounds/vo/antimage/anti_spawn_04.vsnd_c",
+  "Sound\\Dota\\chen\\attack_1.mp3": "sounds/vo/chen/chen_attack_01.vsnd_c",
+  "Sound\\Dota\\chen\\attack_2.mp3": "sounds/vo/chen/chen_attack_02.vsnd_c",
+  "Sound\\Dota\\chen\\attack_3.mp3": "sounds/vo/chen/chen_attack_03.vsnd_c",
+  "Sound\\Dota\\chen\\attack_4.mp3": "sounds/vo/chen/chen_attack_04.vsnd_c",
+  "Sound\\Dota\\chen\\attack_5.mp3": "sounds/vo/chen/chen_attack_05.vsnd_c",
+  "Sound\\Dota\\chen\\attack_6.mp3": "sounds/vo/chen/chen_attack_06.vsnd_c",
+  "Sound\\Dota\\chen\\attack_7.mp3": "sounds/vo/chen/chen_attack_07.vsnd_c",
+  "Sound\\Dota\\chen\\attack_8.mp3": "sounds/vo/chen/chen_attack_08.vsnd_c",
+  "Sound\\Dota\\chen\\cast_chen_hand_of_god_1.mp3": "sounds/vo/chen/chen_ability_handgod_01.vsnd_c",
+  "Sound\\Dota\\chen\\cast_chen_hand_of_god_2.mp3": "sounds/vo/chen/chen_ability_handgod_02.vsnd_c",
+  "Sound\\Dota\\chen\\cast_chen_hand_of_god_3.mp3": "sounds/vo/chen/chen_ability_handgod_03.vsnd_c",
+  "Sound\\Dota\\chen\\cast_chen_holy_persuasion_1.mp3": "sounds/vo/chen/chen_ability_holyp_01.vsnd_c",
+  "Sound\\Dota\\chen\\cast_chen_holy_persuasion_2.mp3": "sounds/vo/chen/chen_ability_holyp_02.vsnd_c",
+  "Sound\\Dota\\chen\\cast_chen_holy_persuasion_3.mp3": "sounds/vo/chen/chen_ability_holyp_03.vsnd_c",
+  "Sound\\Dota\\chen\\cast_chen_penitence_1.mp3": "sounds/vo/chen/chen_ability_penit_01.vsnd_c",
+  "Sound\\Dota\\chen\\cast_chen_penitence_2.mp3": "sounds/vo/chen/chen_ability_penit_02.vsnd_c",
+  "Sound\\Dota\\chen\\cast_chen_penitence_3.mp3": "sounds/vo/chen/chen_ability_penit_03.vsnd_c",
+  "Sound\\Dota\\chen\\death_1.mp3": "sounds/vo/chen/chen_death_01.vsnd_c",
+  "Sound\\Dota\\chen\\death_2.mp3": "sounds/vo/chen/chen_death_02.vsnd_c",
+  "Sound\\Dota\\chen\\death_3.mp3": "sounds/vo/chen/chen_death_03.vsnd_c",
+  "Sound\\Dota\\chen\\death_4.mp3": "sounds/vo/chen/chen_death_04.vsnd_c",
+  "Sound\\Dota\\chen\\kill_1.mp3": "sounds/vo/chen/chen_kill_01.vsnd_c",
+  "Sound\\Dota\\chen\\kill_2.mp3": "sounds/vo/chen/chen_kill_02.vsnd_c",
+  "Sound\\Dota\\chen\\kill_3.mp3": "sounds/vo/chen/chen_kill_03.vsnd_c",
+  "Sound\\Dota\\chen\\kill_4.mp3": "sounds/vo/chen/chen_kill_04.vsnd_c",
+  "Sound\\Dota\\chen\\laugh_1.mp3": "sounds/vo/chen/chen_laugh_01.vsnd_c",
+  "Sound\\Dota\\chen\\laugh_2.mp3": "sounds/vo/chen/chen_laugh_02.vsnd_c",
+  "Sound\\Dota\\chen\\laugh_3.mp3": "sounds/vo/chen/chen_laugh_03.vsnd_c",
+  "Sound\\Dota\\chen\\laugh_4.mp3": "sounds/vo/chen/chen_laugh_04.vsnd_c",
+  "Sound\\Dota\\chen\\levelup_1.mp3": "sounds/vo/chen/chen_level_01.vsnd_c",
+  "Sound\\Dota\\chen\\levelup_2.mp3": "sounds/vo/chen/chen_level_03.vsnd_c",
+  "Sound\\Dota\\chen\\levelup_3.mp3": "sounds/vo/chen/chen_level_04.vsnd_c",
+  "Sound\\Dota\\chen\\levelup_4.mp3": "sounds/vo/chen/chen_level_05.vsnd_c",
+  "Sound\\Dota\\chen\\move_1.mp3": "sounds/vo/chen/chen_move_01.vsnd_c",
+  "Sound\\Dota\\chen\\move_2.mp3": "sounds/vo/chen/chen_move_02.vsnd_c",
+  "Sound\\Dota\\chen\\move_3.mp3": "sounds/vo/chen/chen_move_03.vsnd_c",
+  "Sound\\Dota\\chen\\move_4.mp3": "sounds/vo/chen/chen_move_04.vsnd_c",
+  "Sound\\Dota\\chen\\move_5.mp3": "sounds/vo/chen/chen_move_05.vsnd_c",
+  "Sound\\Dota\\chen\\move_6.mp3": "sounds/vo/chen/chen_move_06.vsnd_c",
+  "Sound\\Dota\\chen\\move_7.mp3": "sounds/vo/chen/chen_move_07.vsnd_c",
+  "Sound\\Dota\\chen\\move_8.mp3": "sounds/vo/chen/chen_move_08.vsnd_c",
+  "Sound\\Dota\\chen\\spawn_1.mp3": "sounds/vo/chen/chen_spawn_01.vsnd_c",
+  "Sound\\Dota\\chen\\spawn_2.mp3": "sounds/vo/chen/chen_spawn_02.vsnd_c",
+  "Sound\\Dota\\chen\\spawn_3.mp3": "sounds/vo/chen/chen_spawn_03.vsnd_c",
+  "Sound\\Dota\\chen\\spawn_4.mp3": "sounds/vo/chen/chen_spawn_04.vsnd_c",
+  "Sound\\Dota\\furion\\attack_1.mp3": "sounds/vo/furion/furi_attack_01.vsnd_c",
+  "Sound\\Dota\\furion\\attack_2.mp3": "sounds/vo/furion/furi_attack_02.vsnd_c",
+  "Sound\\Dota\\furion\\attack_3.mp3": "sounds/vo/furion/furi_attack_03.vsnd_c",
+  "Sound\\Dota\\furion\\attack_4.mp3": "sounds/vo/furion/furi_attack_04.vsnd_c",
+  "Sound\\Dota\\furion\\attack_5.mp3": "sounds/vo/furion/furi_attack_05.vsnd_c",
+  "Sound\\Dota\\furion\\attack_6.mp3": "sounds/vo/furion/furi_attack_06.vsnd_c",
+  "Sound\\Dota\\furion\\attack_7.mp3": "sounds/vo/furion/furi_attack_07.vsnd_c",
+  "Sound\\Dota\\furion\\attack_8.mp3": "sounds/vo/furion/furi_attack_08.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_force_of_nature_1.mp3": "sounds/vo/furion/furi_ability_force_01.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_force_of_nature_2.mp3": "sounds/vo/furion/furi_ability_force_02.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_force_of_nature_3.mp3": "sounds/vo/furion/furi_ability_force_03.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_sprout_1.mp3": "sounds/vo/furion/furi_ability_sprout_01.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_sprout_2.mp3": "sounds/vo/furion/furi_ability_sprout_02.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_sprout_3.mp3": "sounds/vo/furion/furi_ability_sprout_03.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_teleportation_1.mp3": "sounds/vo/furion/furi_ability_teleport_01.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_teleportation_2.mp3": "sounds/vo/furion/furi_ability_teleport_02.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_teleportation_3.mp3": "sounds/vo/furion/furi_ability_teleport_03.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_wrath_of_nature_1.mp3": "sounds/vo/furion/furi_ability_wrath_01.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_wrath_of_nature_2.mp3": "sounds/vo/furion/furi_ability_wrath_02.vsnd_c",
+  "Sound\\Dota\\furion\\cast_furion_wrath_of_nature_3.mp3": "sounds/vo/furion/furi_ability_wrath_03.vsnd_c",
+  "Sound\\Dota\\furion\\death_1.mp3": "sounds/vo/furion/furi_death_01.vsnd_c",
+  "Sound\\Dota\\furion\\death_2.mp3": "sounds/vo/furion/furi_death_02.vsnd_c",
+  "Sound\\Dota\\furion\\death_3.mp3": "sounds/vo/furion/furi_death_03.vsnd_c",
+  "Sound\\Dota\\furion\\death_4.mp3": "sounds/vo/furion/furi_death_04.vsnd_c",
+  "Sound\\Dota\\furion\\kill_1.mp3": "sounds/vo/furion/furi_kill_01.vsnd_c",
+  "Sound\\Dota\\furion\\kill_2.mp3": "sounds/vo/furion/furi_kill_02.vsnd_c",
+  "Sound\\Dota\\furion\\kill_3.mp3": "sounds/vo/furion/furi_kill_03.vsnd_c",
+  "Sound\\Dota\\furion\\kill_4.mp3": "sounds/vo/furion/furi_kill_04.vsnd_c",
+  "Sound\\Dota\\furion\\laugh_1.mp3": "sounds/vo/furion/furi_laugh_01.vsnd_c",
+  "Sound\\Dota\\furion\\laugh_2.mp3": "sounds/vo/furion/furi_laugh_03.vsnd_c",
+  "Sound\\Dota\\furion\\laugh_3.mp3": "sounds/vo/furion/furi_laugh_04.vsnd_c",
+  "Sound\\Dota\\furion\\laugh_4.mp3": "sounds/vo/furion/furi_laugh_05.vsnd_c",
+  "Sound\\Dota\\furion\\levelup_1.mp3": "sounds/vo/furion/furi_level_03.vsnd_c",
+  "Sound\\Dota\\furion\\levelup_2.mp3": "sounds/vo/furion/furi_level_04.vsnd_c",
+  "Sound\\Dota\\furion\\levelup_3.mp3": "sounds/vo/furion/furi_level_05.vsnd_c",
+  "Sound\\Dota\\furion\\levelup_4.mp3": "sounds/vo/furion/furi_level_07.vsnd_c",
+  "Sound\\Dota\\furion\\move_1.mp3": "sounds/vo/furion/furi_move_01.vsnd_c",
+  "Sound\\Dota\\furion\\move_2.mp3": "sounds/vo/furion/furi_move_02.vsnd_c",
+  "Sound\\Dota\\furion\\move_3.mp3": "sounds/vo/furion/furi_move_03.vsnd_c",
+  "Sound\\Dota\\furion\\move_4.mp3": "sounds/vo/furion/furi_move_04.vsnd_c",
+  "Sound\\Dota\\furion\\move_5.mp3": "sounds/vo/furion/furi_move_05.vsnd_c",
+  "Sound\\Dota\\furion\\move_6.mp3": "sounds/vo/furion/furi_move_06.vsnd_c",
+  "Sound\\Dota\\furion\\move_7.mp3": "sounds/vo/furion/furi_move_07.vsnd_c",
+  "Sound\\Dota\\furion\\move_8.mp3": "sounds/vo/furion/furi_move_08.vsnd_c",
+  "Sound\\Dota\\furion\\spawn_1.mp3": "sounds/vo/furion/furi_spawn_01.vsnd_c",
+  "Sound\\Dota\\furion\\spawn_2.mp3": "sounds/vo/furion/furi_spawn_02.vsnd_c",
+  "Sound\\Dota\\furion\\spawn_3.mp3": "sounds/vo/furion/furi_spawn_03.vsnd_c",
+  "Sound\\Dota\\meepo\\attack_1.mp3": "sounds/vo/meepo/meepo_attack_01.vsnd_c",
+  "Sound\\Dota\\meepo\\attack_2.mp3": "sounds/vo/meepo/meepo_attack_02.vsnd_c",
+  "Sound\\Dota\\meepo\\attack_3.mp3": "sounds/vo/meepo/meepo_attack_03.vsnd_c",
+  "Sound\\Dota\\meepo\\attack_4.mp3": "sounds/vo/meepo/meepo_attack_04.vsnd_c",
+  "Sound\\Dota\\meepo\\attack_5.mp3": "sounds/vo/meepo/meepo_attack_05.vsnd_c",
+  "Sound\\Dota\\meepo\\attack_6.mp3": "sounds/vo/meepo/meepo_attack_06.vsnd_c",
+  "Sound\\Dota\\meepo\\attack_7.mp3": "sounds/vo/meepo/meepo_attack_07.vsnd_c",
+  "Sound\\Dota\\meepo\\attack_8.mp3": "sounds/vo/meepo/meepo_attack_08.vsnd_c",
+  "Sound\\Dota\\meepo\\cast_meepo_divided_we_stand_1.mp3": "sounds/vo/meepo/meepo_divided_01.vsnd_c",
+  "Sound\\Dota\\meepo\\cast_meepo_divided_we_stand_2.mp3": "sounds/vo/meepo/meepo_divided_02.vsnd_c",
+  "Sound\\Dota\\meepo\\cast_meepo_divided_we_stand_3.mp3": "sounds/vo/meepo/meepo_divided_03.vsnd_c",
+  "Sound\\Dota\\meepo\\cast_meepo_earthbind_1.mp3": "sounds/vo/meepo/meepo_earthbind_01.vsnd_c",
+  "Sound\\Dota\\meepo\\cast_meepo_earthbind_2.mp3": "sounds/vo/meepo/meepo_earthbind_02.vsnd_c",
+  "Sound\\Dota\\meepo\\cast_meepo_earthbind_3.mp3": "sounds/vo/meepo/meepo_earthbind_03.vsnd_c",
+  "Sound\\Dota\\meepo\\cast_meepo_poof_1.mp3": "sounds/vo/meepo/meepo_poof_01.vsnd_c",
+  "Sound\\Dota\\meepo\\cast_meepo_poof_2.mp3": "sounds/vo/meepo/meepo_poof_02.vsnd_c",
+  "Sound\\Dota\\meepo\\cast_meepo_poof_3.mp3": "sounds/vo/meepo/meepo_poof_03.vsnd_c",
+  "Sound\\Dota\\meepo\\death_1.mp3": "sounds/vo/meepo/meepo_death_01.vsnd_c",
+  "Sound\\Dota\\meepo\\death_2.mp3": "sounds/vo/meepo/meepo_death_02.vsnd_c",
+  "Sound\\Dota\\meepo\\death_3.mp3": "sounds/vo/meepo/meepo_death_03.vsnd_c",
+  "Sound\\Dota\\meepo\\death_4.mp3": "sounds/vo/meepo/meepo_death_04.vsnd_c",
+  "Sound\\Dota\\meepo\\kill_1.mp3": "sounds/vo/meepo/meepo_kill_01.vsnd_c",
+  "Sound\\Dota\\meepo\\kill_2.mp3": "sounds/vo/meepo/meepo_kill_02.vsnd_c",
+  "Sound\\Dota\\meepo\\kill_3.mp3": "sounds/vo/meepo/meepo_kill_03.vsnd_c",
+  "Sound\\Dota\\meepo\\kill_4.mp3": "sounds/vo/meepo/meepo_kill_04.vsnd_c",
+  "Sound\\Dota\\meepo\\laugh_1.mp3": "sounds/vo/meepo/meepo_laugh_01.vsnd_c",
+  "Sound\\Dota\\meepo\\laugh_2.mp3": "sounds/vo/meepo/meepo_laugh_02.vsnd_c",
+  "Sound\\Dota\\meepo\\laugh_3.mp3": "sounds/vo/meepo/meepo_laugh_03.vsnd_c",
+  "Sound\\Dota\\meepo\\laugh_4.mp3": "sounds/vo/meepo/meepo_laugh_04.vsnd_c",
+  "Sound\\Dota\\meepo\\levelup_1.mp3": "sounds/vo/meepo/meepo_levelup_01.vsnd_c",
+  "Sound\\Dota\\meepo\\levelup_2.mp3": "sounds/vo/meepo/meepo_levelup_02.vsnd_c",
+  "Sound\\Dota\\meepo\\levelup_3.mp3": "sounds/vo/meepo/meepo_levelup_03.vsnd_c",
+  "Sound\\Dota\\meepo\\levelup_4.mp3": "sounds/vo/meepo/meepo_levelup_04.vsnd_c",
+  "Sound\\Dota\\meepo\\move_1.mp3": "sounds/vo/meepo/meepo_move_01.vsnd_c",
+  "Sound\\Dota\\meepo\\move_2.mp3": "sounds/vo/meepo/meepo_move_02.vsnd_c",
+  "Sound\\Dota\\meepo\\move_3.mp3": "sounds/vo/meepo/meepo_move_03.vsnd_c",
+  "Sound\\Dota\\meepo\\move_4.mp3": "sounds/vo/meepo/meepo_move_04.vsnd_c",
+  "Sound\\Dota\\meepo\\move_5.mp3": "sounds/vo/meepo/meepo_move_05.vsnd_c",
+  "Sound\\Dota\\meepo\\move_6.mp3": "sounds/vo/meepo/meepo_move_06.vsnd_c",
+  "Sound\\Dota\\meepo\\move_7.mp3": "sounds/vo/meepo/meepo_move_07.vsnd_c",
+  "Sound\\Dota\\meepo\\move_8.mp3": "sounds/vo/meepo/meepo_move_08.vsnd_c",
+  "Sound\\Dota\\meepo\\spawn_1.mp3": "sounds/vo/meepo/meepo_spawn_01.vsnd_c",
+  "Sound\\Dota\\meepo\\spawn_2.mp3": "sounds/vo/meepo/meepo_spawn_02.vsnd_c",
+  "Sound\\Dota\\meepo\\spawn_3.mp3": "sounds/vo/meepo/meepo_spawn_03.vsnd_c",
+  "Sound\\Dota\\meepo\\spawn_4.mp3": "sounds/vo/meepo/meepo_spawn_04.vsnd_c",
+  "Sound\\Dota\\morphling\\attack_1.mp3": "sounds/vo/morphling/mrph_attack_01.vsnd_c",
+  "Sound\\Dota\\morphling\\attack_2.mp3": "sounds/vo/morphling/mrph_attack_02.vsnd_c",
+  "Sound\\Dota\\morphling\\attack_3.mp3": "sounds/vo/morphling/mrph_attack_02a.vsnd_c",
+  "Sound\\Dota\\morphling\\attack_4.mp3": "sounds/vo/morphling/mrph_attack_03.vsnd_c",
+  "Sound\\Dota\\morphling\\attack_5.mp3": "sounds/vo/morphling/mrph_attack_03a.vsnd_c",
+  "Sound\\Dota\\morphling\\attack_6.mp3": "sounds/vo/morphling/mrph_attack_03b.vsnd_c",
+  "Sound\\Dota\\morphling\\attack_7.mp3": "sounds/vo/morphling/mrph_attack_06.vsnd_c",
+  "Sound\\Dota\\morphling\\attack_8.mp3": "sounds/vo/morphling/mrph_attack_07.vsnd_c",
+  "Sound\\Dota\\morphling\\cast_morphling_morph_replicate_1.mp3": "sounds/vo/morphling/mrph_ability_replicate_02.vsnd_c",
+  "Sound\\Dota\\morphling\\cast_morphling_replicate_1.mp3": "sounds/vo/morphling/mrph_ability_replicate_01.vsnd_c",
+  "Sound\\Dota\\morphling\\cast_morphling_replicate_2.mp3": "sounds/vo/morphling/mrph_ability_replicate_03.vsnd_c",
+  "Sound\\Dota\\morphling\\death_1.mp3": "sounds/vo/morphling/mrph_death_01.vsnd_c",
+  "Sound\\Dota\\morphling\\death_2.mp3": "sounds/vo/morphling/mrph_death_02.vsnd_c",
+  "Sound\\Dota\\morphling\\death_3.mp3": "sounds/vo/morphling/mrph_death_03.vsnd_c",
+  "Sound\\Dota\\morphling\\death_4.mp3": "sounds/vo/morphling/mrph_death_04.vsnd_c",
+  "Sound\\Dota\\morphling\\kill_1.mp3": "sounds/vo/morphling/mrph_kill_01.vsnd_c",
+  "Sound\\Dota\\morphling\\kill_2.mp3": "sounds/vo/morphling/mrph_kill_02.vsnd_c",
+  "Sound\\Dota\\morphling\\kill_3.mp3": "sounds/vo/morphling/mrph_kill_04.vsnd_c",
+  "Sound\\Dota\\morphling\\kill_4.mp3": "sounds/vo/morphling/mrph_kill_05.vsnd_c",
+  "Sound\\Dota\\morphling\\laugh_1.mp3": "sounds/vo/morphling/mrph_laugh_01.vsnd_c",
+  "Sound\\Dota\\morphling\\laugh_2.mp3": "sounds/vo/morphling/mrph_laugh_02.vsnd_c",
+  "Sound\\Dota\\morphling\\laugh_3.mp3": "sounds/vo/morphling/mrph_laugh_03.vsnd_c",
+  "Sound\\Dota\\morphling\\laugh_4.mp3": "sounds/vo/morphling/mrph_laugh_04.vsnd_c",
+  "Sound\\Dota\\morphling\\levelup_1.mp3": "sounds/vo/morphling/mrph_level_01.vsnd_c",
+  "Sound\\Dota\\morphling\\levelup_2.mp3": "sounds/vo/morphling/mrph_level_02.vsnd_c",
+  "Sound\\Dota\\morphling\\levelup_3.mp3": "sounds/vo/morphling/mrph_level_02a.vsnd_c",
+  "Sound\\Dota\\morphling\\levelup_4.mp3": "sounds/vo/morphling/mrph_level_03.vsnd_c",
+  "Sound\\Dota\\morphling\\move_1.mp3": "sounds/vo/morphling/mrph_move_01.vsnd_c",
+  "Sound\\Dota\\morphling\\move_2.mp3": "sounds/vo/morphling/mrph_move_01a.vsnd_c",
+  "Sound\\Dota\\morphling\\move_3.mp3": "sounds/vo/morphling/mrph_move_01b.vsnd_c",
+  "Sound\\Dota\\morphling\\move_4.mp3": "sounds/vo/morphling/mrph_move_01c.vsnd_c",
+  "Sound\\Dota\\morphling\\move_5.mp3": "sounds/vo/morphling/mrph_move_01d.vsnd_c",
+  "Sound\\Dota\\morphling\\move_6.mp3": "sounds/vo/morphling/mrph_move_04.vsnd_c",
+  "Sound\\Dota\\morphling\\move_7.mp3": "sounds/vo/morphling/mrph_move_05.vsnd_c",
+  "Sound\\Dota\\morphling\\move_8.mp3": "sounds/vo/morphling/mrph_move_06.vsnd_c",
+  "Sound\\Dota\\morphling\\spawn_1.mp3": "sounds/vo/morphling/mrph_spawn_01.vsnd_c",
+  "Sound\\Dota\\morphling\\spawn_2.mp3": "sounds/vo/morphling/mrph_spawn_04.vsnd_c",
+  "Sound\\Dota\\morphling\\spawn_3.mp3": "sounds/vo/morphling/mrph_spawn_05.vsnd_c",
+  "Sound\\Dota\\morphling\\spawn_4.mp3": "sounds/vo/morphling/mrph_spawn_06.vsnd_c",
+  "Sound\\Dota\\nevermore\\attack_1.mp3": "sounds/vo/nevermore/nev_attack_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\attack_2.mp3": "sounds/vo/nevermore/nev_attack_02.vsnd_c",
+  "Sound\\Dota\\nevermore\\attack_3.mp3": "sounds/vo/nevermore/nev_attack_03.vsnd_c",
+  "Sound\\Dota\\nevermore\\attack_4.mp3": "sounds/vo/nevermore/nev_attack_04.vsnd_c",
+  "Sound\\Dota\\nevermore\\attack_5.mp3": "sounds/vo/nevermore/nev_attack_05.vsnd_c",
+  "Sound\\Dota\\nevermore\\attack_6.mp3": "sounds/vo/nevermore/nev_attack_06.vsnd_c",
+  "Sound\\Dota\\nevermore\\attack_7.mp3": "sounds/vo/nevermore/nev_attack_07.vsnd_c",
+  "Sound\\Dota\\nevermore\\attack_8.mp3": "sounds/vo/nevermore/nev_attack_08.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_dark_lord_1.mp3": "sounds/vo/nevermore/nev_ability_presence_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_dark_lord_2.mp3": "sounds/vo/nevermore/nev_ability_presence_02.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_dark_lord_3.mp3": "sounds/vo/nevermore/nev_ability_presence_03.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_necromastery_1.mp3": "sounds/vo/nevermore/nev_ability_mastery_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_requiem_1.mp3": "sounds/vo/nevermore/nev_ability_requiem_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_requiem_2.mp3": "sounds/vo/nevermore/nev_ability_requiem_02.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_requiem_3.mp3": "sounds/vo/nevermore/nev_ability_requiem_03.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze1_1.mp3": "sounds/vo/nevermore/nev_ability_shadow_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze1_2.mp3": "sounds/vo/nevermore/nev_ability_shadow_04.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze1_3.mp3": "sounds/vo/nevermore/nev_ability_shadow_07.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze2_1.mp3": "sounds/vo/nevermore/nev_ability_shadow_02.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze2_2.mp3": "sounds/vo/nevermore/nev_ability_shadow_05.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze2_3.mp3": "sounds/vo/nevermore/nev_ability_shadow_08.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze3_1.mp3": "sounds/vo/nevermore/nev_ability_shadow_03.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze3_2.mp3": "sounds/vo/nevermore/nev_ability_shadow_06.vsnd_c",
+  "Sound\\Dota\\nevermore\\cast_nevermore_shadowraze3_3.mp3": "sounds/vo/nevermore/nev_ability_shadow_09.vsnd_c",
+  "Sound\\Dota\\nevermore\\death_1.mp3": "sounds/vo/nevermore/nev_death_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\death_2.mp3": "sounds/vo/nevermore/nev_death_03.vsnd_c",
+  "Sound\\Dota\\nevermore\\death_3.mp3": "sounds/vo/nevermore/nev_death_04.vsnd_c",
+  "Sound\\Dota\\nevermore\\death_4.mp3": "sounds/vo/nevermore/nev_death_05.vsnd_c",
+  "Sound\\Dota\\nevermore\\kill_1.mp3": "sounds/vo/nevermore/nev_kill_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\kill_2.mp3": "sounds/vo/nevermore/nev_kill_02.vsnd_c",
+  "Sound\\Dota\\nevermore\\kill_3.mp3": "sounds/vo/nevermore/nev_kill_03.vsnd_c",
+  "Sound\\Dota\\nevermore\\kill_4.mp3": "sounds/vo/nevermore/nev_kill_04.vsnd_c",
+  "Sound\\Dota\\nevermore\\laugh_1.mp3": "sounds/vo/nevermore/nev_laugh_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\laugh_2.mp3": "sounds/vo/nevermore/nev_laugh_02.vsnd_c",
+  "Sound\\Dota\\nevermore\\laugh_3.mp3": "sounds/vo/nevermore/nev_laugh_03.vsnd_c",
+  "Sound\\Dota\\nevermore\\laugh_4.mp3": "sounds/vo/nevermore/nev_laugh_04.vsnd_c",
+  "Sound\\Dota\\nevermore\\levelup_1.mp3": "sounds/vo/nevermore/nev_level_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\levelup_2.mp3": "sounds/vo/nevermore/nev_level_02.vsnd_c",
+  "Sound\\Dota\\nevermore\\levelup_3.mp3": "sounds/vo/nevermore/nev_level_03.vsnd_c",
+  "Sound\\Dota\\nevermore\\levelup_4.mp3": "sounds/vo/nevermore/nev_level_04.vsnd_c",
+  "Sound\\Dota\\nevermore\\move_1.mp3": "sounds/vo/nevermore/nev_move_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\move_2.mp3": "sounds/vo/nevermore/nev_move_02.vsnd_c",
+  "Sound\\Dota\\nevermore\\move_3.mp3": "sounds/vo/nevermore/nev_move_03.vsnd_c",
+  "Sound\\Dota\\nevermore\\move_4.mp3": "sounds/vo/nevermore/nev_move_04.vsnd_c",
+  "Sound\\Dota\\nevermore\\move_5.mp3": "sounds/vo/nevermore/nev_move_05.vsnd_c",
+  "Sound\\Dota\\nevermore\\move_6.mp3": "sounds/vo/nevermore/nev_move_06.vsnd_c",
+  "Sound\\Dota\\nevermore\\move_7.mp3": "sounds/vo/nevermore/nev_move_07.vsnd_c",
+  "Sound\\Dota\\nevermore\\move_8.mp3": "sounds/vo/nevermore/nev_move_09.vsnd_c",
+  "Sound\\Dota\\nevermore\\spawn_1.mp3": "sounds/vo/nevermore/nev_spawn_01.vsnd_c",
+  "Sound\\Dota\\nevermore\\spawn_2.mp3": "sounds/vo/nevermore/nev_spawn_02.vsnd_c",
+  "Sound\\Dota\\nevermore\\spawn_3.mp3": "sounds/vo/nevermore/nev_spawn_03.vsnd_c",
+  "Sound\\Dota\\nevermore\\spawn_4.mp3": "sounds/vo/nevermore/nev_spawn_04.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\attack_1.mp3": "sounds/vo/ogre_magi/ogmag_attack_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\attack_2.mp3": "sounds/vo/ogre_magi/ogmag_attack_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\attack_3.mp3": "sounds/vo/ogre_magi/ogmag_attack_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\attack_4.mp3": "sounds/vo/ogre_magi/ogmag_attack_04.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\attack_5.mp3": "sounds/vo/ogre_magi/ogmag_attack_05.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\attack_6.mp3": "sounds/vo/ogre_magi/ogmag_attack_06.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\attack_7.mp3": "sounds/vo/ogre_magi/ogmag_attack_07.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\attack_8.mp3": "sounds/vo/ogre_magi/ogmag_attack_08.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_bloodlust_1.mp3": "sounds/vo/ogre_magi/ogmag_ability_bloodlust_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_bloodlust_2.mp3": "sounds/vo/ogre_magi/ogmag_ability_bloodlust_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_bloodlust_3.mp3": "sounds/vo/ogre_magi/ogmag_ability_bloodlust_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_fireblast_1.mp3": "sounds/vo/ogre_magi/ogmag_ability_firebl_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_fireblast_2.mp3": "sounds/vo/ogre_magi/ogmag_ability_firebl_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_fireblast_3.mp3": "sounds/vo/ogre_magi/ogmag_ability_firebl_05.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_ignite_1.mp3": "sounds/vo/ogre_magi/ogmag_ability_ignite_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_ignite_2.mp3": "sounds/vo/ogre_magi/ogmag_ability_ignite_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_ignite_3.mp3": "sounds/vo/ogre_magi/ogmag_ability_ignite_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_multicast_1.mp3": "sounds/vo/ogre_magi/ogmag_ability_multi_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_multicast_2.mp3": "sounds/vo/ogre_magi/ogmag_ability_multi_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_multicast_3.mp3": "sounds/vo/ogre_magi/ogmag_ability_multi_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_unrefined_fireblast_1.mp3": "sounds/vo/ogre_magi/ogmag_ability_firebl_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_unrefined_fireblast_2.mp3": "sounds/vo/ogre_magi/ogmag_ability_firebl_04.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\cast_ogre_magi_unrefined_fireblast_3.mp3": "sounds/vo/ogre_magi/ogmag_ability_firebl_06.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\death_1.mp3": "sounds/vo/ogre_magi/ogmag_death_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\death_2.mp3": "sounds/vo/ogre_magi/ogmag_death_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\death_3.mp3": "sounds/vo/ogre_magi/ogmag_death_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\death_4.mp3": "sounds/vo/ogre_magi/ogmag_death_04.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\kill_1.mp3": "sounds/vo/ogre_magi/ogmag_kill_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\kill_2.mp3": "sounds/vo/ogre_magi/ogmag_kill_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\kill_3.mp3": "sounds/vo/ogre_magi/ogmag_kill_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\kill_4.mp3": "sounds/vo/ogre_magi/ogmag_kill_04.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\laugh_1.mp3": "sounds/vo/ogre_magi/ogmag_laugh_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\laugh_2.mp3": "sounds/vo/ogre_magi/ogmag_laugh_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\laugh_3.mp3": "sounds/vo/ogre_magi/ogmag_laugh_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\laugh_4.mp3": "sounds/vo/ogre_magi/ogmag_laugh_04.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\levelup_1.mp3": "sounds/vo/ogre_magi/ogmag_level_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\levelup_2.mp3": "sounds/vo/ogre_magi/ogmag_level_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\levelup_3.mp3": "sounds/vo/ogre_magi/ogmag_level_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\levelup_4.mp3": "sounds/vo/ogre_magi/ogmag_level_04.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\move_1.mp3": "sounds/vo/ogre_magi/ogmag_move_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\move_2.mp3": "sounds/vo/ogre_magi/ogmag_move_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\move_3.mp3": "sounds/vo/ogre_magi/ogmag_move_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\move_4.mp3": "sounds/vo/ogre_magi/ogmag_move_04.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\move_5.mp3": "sounds/vo/ogre_magi/ogmag_move_05.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\move_6.mp3": "sounds/vo/ogre_magi/ogmag_move_06.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\move_7.mp3": "sounds/vo/ogre_magi/ogmag_move_07.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\move_8.mp3": "sounds/vo/ogre_magi/ogmag_move_08.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\spawn_1.mp3": "sounds/vo/ogre_magi/ogmag_spawn_01.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\spawn_2.mp3": "sounds/vo/ogre_magi/ogmag_spawn_02.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\spawn_3.mp3": "sounds/vo/ogre_magi/ogmag_spawn_03.vsnd_c",
+  "Sound\\Dota\\ogre_magi\\spawn_4.mp3": "sounds/vo/ogre_magi/ogmag_spawn_04.vsnd_c",
+  "Sound\\Dota\\pudge\\attack_1.mp3": "sounds/vo/pudge/pud_attack_01.vsnd_c",
+  "Sound\\Dota\\pudge\\attack_2.mp3": "sounds/vo/pudge/pud_attack_02.vsnd_c",
+  "Sound\\Dota\\pudge\\attack_3.mp3": "sounds/vo/pudge/pud_attack_03.vsnd_c",
+  "Sound\\Dota\\pudge\\attack_4.mp3": "sounds/vo/pudge/pud_attack_04.vsnd_c",
+  "Sound\\Dota\\pudge\\attack_5.mp3": "sounds/vo/pudge/pud_attack_05.vsnd_c",
+  "Sound\\Dota\\pudge\\attack_6.mp3": "sounds/vo/pudge/pud_attack_06.vsnd_c",
+  "Sound\\Dota\\pudge\\attack_7.mp3": "sounds/vo/pudge/pud_attack_08.vsnd_c",
+  "Sound\\Dota\\pudge\\attack_8.mp3": "sounds/vo/pudge/pud_attack_09.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_dismember_1.mp3": "sounds/vo/pudge/pud_ability_devour_01.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_dismember_2.mp3": "sounds/vo/pudge/pud_ability_devour_02.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_dismember_3.mp3": "sounds/vo/pudge/pud_ability_devour_03.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_flesh_heap_1.mp3": "sounds/vo/pudge/pud_ability_heap_01.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_flesh_heap_2.mp3": "sounds/vo/pudge/pud_ability_heap_02.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_meat_hook_1.mp3": "sounds/vo/pudge/pud_ability_hook_01.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_meat_hook_2.mp3": "sounds/vo/pudge/pud_ability_hook_02.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_meat_hook_3.mp3": "sounds/vo/pudge/pud_ability_hook_03.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_rot_1.mp3": "sounds/vo/pudge/pud_ability_rot_02.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_rot_2.mp3": "sounds/vo/pudge/pud_ability_rot_07.vsnd_c",
+  "Sound\\Dota\\pudge\\cast_pudge_rot_3.mp3": "sounds/vo/pudge/pud_ability_rot_08.vsnd_c",
+  "Sound\\Dota\\pudge\\death_1.mp3": "sounds/vo/pudge/pud_death_01.vsnd_c",
+  "Sound\\Dota\\pudge\\death_2.mp3": "sounds/vo/pudge/pud_death_02.vsnd_c",
+  "Sound\\Dota\\pudge\\death_3.mp3": "sounds/vo/pudge/pud_death_03.vsnd_c",
+  "Sound\\Dota\\pudge\\death_4.mp3": "sounds/vo/pudge/pud_death_04.vsnd_c",
+  "Sound\\Dota\\pudge\\kill_1.mp3": "sounds/vo/pudge/pud_kill_01.vsnd_c",
+  "Sound\\Dota\\pudge\\kill_2.mp3": "sounds/vo/pudge/pud_kill_02.vsnd_c",
+  "Sound\\Dota\\pudge\\kill_3.mp3": "sounds/vo/pudge/pud_kill_03.vsnd_c",
+  "Sound\\Dota\\pudge\\kill_4.mp3": "sounds/vo/pudge/pud_kill_04.vsnd_c",
+  "Sound\\Dota\\pudge\\laugh_1.mp3": "sounds/vo/pudge/pud_laugh_01.vsnd_c",
+  "Sound\\Dota\\pudge\\laugh_2.mp3": "sounds/vo/pudge/pud_laugh_02.vsnd_c",
+  "Sound\\Dota\\pudge\\laugh_3.mp3": "sounds/vo/pudge/pud_laugh_03.vsnd_c",
+  "Sound\\Dota\\pudge\\laugh_4.mp3": "sounds/vo/pudge/pud_laugh_04.vsnd_c",
+  "Sound\\Dota\\pudge\\levelup_1.mp3": "sounds/vo/pudge/pud_level_01.vsnd_c",
+  "Sound\\Dota\\pudge\\levelup_2.mp3": "sounds/vo/pudge/pud_level_02.vsnd_c",
+  "Sound\\Dota\\pudge\\levelup_3.mp3": "sounds/vo/pudge/pud_level_03.vsnd_c",
+  "Sound\\Dota\\pudge\\levelup_4.mp3": "sounds/vo/pudge/pud_level_04.vsnd_c",
+  "Sound\\Dota\\pudge\\move_1.mp3": "sounds/vo/pudge/pud_move_01.vsnd_c",
+  "Sound\\Dota\\pudge\\move_2.mp3": "sounds/vo/pudge/pud_move_03.vsnd_c",
+  "Sound\\Dota\\pudge\\move_3.mp3": "sounds/vo/pudge/pud_move_04.vsnd_c",
+  "Sound\\Dota\\pudge\\move_4.mp3": "sounds/vo/pudge/pud_move_05.vsnd_c",
+  "Sound\\Dota\\pudge\\move_5.mp3": "sounds/vo/pudge/pud_move_06.vsnd_c",
+  "Sound\\Dota\\pudge\\move_6.mp3": "sounds/vo/pudge/pud_move_07.vsnd_c",
+  "Sound\\Dota\\pudge\\move_7.mp3": "sounds/vo/pudge/pud_move_09.vsnd_c",
+  "Sound\\Dota\\pudge\\move_8.mp3": "sounds/vo/pudge/pud_move_10.vsnd_c",
+  "Sound\\Dota\\pudge\\spawn_1.mp3": "sounds/vo/pudge/pud_spawn_01.vsnd_c",
+  "Sound\\Dota\\pudge\\spawn_2.mp3": "sounds/vo/pudge/pud_spawn_02.vsnd_c",
+  "Sound\\Dota\\pudge\\spawn_3.mp3": "sounds/vo/pudge/pud_spawn_03.vsnd_c",
+  "Sound\\Dota\\pudge\\spawn_4.mp3": "sounds/vo/pudge/pud_spawn_04.vsnd_c",
+  "Sound\\Dota\\rubick\\attack_1.mp3": "sounds/vo/rubick/rubick_attack_01.vsnd_c",
+  "Sound\\Dota\\rubick\\attack_2.mp3": "sounds/vo/rubick/rubick_attack_02.vsnd_c",
+  "Sound\\Dota\\rubick\\attack_3.mp3": "sounds/vo/rubick/rubick_attack_03.vsnd_c",
+  "Sound\\Dota\\rubick\\attack_4.mp3": "sounds/vo/rubick/rubick_attack_04.vsnd_c",
+  "Sound\\Dota\\rubick\\attack_5.mp3": "sounds/vo/rubick/rubick_attack_05.vsnd_c",
+  "Sound\\Dota\\rubick\\attack_6.mp3": "sounds/vo/rubick/rubick_attack_06.vsnd_c",
+  "Sound\\Dota\\rubick\\attack_7.mp3": "sounds/vo/rubick/rubick_attack_07.vsnd_c",
+  "Sound\\Dota\\rubick\\attack_8.mp3": "sounds/vo/rubick/rubick_attack_08.vsnd_c",
+  "Sound\\Dota\\rubick\\cast_rubick_fade_bolt_1.mp3": "sounds/vo/rubick/rubick_fadebolt_01.vsnd_c",
+  "Sound\\Dota\\rubick\\cast_rubick_fade_bolt_2.mp3": "sounds/vo/rubick/rubick_fadebolt_02.vsnd_c",
+  "Sound\\Dota\\rubick\\cast_rubick_fade_bolt_3.mp3": "sounds/vo/rubick/rubick_fadebolt_03.vsnd_c",
+  "Sound\\Dota\\rubick\\cast_rubick_spell_steal_1.mp3": "sounds/vo/rubick/rubick_spellsteal_01.vsnd_c",
+  "Sound\\Dota\\rubick\\cast_rubick_spell_steal_2.mp3": "sounds/vo/rubick/rubick_spellsteal_02.vsnd_c",
+  "Sound\\Dota\\rubick\\cast_rubick_spell_steal_3.mp3": "sounds/vo/rubick/rubick_spellsteal_03.vsnd_c",
+  "Sound\\Dota\\rubick\\cast_rubick_telekinesis_1.mp3": "sounds/vo/rubick/rubick_telekinesis_down_01.vsnd_c",
+  "Sound\\Dota\\rubick\\cast_rubick_telekinesis_2.mp3": "sounds/vo/rubick/rubick_telekinesis_down_02.vsnd_c",
+  "Sound\\Dota\\rubick\\cast_rubick_telekinesis_3.mp3": "sounds/vo/rubick/rubick_telekinesis_down_03.vsnd_c",
+  "Sound\\Dota\\rubick\\death_1.mp3": "sounds/vo/rubick/rubick_death_01.vsnd_c",
+  "Sound\\Dota\\rubick\\death_2.mp3": "sounds/vo/rubick/rubick_death_02.vsnd_c",
+  "Sound\\Dota\\rubick\\death_3.mp3": "sounds/vo/rubick/rubick_death_03.vsnd_c",
+  "Sound\\Dota\\rubick\\death_4.mp3": "sounds/vo/rubick/rubick_death_04.vsnd_c",
+  "Sound\\Dota\\rubick\\kill_1.mp3": "sounds/vo/rubick/rubick_kill_01.vsnd_c",
+  "Sound\\Dota\\rubick\\kill_2.mp3": "sounds/vo/rubick/rubick_kill_02.vsnd_c",
+  "Sound\\Dota\\rubick\\kill_3.mp3": "sounds/vo/rubick/rubick_kill_03.vsnd_c",
+  "Sound\\Dota\\rubick\\kill_4.mp3": "sounds/vo/rubick/rubick_kill_04.vsnd_c",
+  "Sound\\Dota\\rubick\\laugh_1.mp3": "sounds/vo/rubick/rubick_laugh_01.vsnd_c",
+  "Sound\\Dota\\rubick\\laugh_2.mp3": "sounds/vo/rubick/rubick_laugh_02.vsnd_c",
+  "Sound\\Dota\\rubick\\laugh_3.mp3": "sounds/vo/rubick/rubick_laugh_03.vsnd_c",
+  "Sound\\Dota\\rubick\\laugh_4.mp3": "sounds/vo/rubick/rubick_laugh_04.vsnd_c",
+  "Sound\\Dota\\rubick\\levelup_1.mp3": "sounds/vo/rubick/rubick_levelup_01.vsnd_c",
+  "Sound\\Dota\\rubick\\levelup_2.mp3": "sounds/vo/rubick/rubick_levelup_02.vsnd_c",
+  "Sound\\Dota\\rubick\\levelup_3.mp3": "sounds/vo/rubick/rubick_levelup_03.vsnd_c",
+  "Sound\\Dota\\rubick\\levelup_4.mp3": "sounds/vo/rubick/rubick_levelup_04.vsnd_c",
+  "Sound\\Dota\\rubick\\move_1.mp3": "sounds/vo/rubick/rubick_move_01.vsnd_c",
+  "Sound\\Dota\\rubick\\move_2.mp3": "sounds/vo/rubick/rubick_move_02.vsnd_c",
+  "Sound\\Dota\\rubick\\move_3.mp3": "sounds/vo/rubick/rubick_move_03.vsnd_c",
+  "Sound\\Dota\\rubick\\move_4.mp3": "sounds/vo/rubick/rubick_move_04.vsnd_c",
+  "Sound\\Dota\\rubick\\move_5.mp3": "sounds/vo/rubick/rubick_move_05.vsnd_c",
+  "Sound\\Dota\\rubick\\move_6.mp3": "sounds/vo/rubick/rubick_move_06.vsnd_c",
+  "Sound\\Dota\\rubick\\move_7.mp3": "sounds/vo/rubick/rubick_move_07.vsnd_c",
+  "Sound\\Dota\\rubick\\move_8.mp3": "sounds/vo/rubick/rubick_move_08.vsnd_c",
+  "Sound\\Dota\\rubick\\spawn_1.mp3": "sounds/vo/rubick/rubick_spawn_01.vsnd_c",
+  "Sound\\Dota\\rubick\\spawn_2.mp3": "sounds/vo/rubick/rubick_spawn_02.vsnd_c",
+  "Sound\\Dota\\rubick\\spawn_3.mp3": "sounds/vo/rubick/rubick_spawn_03.vsnd_c",
+  "Sound\\Dota\\rubick\\spawn_4.mp3": "sounds/vo/rubick/rubick_spawn_04.vsnd_c",
+  "Sound\\Dota\\techies\\attack_1.mp3": "sounds/vo/techies/tech_attack_01.vsnd_c",
+  "Sound\\Dota\\techies\\attack_2.mp3": "sounds/vo/techies/tech_attack_02.vsnd_c",
+  "Sound\\Dota\\techies\\attack_3.mp3": "sounds/vo/techies/tech_attack_03.vsnd_c",
+  "Sound\\Dota\\techies\\attack_4.mp3": "sounds/vo/techies/tech_attack_05.vsnd_c",
+  "Sound\\Dota\\techies\\attack_5.mp3": "sounds/vo/techies/tech_attack_06.vsnd_c",
+  "Sound\\Dota\\techies\\attack_6.mp3": "sounds/vo/techies/tech_attack_07.vsnd_c",
+  "Sound\\Dota\\techies\\attack_7.mp3": "sounds/vo/techies/tech_attack_09.vsnd_c",
+  "Sound\\Dota\\techies\\attack_8.mp3": "sounds/vo/techies/tech_attack_12.vsnd_c",
+  "Sound\\Dota\\techies\\cast_techies_focused_detonate_1.mp3": "sounds/vo/techies/tech_focuseddetonate_01.vsnd_c",
+  "Sound\\Dota\\techies\\cast_techies_focused_detonate_2.mp3": "sounds/vo/techies/tech_focuseddetonate_02.vsnd_c",
+  "Sound\\Dota\\techies\\cast_techies_focused_detonate_3.mp3": "sounds/vo/techies/tech_focuseddetonate_04.vsnd_c",
+  "Sound\\Dota\\techies\\cast_techies_land_mines_1.mp3": "sounds/vo/techies/tech_setmine_01.vsnd_c",
+  "Sound\\Dota\\techies\\cast_techies_land_mines_2.mp3": "sounds/vo/techies/tech_setmine_02.vsnd_c",
+  "Sound\\Dota\\techies\\cast_techies_land_mines_3.mp3": "sounds/vo/techies/tech_setmine_04.vsnd_c",
+  "Sound\\Dota\\techies\\cast_techies_suicide_1.mp3": "sounds/vo/techies/tech_suicidesquad_01.vsnd_c",
+  "Sound\\Dota\\techies\\cast_techies_suicide_2.mp3": "sounds/vo/techies/tech_suicidesquad_02.vsnd_c",
+  "Sound\\Dota\\techies\\cast_techies_suicide_3.mp3": "sounds/vo/techies/tech_suicidesquad_03.vsnd_c",
+  "Sound\\Dota\\techies\\death_1.mp3": "sounds/vo/techies/tech_death_01.vsnd_c",
+  "Sound\\Dota\\techies\\death_2.mp3": "sounds/vo/techies/tech_death_02.vsnd_c",
+  "Sound\\Dota\\techies\\death_3.mp3": "sounds/vo/techies/tech_death_04.vsnd_c",
+  "Sound\\Dota\\techies\\death_4.mp3": "sounds/vo/techies/tech_death_05.vsnd_c",
+  "Sound\\Dota\\techies\\kill_1.mp3": "sounds/vo/techies/tech_kill_01.vsnd_c",
+  "Sound\\Dota\\techies\\kill_2.mp3": "sounds/vo/techies/tech_kill_02.vsnd_c",
+  "Sound\\Dota\\techies\\kill_3.mp3": "sounds/vo/techies/tech_kill_03.vsnd_c",
+  "Sound\\Dota\\techies\\kill_4.mp3": "sounds/vo/techies/tech_kill_04.vsnd_c",
+  "Sound\\Dota\\techies\\levelup_1.mp3": "sounds/vo/techies/tech_levelup_01.vsnd_c",
+  "Sound\\Dota\\techies\\levelup_2.mp3": "sounds/vo/techies/tech_levelup_02.vsnd_c",
+  "Sound\\Dota\\techies\\levelup_3.mp3": "sounds/vo/techies/tech_levelup_03.vsnd_c",
+  "Sound\\Dota\\techies\\levelup_4.mp3": "sounds/vo/techies/tech_levelup_04.vsnd_c",
+  "Sound\\Dota\\techies\\move_1.mp3": "sounds/vo/techies/tech_move_01.vsnd_c",
+  "Sound\\Dota\\techies\\move_2.mp3": "sounds/vo/techies/tech_move_02.vsnd_c",
+  "Sound\\Dota\\techies\\move_3.mp3": "sounds/vo/techies/tech_move_03.vsnd_c",
+  "Sound\\Dota\\techies\\move_4.mp3": "sounds/vo/techies/tech_move_04.vsnd_c",
+  "Sound\\Dota\\techies\\move_5.mp3": "sounds/vo/techies/tech_move_06.vsnd_c",
+  "Sound\\Dota\\techies\\move_6.mp3": "sounds/vo/techies/tech_move_07.vsnd_c",
+  "Sound\\Dota\\techies\\move_7.mp3": "sounds/vo/techies/tech_move_08.vsnd_c",
+  "Sound\\Dota\\techies\\move_8.mp3": "sounds/vo/techies/tech_move_09.vsnd_c",
+  "Sound\\Dota\\techies\\spawn_1.mp3": "sounds/vo/techies/tech_spawn_01.vsnd_c",
+  "Sound\\Dota\\techies\\spawn_2.mp3": "sounds/vo/techies/tech_spawn_02.vsnd_c",
+  "Sound\\Dota\\techies\\spawn_3.mp3": "sounds/vo/techies/tech_spawn_03.vsnd_c",
+  "Sound\\Dota\\techies\\spawn_4.mp3": "sounds/vo/techies/tech_spawn_04.vsnd_c",
+  "Sound\\Dota\\tinker\\attack_1.mp3": "sounds/vo/tinker/tink_attack_01.vsnd_c",
+  "Sound\\Dota\\tinker\\attack_2.mp3": "sounds/vo/tinker/tink_attack_02.vsnd_c",
+  "Sound\\Dota\\tinker\\attack_3.mp3": "sounds/vo/tinker/tink_attack_03.vsnd_c",
+  "Sound\\Dota\\tinker\\attack_4.mp3": "sounds/vo/tinker/tink_attack_04.vsnd_c",
+  "Sound\\Dota\\tinker\\attack_5.mp3": "sounds/vo/tinker/tink_attack_05.vsnd_c",
+  "Sound\\Dota\\tinker\\attack_6.mp3": "sounds/vo/tinker/tink_attack_06.vsnd_c",
+  "Sound\\Dota\\tinker\\attack_7.mp3": "sounds/vo/tinker/tink_attack_07.vsnd_c",
+  "Sound\\Dota\\tinker\\attack_8.mp3": "sounds/vo/tinker/tink_attack_08.vsnd_c",
+  "Sound\\Dota\\tinker\\cast_tinker_laser_1.mp3": "sounds/vo/tinker/tink_ability_laser_01.vsnd_c",
+  "Sound\\Dota\\tinker\\cast_tinker_laser_2.mp3": "sounds/vo/tinker/tink_ability_laser_02.vsnd_c",
+  "Sound\\Dota\\tinker\\cast_tinker_laser_3.mp3": "sounds/vo/tinker/tink_ability_laser_03.vsnd_c",
+  "Sound\\Dota\\tinker\\cast_tinker_march_of_the_machines_1.mp3": "sounds/vo/tinker/tink_ability_marchofthemachines_01.vsnd_c",
+  "Sound\\Dota\\tinker\\cast_tinker_march_of_the_machines_2.mp3": "sounds/vo/tinker/tink_ability_marchofthemachines_02.vsnd_c",
+  "Sound\\Dota\\tinker\\cast_tinker_march_of_the_machines_3.mp3": "sounds/vo/tinker/tink_ability_marchofthemachines_03.vsnd_c",
+  "Sound\\Dota\\tinker\\cast_tinker_rearm_1.mp3": "sounds/vo/tinker/tink_ability_rearm_01.vsnd_c",
+  "Sound\\Dota\\tinker\\cast_tinker_rearm_2.mp3": "sounds/vo/tinker/tink_ability_rearm_02.vsnd_c",
+  "Sound\\Dota\\tinker\\cast_tinker_rearm_3.mp3": "sounds/vo/tinker/tink_ability_rearm_03.vsnd_c",
+  "Sound\\Dota\\tinker\\death_1.mp3": "sounds/vo/tinker/tink_death_01.vsnd_c",
+  "Sound\\Dota\\tinker\\death_2.mp3": "sounds/vo/tinker/tink_death_02.vsnd_c",
+  "Sound\\Dota\\tinker\\death_3.mp3": "sounds/vo/tinker/tink_death_03.vsnd_c",
+  "Sound\\Dota\\tinker\\death_4.mp3": "sounds/vo/tinker/tink_death_04.vsnd_c",
+  "Sound\\Dota\\tinker\\kill_1.mp3": "sounds/vo/tinker/tink_kill_01.vsnd_c",
+  "Sound\\Dota\\tinker\\kill_2.mp3": "sounds/vo/tinker/tink_kill_02.vsnd_c",
+  "Sound\\Dota\\tinker\\kill_3.mp3": "sounds/vo/tinker/tink_kill_03.vsnd_c",
+  "Sound\\Dota\\tinker\\kill_4.mp3": "sounds/vo/tinker/tink_kill_04.vsnd_c",
+  "Sound\\Dota\\tinker\\laugh_1.mp3": "sounds/vo/tinker/tink_laugh_01.vsnd_c",
+  "Sound\\Dota\\tinker\\laugh_2.mp3": "sounds/vo/tinker/tink_laugh_02.vsnd_c",
+  "Sound\\Dota\\tinker\\laugh_3.mp3": "sounds/vo/tinker/tink_laugh_03.vsnd_c",
+  "Sound\\Dota\\tinker\\laugh_4.mp3": "sounds/vo/tinker/tink_laugh_04.vsnd_c",
+  "Sound\\Dota\\tinker\\levelup_1.mp3": "sounds/vo/tinker/tink_levelup_01.vsnd_c",
+  "Sound\\Dota\\tinker\\levelup_2.mp3": "sounds/vo/tinker/tink_levelup_02.vsnd_c",
+  "Sound\\Dota\\tinker\\levelup_3.mp3": "sounds/vo/tinker/tink_levelup_03.vsnd_c",
+  "Sound\\Dota\\tinker\\levelup_4.mp3": "sounds/vo/tinker/tink_levelup_04.vsnd_c",
+  "Sound\\Dota\\tinker\\move_1.mp3": "sounds/vo/tinker/tink_move_01.vsnd_c",
+  "Sound\\Dota\\tinker\\move_2.mp3": "sounds/vo/tinker/tink_move_02.vsnd_c",
+  "Sound\\Dota\\tinker\\move_3.mp3": "sounds/vo/tinker/tink_move_03.vsnd_c",
+  "Sound\\Dota\\tinker\\move_4.mp3": "sounds/vo/tinker/tink_move_04.vsnd_c",
+  "Sound\\Dota\\tinker\\move_5.mp3": "sounds/vo/tinker/tink_move_05.vsnd_c",
+  "Sound\\Dota\\tinker\\move_6.mp3": "sounds/vo/tinker/tink_move_06.vsnd_c",
+  "Sound\\Dota\\tinker\\move_7.mp3": "sounds/vo/tinker/tink_move_07.vsnd_c",
+  "Sound\\Dota\\tinker\\move_8.mp3": "sounds/vo/tinker/tink_move_08.vsnd_c",
+  "Sound\\Dota\\tinker\\spawn_1.mp3": "sounds/vo/tinker/tink_spawn_01.vsnd_c",
+  "Sound\\Dota\\tinker\\spawn_2.mp3": "sounds/vo/tinker/tink_spawn_02.vsnd_c",
+  "Sound\\Dota\\tinker\\spawn_3.mp3": "sounds/vo/tinker/tink_spawn_03.vsnd_c",
+  "Sound\\Dota\\tinker\\spawn_4.mp3": "sounds/vo/tinker/tink_spawn_04.vsnd_c"
+ },
+ "spares": {
+  "pudge": {
+   "attack": [
+    "sounds/vo/pudge/pud_attack_10.vsnd_c",
+    "sounds/vo/pudge/pud_attack_11.vsnd_c",
+    "sounds/vo/pudge/pud_attack_12.vsnd_c",
+    "sounds/vo/pudge/pud_attack_13.vsnd_c"
+   ],
+   "cast_pudge_dismember": [
+    "sounds/vo/pudge/pud_ability_devour_04.vsnd_c",
+    "sounds/vo/pudge/pud_ability_devour_05.vsnd_c",
+    "sounds/vo/pudge/pud_ability_devour_06.vsnd_c",
+    "sounds/vo/pudge/pud_ability_devour_07.vsnd_c"
+   ],
+   "cast_pudge_meat_hook": [
+    "sounds/vo/pudge/pud_ability_hook_04.vsnd_c",
+    "sounds/vo/pudge/pud_ability_hook_05.vsnd_c",
+    "sounds/vo/pudge/pud_ability_hook_06.vsnd_c",
+    "sounds/vo/pudge/pud_ability_hook_07.vsnd_c"
+   ],
+   "cast_pudge_rot": [
+    "sounds/vo/pudge/pud_ability_rot_09.vsnd_c",
+    "sounds/vo/pudge/pud_ability_rot_10.vsnd_c",
+    "sounds/vo/pudge/pud_ability_rot_11.vsnd_c",
+    "sounds/vo/pudge/pud_ability_rot_12.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/pudge/pud_death_05.vsnd_c",
+    "sounds/vo/pudge/pud_death_06.vsnd_c",
+    "sounds/vo/pudge/pud_death_07.vsnd_c",
+    "sounds/vo/pudge/pud_death_08.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/pudge/pud_kill_05.vsnd_c",
+    "sounds/vo/pudge/pud_kill_06.vsnd_c",
+    "sounds/vo/pudge/pud_kill_07.vsnd_c",
+    "sounds/vo/pudge/pud_kill_08.vsnd_c"
+   ],
+   "laugh": [
+    "sounds/vo/pudge/pud_laugh_05.vsnd_c",
+    "sounds/vo/pudge/pud_laugh_06.vsnd_c",
+    "sounds/vo/pudge/pud_laugh_07.vsnd_c"
+   ],
+   "levelup": [
+    "sounds/vo/pudge/pud_level_05.vsnd_c",
+    "sounds/vo/pudge/pud_level_06.vsnd_c",
+    "sounds/vo/pudge/pud_level_07.vsnd_c",
+    "sounds/vo/pudge/pud_level_08.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/pudge/pud_move_11.vsnd_c",
+    "sounds/vo/pudge/pud_move_12.vsnd_c",
+    "sounds/vo/pudge/pud_move_13.vsnd_c",
+    "sounds/vo/pudge/pud_move_14.vsnd_c"
+   ],
+   "spawn": [
+    "sounds/vo/pudge/pud_spawn_06.vsnd_c",
+    "sounds/vo/pudge/pud_spawn_07.vsnd_c",
+    "sounds/vo/pudge/pud_spawn_08.vsnd_c",
+    "sounds/vo/pudge/pud_spawn_09.vsnd_c"
+   ]
+  },
+  "meepo": {
+   "attack": [
+    "sounds/vo/meepo/meepo_attack_09.vsnd_c",
+    "sounds/vo/meepo/meepo_attack_10.vsnd_c",
+    "sounds/vo/meepo/meepo_attack_11.vsnd_c",
+    "sounds/vo/meepo/meepo_attack_12.vsnd_c"
+   ],
+   "cast_meepo_divided_we_stand": [
+    "sounds/vo/meepo/meepo_divided_04.vsnd_c",
+    "sounds/vo/meepo/meepo_divided_05.vsnd_c",
+    "sounds/vo/meepo/meepo_divided_06.vsnd_c",
+    "sounds/vo/meepo/meepo_divided_07.vsnd_c"
+   ],
+   "cast_meepo_earthbind": [
+    "sounds/vo/meepo/meepo_earthbind_04.vsnd_c",
+    "sounds/vo/meepo/meepo_earthbind_05.vsnd_c",
+    "sounds/vo/meepo/meepo_earthbind_06.vsnd_c",
+    "sounds/vo/meepo/meepo_earthbind_07.vsnd_c"
+   ],
+   "cast_meepo_poof": [
+    "sounds/vo/meepo/meepo_poof_04.vsnd_c",
+    "sounds/vo/meepo/meepo_poof_05.vsnd_c",
+    "sounds/vo/meepo/meepo_poof_06.vsnd_c",
+    "sounds/vo/meepo/meepo_poof_07.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/meepo/meepo_death_05.vsnd_c",
+    "sounds/vo/meepo/meepo_death_06.vsnd_c",
+    "sounds/vo/meepo/meepo_death_07.vsnd_c",
+    "sounds/vo/meepo/meepo_death_08.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/meepo/meepo_kill_05.vsnd_c",
+    "sounds/vo/meepo/meepo_kill_06.vsnd_c",
+    "sounds/vo/meepo/meepo_kill_07.vsnd_c",
+    "sounds/vo/meepo/meepo_kill_08.vsnd_c"
+   ],
+   "laugh": [
+    "sounds/vo/meepo/meepo_laugh_05.vsnd_c",
+    "sounds/vo/meepo/meepo_laugh_06.vsnd_c",
+    "sounds/vo/meepo/meepo_laugh_07.vsnd_c",
+    "sounds/vo/meepo/meepo_laugh_08.vsnd_c"
+   ],
+   "levelup": [
+    "sounds/vo/meepo/meepo_levelup_05.vsnd_c",
+    "sounds/vo/meepo/meepo_levelup_06.vsnd_c",
+    "sounds/vo/meepo/meepo_levelup_07.vsnd_c",
+    "sounds/vo/meepo/meepo_levelup_08.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/meepo/meepo_move_09.vsnd_c",
+    "sounds/vo/meepo/meepo_move_10.vsnd_c",
+    "sounds/vo/meepo/meepo_move_11.vsnd_c",
+    "sounds/vo/meepo/meepo_move_12.vsnd_c"
+   ],
+   "spawn": [
+    "sounds/vo/meepo/meepo_spawn_05.vsnd_c"
+   ]
+  },
+  "tinker": {
+   "attack": [
+    "sounds/vo/tinker/tink_attack_09.vsnd_c",
+    "sounds/vo/tinker/tink_attack_10.vsnd_c",
+    "sounds/vo/tinker/tink_attack_11.vsnd_c",
+    "sounds/vo/tinker/tink_attack_12.vsnd_c"
+   ],
+   "cast_tinker_laser": [
+    "sounds/vo/tinker/tink_ability_laser_04.vsnd_c"
+   ],
+   "cast_tinker_march_of_the_machines": [
+    "sounds/vo/tinker/tink_ability_marchofthemachines_04.vsnd_c",
+    "sounds/vo/tinker/tink_ability_marchofthemachines_05.vsnd_c",
+    "sounds/vo/tinker/tink_ability_marchofthemachines_06.vsnd_c",
+    "sounds/vo/tinker/tink_ability_marchofthemachines_07.vsnd_c"
+   ],
+   "cast_tinker_rearm": [
+    "sounds/vo/tinker/tink_ability_rearm_04.vsnd_c",
+    "sounds/vo/tinker/tink_ability_rearm_05.vsnd_c",
+    "sounds/vo/tinker/tink_ability_rearm_06.vsnd_c",
+    "sounds/vo/tinker/tink_ability_rearm_07.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/tinker/tink_death_05.vsnd_c",
+    "sounds/vo/tinker/tink_death_06.vsnd_c",
+    "sounds/vo/tinker/tink_death_07.vsnd_c",
+    "sounds/vo/tinker/tink_death_08.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/tinker/tink_kill_05.vsnd_c",
+    "sounds/vo/tinker/tink_kill_06.vsnd_c",
+    "sounds/vo/tinker/tink_kill_07.vsnd_c",
+    "sounds/vo/tinker/tink_kill_08.vsnd_c"
+   ],
+   "laugh": [
+    "sounds/vo/tinker/tink_laugh_05.vsnd_c",
+    "sounds/vo/tinker/tink_laugh_06.vsnd_c",
+    "sounds/vo/tinker/tink_laugh_07.vsnd_c",
+    "sounds/vo/tinker/tink_laugh_08.vsnd_c"
+   ],
+   "levelup": [
+    "sounds/vo/tinker/tink_levelup_05.vsnd_c",
+    "sounds/vo/tinker/tink_levelup_06.vsnd_c",
+    "sounds/vo/tinker/tink_levelup_07.vsnd_c",
+    "sounds/vo/tinker/tink_levelup_08.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/tinker/tink_move_09.vsnd_c",
+    "sounds/vo/tinker/tink_move_10.vsnd_c",
+    "sounds/vo/tinker/tink_move_11.vsnd_c",
+    "sounds/vo/tinker/tink_move_12.vsnd_c"
+   ],
+   "spawn": [
+    "sounds/vo/tinker/tink_spawn_05.vsnd_c",
+    "sounds/vo/tinker/tink_spawn_06.vsnd_c",
+    "sounds/vo/tinker/tink_spawn_07.vsnd_c",
+    "sounds/vo/tinker/tink_spawn_08.vsnd_c"
+   ]
+  },
+  "rubick": {
+   "attack": [
+    "sounds/vo/rubick/rubick_attack_09.vsnd_c",
+    "sounds/vo/rubick/rubick_attack_10.vsnd_c",
+    "sounds/vo/rubick/rubick_attack_11.vsnd_c",
+    "sounds/vo/rubick/rubick_attack_12.vsnd_c"
+   ],
+   "cast_rubick_fade_bolt": [
+    "sounds/vo/rubick/rubick_fadebolt_04.vsnd_c",
+    "sounds/vo/rubick/rubick_fadebolt_05.vsnd_c",
+    "sounds/vo/rubick/rubick_fadebolt_06.vsnd_c"
+   ],
+   "cast_rubick_spell_steal": [
+    "sounds/vo/rubick/rubick_spellsteal_04.vsnd_c",
+    "sounds/vo/rubick/rubick_spellsteal_05.vsnd_c",
+    "sounds/vo/rubick/rubick_spellsteal_06.vsnd_c",
+    "sounds/vo/rubick/rubick_spellsteal_07.vsnd_c"
+   ],
+   "cast_rubick_telekinesis": [
+    "sounds/vo/rubick/rubick_telekinesis_down_04.vsnd_c",
+    "sounds/vo/rubick/rubick_telekinesis_up_01.vsnd_c",
+    "sounds/vo/rubick/rubick_telekinesis_up_02.vsnd_c",
+    "sounds/vo/rubick/rubick_telekinesis_up_03.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/rubick/rubick_death_05.vsnd_c",
+    "sounds/vo/rubick/rubick_death_06.vsnd_c",
+    "sounds/vo/rubick/rubick_death_07.vsnd_c",
+    "sounds/vo/rubick/rubick_death_08.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/rubick/rubick_kill_05.vsnd_c",
+    "sounds/vo/rubick/rubick_kill_06.vsnd_c",
+    "sounds/vo/rubick/rubick_kill_07.vsnd_c",
+    "sounds/vo/rubick/rubick_kill_08.vsnd_c"
+   ],
+   "laugh": [
+    "sounds/vo/rubick/rubick_laugh_05.vsnd_c",
+    "sounds/vo/rubick/rubick_laugh_06.vsnd_c",
+    "sounds/vo/rubick/rubick_laugh_07.vsnd_c",
+    "sounds/vo/rubick/rubick_laugh_08.vsnd_c"
+   ],
+   "levelup": [
+    "sounds/vo/rubick/rubick_levelup_05.vsnd_c",
+    "sounds/vo/rubick/rubick_levelup_06.vsnd_c",
+    "sounds/vo/rubick/rubick_levelup_07.vsnd_c",
+    "sounds/vo/rubick/rubick_levelup_08.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/rubick/rubick_move_09.vsnd_c",
+    "sounds/vo/rubick/rubick_move_10.vsnd_c",
+    "sounds/vo/rubick/rubick_move_11.vsnd_c",
+    "sounds/vo/rubick/rubick_move_12.vsnd_c"
+   ],
+   "spawn": [
+    "sounds/vo/rubick/rubick_spawn_05.vsnd_c",
+    "sounds/vo/rubick/rubick_spawn_06.vsnd_c"
+   ]
+  },
+  "morphling": {
+   "attack": [
+    "sounds/vo/morphling/mrph_attack_08.vsnd_c",
+    "sounds/vo/morphling/mrph_attack_09.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/morphling/mrph_death_05.vsnd_c",
+    "sounds/vo/morphling/mrph_death_06.vsnd_c",
+    "sounds/vo/morphling/mrph_death_07.vsnd_c",
+    "sounds/vo/morphling/mrph_death_08.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/morphling/mrph_kill_06.vsnd_c",
+    "sounds/vo/morphling/mrph_kill_07.vsnd_c",
+    "sounds/vo/morphling/mrph_kill_08.vsnd_c",
+    "sounds/vo/morphling/mrph_kill_09.vsnd_c"
+   ],
+   "laugh": [
+    "sounds/vo/morphling/mrph_laugh_05.vsnd_c",
+    "sounds/vo/morphling/mrph_laugh_07.vsnd_c",
+    "sounds/vo/morphling/mrph_laugh_08.vsnd_c",
+    "sounds/vo/morphling/mrph_laugh_09.vsnd_c"
+   ],
+   "levelup": [
+    "sounds/vo/morphling/mrph_level_04.vsnd_c",
+    "sounds/vo/morphling/mrph_level_05.vsnd_c",
+    "sounds/vo/morphling/mrph_level_06.vsnd_c",
+    "sounds/vo/morphling/mrph_level_07.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/morphling/mrph_move_07.vsnd_c",
+    "sounds/vo/morphling/mrph_move_09.vsnd_c",
+    "sounds/vo/morphling/mrph_move_09a.vsnd_c",
+    "sounds/vo/morphling/mrph_move_10.vsnd_c"
+   ],
+   "spawn": [
+    "sounds/vo/morphling/mrph_spawn_08.vsnd_c"
+   ]
+  },
+  "furion": {
+   "attack": [
+    "sounds/vo/furion/furi_attack_09.vsnd_c",
+    "sounds/vo/furion/furi_attack_10.vsnd_c",
+    "sounds/vo/furion/furi_attack_11.vsnd_c"
+   ],
+   "cast_furion_force_of_nature": [
+    "sounds/vo/furion/furi_ability_force_04.vsnd_c",
+    "sounds/vo/furion/furi_ability_force_05.vsnd_c",
+    "sounds/vo/furion/furi_ability_force_06.vsnd_c",
+    "sounds/vo/furion/furi_ability_force_07.vsnd_c"
+   ],
+   "cast_furion_sprout": [
+    "sounds/vo/furion/furi_ability_sprout_04.vsnd_c",
+    "sounds/vo/furion/furi_ability_sprout_05.vsnd_c",
+    "sounds/vo/furion/furi_ability_sprout_06.vsnd_c"
+   ],
+   "cast_furion_teleportation": [
+    "sounds/vo/furion/furi_ability_teleport_04.vsnd_c"
+   ],
+   "cast_furion_wrath_of_nature": [
+    "sounds/vo/furion/furi_ability_wrath_04.vsnd_c",
+    "sounds/vo/furion/furi_ability_wrath_05.vsnd_c",
+    "sounds/vo/furion/furi_ability_wrath_06.vsnd_c",
+    "sounds/vo/furion/furi_ability_wrath_07.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/furion/furi_death_05.vsnd_c",
+    "sounds/vo/furion/furi_death_06.vsnd_c",
+    "sounds/vo/furion/furi_death_07.vsnd_c",
+    "sounds/vo/furion/furi_death_08.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/furion/furi_kill_05.vsnd_c",
+    "sounds/vo/furion/furi_kill_06.vsnd_c",
+    "sounds/vo/furion/furi_kill_07.vsnd_c",
+    "sounds/vo/furion/furi_kill_08.vsnd_c"
+   ],
+   "laugh": [
+    "sounds/vo/furion/furi_laugh_06.vsnd_c",
+    "sounds/vo/furion/furi_laugh_07.vsnd_c",
+    "sounds/vo/furion/furi_laugh_08.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/furion/furi_move_09.vsnd_c",
+    "sounds/vo/furion/furi_move_10.vsnd_c",
+    "sounds/vo/furion/furi_move_11.vsnd_c",
+    "sounds/vo/furion/furi_move_12.vsnd_c"
+   ]
+  },
+  "chen": {
+   "attack": [
+    "sounds/vo/chen/chen_attack_09.vsnd_c",
+    "sounds/vo/chen/chen_attack_10.vsnd_c",
+    "sounds/vo/chen/chen_attack_11.vsnd_c"
+   ],
+   "cast_chen_holy_persuasion": [
+    "sounds/vo/chen/chen_ability_holyp_04.vsnd_c",
+    "sounds/vo/chen/chen_ability_holyp_05.vsnd_c",
+    "sounds/vo/chen/chen_ability_holyp_06.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/chen/chen_death_05.vsnd_c",
+    "sounds/vo/chen/chen_death_06.vsnd_c",
+    "sounds/vo/chen/chen_death_07.vsnd_c",
+    "sounds/vo/chen/chen_death_08.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/chen/chen_kill_05.vsnd_c",
+    "sounds/vo/chen/chen_kill_06.vsnd_c",
+    "sounds/vo/chen/chen_kill_07.vsnd_c",
+    "sounds/vo/chen/chen_kill_08.vsnd_c"
+   ],
+   "laugh": [
+    "sounds/vo/chen/chen_laugh_05.vsnd_c",
+    "sounds/vo/chen/chen_laugh_07.vsnd_c",
+    "sounds/vo/chen/chen_laugh_08.vsnd_c",
+    "sounds/vo/chen/chen_laugh_09.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/chen/chen_move_09.vsnd_c",
+    "sounds/vo/chen/chen_move_10.vsnd_c",
+    "sounds/vo/chen/chen_move_11.vsnd_c",
+    "sounds/vo/chen/chen_move_12.vsnd_c"
+   ],
+   "spawn": [
+    "sounds/vo/chen/chen_spawn_05.vsnd_c"
+   ]
+  },
+  "antimage": {
+   "attack": [
+    "sounds/vo/antimage/anti_attack_09.vsnd_c",
+    "sounds/vo/antimage/anti_attack_10.vsnd_c"
+   ],
+   "cast_antimage_mana_void": [
+    "sounds/vo/antimage/anti_ability_manavoid_04.vsnd_c",
+    "sounds/vo/antimage/anti_ability_manavoid_05.vsnd_c",
+    "sounds/vo/antimage/anti_ability_manavoid_06.vsnd_c",
+    "sounds/vo/antimage/anti_ability_manavoid_07.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/antimage/anti_death_05.vsnd_c",
+    "sounds/vo/antimage/anti_death_06.vsnd_c",
+    "sounds/vo/antimage/anti_death_07.vsnd_c",
+    "sounds/vo/antimage/anti_death_08.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/antimage/anti_kill_05.vsnd_c",
+    "sounds/vo/antimage/anti_kill_06.vsnd_c",
+    "sounds/vo/antimage/anti_kill_07.vsnd_c",
+    "sounds/vo/antimage/anti_kill_08.vsnd_c"
+   ],
+   "laugh": [
+    "sounds/vo/antimage/anti_laugh_05.vsnd_c",
+    "sounds/vo/antimage/anti_laugh_06.vsnd_c",
+    "sounds/vo/antimage/anti_laugh_07.vsnd_c",
+    "sounds/vo/antimage/anti_laugh_08.vsnd_c"
+   ],
+   "levelup": [
+    "sounds/vo/antimage/anti_level_05.vsnd_c",
+    "sounds/vo/antimage/anti_level_06.vsnd_c",
+    "sounds/vo/antimage/anti_level_07.vsnd_c",
+    "sounds/vo/antimage/anti_level_08.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/antimage/anti_move_09.vsnd_c",
+    "sounds/vo/antimage/anti_move_10.vsnd_c",
+    "sounds/vo/antimage/anti_move_11.vsnd_c",
+    "sounds/vo/antimage/anti_move_12.vsnd_c"
+   ]
+  },
+  "techies": {
+   "attack": [
+    "sounds/vo/techies/tech_attack_13.vsnd_c",
+    "sounds/vo/techies/tech_attack_14.vsnd_c",
+    "sounds/vo/techies/tech_attack_15.vsnd_c",
+    "sounds/vo/techies/tech_attack_16.vsnd_c"
+   ],
+   "cast_techies_focused_detonate": [
+    "sounds/vo/techies/tech_focuseddetonate_05.vsnd_c",
+    "sounds/vo/techies/tech_focuseddetonate_06.vsnd_c",
+    "sounds/vo/techies/tech_focuseddetonate_07.vsnd_c",
+    "sounds/vo/techies/tech_focuseddetonate_08.vsnd_c"
+   ],
+   "cast_techies_land_mines": [
+    "sounds/vo/techies/tech_setmine_05.vsnd_c",
+    "sounds/vo/techies/tech_setmine_06.vsnd_c",
+    "sounds/vo/techies/tech_setmine_07.vsnd_c",
+    "sounds/vo/techies/tech_setmine_08.vsnd_c"
+   ],
+   "cast_techies_suicide": [
+    "sounds/vo/techies/tech_suicidesquad_04.vsnd_c",
+    "sounds/vo/techies/tech_suicidesquad_06.vsnd_c",
+    "sounds/vo/techies/tech_suicidesquad_07.vsnd_c",
+    "sounds/vo/techies/tech_suicidesquad_08.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/techies/tech_death_08.vsnd_c",
+    "sounds/vo/techies/tech_death_09.vsnd_c",
+    "sounds/vo/techies/tech_death_10.vsnd_c",
+    "sounds/vo/techies/tech_death_11.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/techies/tech_kill_05.vsnd_c",
+    "sounds/vo/techies/tech_kill_06.vsnd_c",
+    "sounds/vo/techies/tech_kill_07.vsnd_c",
+    "sounds/vo/techies/tech_kill_08.vsnd_c"
+   ],
+   "levelup": [
+    "sounds/vo/techies/tech_levelup_05.vsnd_c",
+    "sounds/vo/techies/tech_levelup_06.vsnd_c",
+    "sounds/vo/techies/tech_levelup_08.vsnd_c",
+    "sounds/vo/techies/tech_levelup_09.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/techies/tech_move_10.vsnd_c",
+    "sounds/vo/techies/tech_move_11.vsnd_c",
+    "sounds/vo/techies/tech_move_12.vsnd_c",
+    "sounds/vo/techies/tech_move_14.vsnd_c"
+   ],
+   "spawn": [
+    "sounds/vo/techies/tech_spawn_05.vsnd_c",
+    "sounds/vo/techies/tech_spawn_06.vsnd_c"
+   ]
+  },
+  "ogre_magi": {
+   "attack": [
+    "sounds/vo/ogre_magi/ogmag_attack_09.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_attack_10.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_attack_11.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_attack_12.vsnd_c"
+   ],
+   "cast_ogre_magi_bloodlust": [
+    "sounds/vo/ogre_magi/ogmag_ability_bloodlust_04.vsnd_c"
+   ],
+   "cast_ogre_magi_multicast": [
+    "sounds/vo/ogre_magi/ogmag_ability_multi_04.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_ability_multi_05.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_ability_multi_06.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_ability_multi_07.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/ogre_magi/ogmag_death_05.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_death_06.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_death_07.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_death_08.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/ogre_magi/ogmag_kill_05.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_kill_06.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_kill_07.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_kill_08.vsnd_c"
+   ],
+   "laugh": [
+    "sounds/vo/ogre_magi/ogmag_laugh_05.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_laugh_06.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_laugh_07.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_laugh_08.vsnd_c"
+   ],
+   "levelup": [
+    "sounds/vo/ogre_magi/ogmag_level_05.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_level_06.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_level_07.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/ogre_magi/ogmag_move_09.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_move_10.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_move_11.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_move_12.vsnd_c"
+   ],
+   "spawn": [
+    "sounds/vo/ogre_magi/ogmag_spawn_05.vsnd_c",
+    "sounds/vo/ogre_magi/ogmag_spawn_06.vsnd_c"
+   ]
+  },
+  "nevermore": {
+   "attack": [
+    "sounds/vo/nevermore/nev_attack_09.vsnd_c",
+    "sounds/vo/nevermore/nev_attack_10.vsnd_c",
+    "sounds/vo/nevermore/nev_attack_11.vsnd_c",
+    "sounds/vo/nevermore/nev_attack_12.vsnd_c"
+   ],
+   "cast_nevermore_requiem": [
+    "sounds/vo/nevermore/nev_ability_requiem_04.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_requiem_05.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_requiem_06.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_requiem_07.vsnd_c"
+   ],
+   "cast_nevermore_shadowraze1": [
+    "sounds/vo/nevermore/nev_ability_shadow_10.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_shadow_13.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_shadow_16.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_shadow_19.vsnd_c"
+   ],
+   "cast_nevermore_shadowraze2": [
+    "sounds/vo/nevermore/nev_ability_shadow_11.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_shadow_14.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_shadow_17.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_shadow_20.vsnd_c"
+   ],
+   "cast_nevermore_shadowraze3": [
+    "sounds/vo/nevermore/nev_ability_shadow_12.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_shadow_15.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_shadow_18.vsnd_c",
+    "sounds/vo/nevermore/nev_ability_shadow_21.vsnd_c"
+   ],
+   "death": [
+    "sounds/vo/nevermore/nev_death_06.vsnd_c",
+    "sounds/vo/nevermore/nev_death_07.vsnd_c",
+    "sounds/vo/nevermore/nev_death_08.vsnd_c",
+    "sounds/vo/nevermore/nev_death_09.vsnd_c"
+   ],
+   "kill": [
+    "sounds/vo/nevermore/nev_kill_05.vsnd_c",
+    "sounds/vo/nevermore/nev_kill_06.vsnd_c",
+    "sounds/vo/nevermore/nev_kill_07.vsnd_c",
+    "sounds/vo/nevermore/nev_kill_08.vsnd_c"
+   ],
+   "laugh": [
+    "sounds/vo/nevermore/nev_laugh_05.vsnd_c",
+    "sounds/vo/nevermore/nev_laugh_06.vsnd_c",
+    "sounds/vo/nevermore/nev_laugh_07.vsnd_c",
+    "sounds/vo/nevermore/nev_laugh_08.vsnd_c"
+   ],
+   "levelup": [
+    "sounds/vo/nevermore/nev_level_05.vsnd_c",
+    "sounds/vo/nevermore/nev_level_06.vsnd_c",
+    "sounds/vo/nevermore/nev_level_07.vsnd_c",
+    "sounds/vo/nevermore/nev_level_08.vsnd_c"
+   ],
+   "move": [
+    "sounds/vo/nevermore/nev_move_10.vsnd_c",
+    "sounds/vo/nevermore/nev_move_11.vsnd_c",
+    "sounds/vo/nevermore/nev_move_12.vsnd_c",
+    "sounds/vo/nevermore/nev_move_13.vsnd_c"
+   ],
+   "spawn": [
+    "sounds/vo/nevermore/nev_spawn_05.vsnd_c",
+    "sounds/vo/nevermore/nev_spawn_06.vsnd_c",
+    "sounds/vo/nevermore/nev_spawn_07.vsnd_c",
+    "sounds/vo/nevermore/nev_spawn_08.vsnd_c"
+   ]
+  }
+ }
+}
