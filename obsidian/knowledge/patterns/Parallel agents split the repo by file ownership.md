@@ -20,6 +20,16 @@ assets, models, world systems, the HUD.
   never commit.
 - **Full brief.** Briefs carry the rules: agents do not inherit `CLAUDE.md`.
 
+## Starting, continuing, stopping (the user's rules, 2026-10-10)
+
+- **Continue unfinished work with a new agent and a fresh brief,** never by resuming the old
+  one. The brief states what the previous agent left (git diff, files) and what remains.
+- **Pick the library agent** from the table in CLAUDE.md before reaching for
+  `general-purpose`.
+- **When limits run low, ask agents to wrap up** instead of killing them. A killed agent can
+  leave half-edited shared files. A wrap-up asks them to finish or revert within a couple of
+  steps and report.
+
 ## Lessons
 
 - A contract change by one agent breaks everyone else. When `specs/models.json` switched to

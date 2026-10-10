@@ -46,9 +46,17 @@ and mdx-m3-viewer's sanity test.
 - About 11.8 MB added to the personalized map.
 - A cold conversion takes 44–54 s.
 
-## Fallback
+## Update (evening of 2026-10-10)
 
-If textures come out black or garbled, set `TEXTURE_ENCODING = "palette"` in
-`launcher/dvc_launcher/models.py`. Palette BLPs are about 3.8 times bigger.
+- All textures are palette BLP1 now, not JPEG (`TEXTURE_ENCODING`). This is part of the hang
+  mitigation, and the map came out 0.5 MiB smaller.
+- 71 units are converted:
+  - neutrals;
+  - Roshan;
+  - summons;
+  - wards;
+  - 9 runes.
+- Neutrals, Roshan, summons and wards also get static portrait models; see
+  [[Neutral portraits are static palette models]].
 
 Related: [[Dota content reaches the map only through the launcher]]

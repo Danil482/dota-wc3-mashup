@@ -14,6 +14,8 @@ Dota 2 VPKs.
 - exports `vtex_c` textures to PNG (icons, HUD art, model textures);
 - extracts the voice line sounds;
 - exports models to glTF for the MDX converter. 73 models take about 19 s.
+- for the map port, decompiles entity lumps, copies the gridnav (`maps/dota.gnv`) and exports
+  the physics and ground meshes as glb. That takes about 17 s cold, once per Dota build.
 
 ## Packaging
 

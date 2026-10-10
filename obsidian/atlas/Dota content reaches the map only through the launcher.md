@@ -25,7 +25,15 @@ player's PC:
 4. Converts models (`models.py` and the `mdx/` converter, listed in `specs/models.json`):
    - `war3mapImported\Dota\<key>.mdx`
    - textures `war3mapImported\Dota\<key>_<name>.blp`
-5. Repacks the map with StormLib and verifies the archive.
+5. Ports Dota's map layout into the terrain and map data (`terrain\`); see
+   [[Dota's map layout is ported 1 to 1 by the launcher]].
+6. Converts item icons (`src/data/items.json` "icons") and the HUD art (`specs/hud_assets.json`).
+7. Repacks the map with StormLib and verifies the archive.
+8. Writes the player's Dota settings next to the map, never into it (`dota_settings.py`); see
+   [[Dota settings reach the game through a local file, never the map]].
+
+Models: 71 units, including static portraits for neutrals, Roshan, summons and wards, plus
+wards and runes ([[Neutral portraits are static palette models]]).
 
 The output is cached per Dota build in `%LOCALAPPDATA%\DotaVsCommander\cache`. A cold run takes
 about a minute; a warm run takes 3–4 s.

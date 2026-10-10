@@ -85,6 +85,13 @@ powershell -ExecutionPolicy Bypass -File tools\run_test.ps1 -Map build\work_<nam
    local state (sound volume, frame visibility) per player.
 7. Hero numbers come from Dota's data (`src/data/heroes.json`, `items.json`, `world.json`).
    Don't hand-tune them in Lua.
+8. A text label on a custom button takes the mouse even when disabled. Make buttons with
+   `Kit.button`, put text on them with `Kit.label`, and register events on `Kit.hit(button)`.
+9. Dota players use items through `src/ui/dota_items.lua`. The native inventory buttons are
+   dead under the Dota HUD.
+10. Mouse events (`EVENT_PLAYER_MOUSE_*`) are registered only after the game starts.
+11. Per-player data, such as a player's Dota settings, never goes into the map file: every
+    lobby member needs the identical map. Use a local CustomMapData file.
 
 ## Agents
 
@@ -98,6 +105,49 @@ powershell -ExecutionPolicy Bypass -File tools\run_test.ps1 -Map build\work_<nam
 - Agents return their `game.lua` hook lines, and the lead integrates them.
 - Agents do not inherit this file. Pass them the relevant rules: language, no game content,
   no secrets, no game launches.
+- To continue unfinished work, start a new agent with a fresh brief. The brief says what the
+  previous agent left and what remains. Don't resume the old agent.
+- When usage limits run low, ask running agents to wrap up (finish or revert within a few
+  steps, then report) rather than killing them in the middle of shared edits.
+
+### Which library agent for which work
+
+The library lives in `~/.claude/agents/`. Prefer these over `general-purpose`.
+
+| Work | Agent |
+|---|---|
+| Lua gameplay (heroes, items, world, bots), build tools | `Senior Python Developer` (`developer.md`) |
+| Launcher (Python, PyInstaller, VRF, StormLib) | `Senior Python Developer` |
+| Fixes from the user's in-game reports | `Minimal Change Engineer` |
+| Mechanics and balance (asymmetric match, economy, waves) | `Game Designer` |
+| Map layout, lanes, commander base area | `Level Designer` |
+| Dota → MDX/BLP conversion, VFX, model and texture budgets | `Technical Artist` |
+| Converter and exporter tooling | `Blender Add-on Engineer` |
+| Voice lines and sound selection | `Game Audio Engineer` |
+| Dota-style HUD and shop | `UI Designer` (layout spec), then `Senior Python Developer` (frames in Lua) |
+| Mock exercises, launcher tests | `QA Engineer` (`tester.md`) |
+| Reading mock/autotest logs | `Test Results Analyzer` |
+| User screenshots | `Evidence Collector` |
+| Review before a commit or a public push (secrets, token) | `Code Reviewer` |
+| Secrets and token checks | `Security Engineer` |
+| Architecture decisions | `Software Architect` |
+| Priorities, read-only | `Planner` (`planner.md`) |
+| README, `docs/FRAMEWORK.md`, vault notes | `Technical Writer` |
+| Before publishing on Melty (one-click and multiplayer claims backed by evidence) | `Reality Checker` |
+| Melty listing text | `App Store Optimizer` |
+
+Notes:
+- No library agent knows WC3 Lua maps. The developer agent is generic despite its name, and
+  its brief must carry the engine invariants above.
+- The root agents (`developer.md`, `tester.md`, `planner.md`) read "CLAUDE.md at the repo
+  root" and `obsidian_vault/...`. Sessions start in this repo, but if one starts elsewhere
+  the brief must say:
+  - the repo is `C:\Users\dania\PycharmProjects\dota-wc3-mashup`;
+  - its rules are in this file;
+  - the vault is `obsidian/`, with the status board at
+    `obsidian/00-home/Current priorities for October 2026.md`.
+- Use `general-purpose` only for research that fits no row above, e.g. reverse-engineering a
+  Dota or WC3 file format.
 
 ## Obsidian vault (`obsidian/`)
 

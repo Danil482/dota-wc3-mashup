@@ -29,7 +29,12 @@ its first `use(name)`, and `defined(name)` checks whether a module exists. That 
   - `voice`
   - `world*`: camps, runes, Roshan, towers
   - test-only: `cheats`, `dummy`, `autotest`
+- `ui/`: the Dota players' HUD, shop, item use and settings (`hud_kit`, `dota_hud`,
+  `dota_shop`, `dota_items`, `dota_settings`); see
+  [[Dota players get a frame-based HUD with their own item buttons]].
 - `heroes/<key>.lua`: one module per hero. Their numbers come from `data.heroes` (Dota KV).
+  `A.level(u, name)` also counts Rubick's stolen copies; see
+  [[Stolen spells use D-cell copies of their objects]].
 - `ai/`: bots. They pick lanes, skill builds and item builds from Valve's bot data, and use
   per-ability hints to cast.
 - `data/`: JSON that the build turns into `data.<name>` modules.

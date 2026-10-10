@@ -35,5 +35,14 @@ date: 2026-10-10
   - `-spells`: an enemy Mountain King storm-bolts you every 4 s, for testing spell blocks
     and reflects.
 - Immortal dummies near the Dota fountain (a hero and a creep) show the last hit and DPS.
+- **Test-build diagnostics** go into the log and are flushed at once:
+  - every new HUD focus;
+  - shop decisions;
+  - UI probes (`-uiprobe`);
+  - quick-cast decisions.
+
+  See [[UI probe logs show which frames get the mouse]].
+- **A freeze vs a crash:** WC3 writes no log for a freeze. Windows' Application event log
+  separates Application Hang (1002) from a crash.
 
 Related: [[The map is built from source with one build.py command]]

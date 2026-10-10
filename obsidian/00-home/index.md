@@ -18,6 +18,7 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[The map script is split into define and use modules]]
 - [[Dota content reaches the map only through the launcher]]
 - [[Testing runs offline on a mock and in game with user clicks]]
+- [[Dota players get a frame-based HUD with their own item buttons]]
 
 ## Decisions
 
@@ -29,6 +30,12 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[Health and mana bonuses are applied as deltas with BlzSetUnitMaxHP]]
 - [[Channels never lock the command card]]
 - [[Hero responses are Dota voice lines played from Lua]]
+- [[Dota's map layout is ported 1 to 1 by the launcher]]
+- [[Items are used through HUD buttons, not the WC3 inventory]]
+- [[Dota settings reach the game through a local file, never the map]]
+- [[Neutral portraits are static palette models]]
+- [[Stolen spells use D-cell copies of their objects]]
+- [[Towers, buildings and lane waves ignore neutrals]]
 
 ## Debugging
 
@@ -36,12 +43,16 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[A map without a minimap crashes with Game data is unable to load]]
 - [[Invisible units mean the map points to Dota models without the launcher]]
 - [[Melty cannot check the token while a VPN is on]]
+- [[Text labels on custom buttons swallow the mouse even when disabled]]
+- [[Native inventory buttons die under the Dota HUD]]
+- [[Selecting some Dota neutrals hung the game]]
 
 ## Patterns
 
 - [[Parallel agents split the repo by file ownership]]
 - [[A sound for one player is created for all and muted by volume]]
 - [[Dota sub-abilities share the main ability cell via BlzUnitHideAbility]]
+- [[UI probe logs show which frames get the mouse]]
 
 ## Integrations and publishing
 
@@ -53,4 +64,5 @@ Status and next tasks: [[Current priorities for October 2026]]
 
 `sessions/` holds one note per working session, named `YYYY-MM-DD <slug>.md`.
 
+- [[2026-10-10 Dota terrain, working HUD and imported Dota settings]]
 - [[2026-10-10 Mashup skeleton from an empty folder to Dota models in game]]
