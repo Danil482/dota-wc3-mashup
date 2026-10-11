@@ -214,8 +214,54 @@ define("items", function()
         local s = Items.istate(it)
         s.cdEnd, s.cdDur, s.native, s.swap = Timer.now() + dur, dur, false, nil
         Timer.after(0, function()
-            if GetItemTypeId(it) ~= 0 and BlzGetUnitAbilityCooldownRemaining(u, id) > 0 then s.native = true end
+            if GetItemTypeId(it) == 0 then return end
+            -- WC3 may not have started it (e.g. a move of the caster inside
+            -- the cast's effect event, as Blink's, ends the cast first);
+            -- started here, WC3's own checks and Tinker's Rearm see it too
+            local wc3 = BlzGetUnitAbilityCooldownRemaining(u, id)
+            if wc3 <= 0 and GetUnitAbilityLevel(u, id) > 0 then BlzStartUnitAbilityCooldown(u, id, dur) end
+            local started = BlzGetUnitAbilityCooldownRemaining(u, id)
+            if started > 0 then s.native = true end
+            if BUILD_TEST_MODE then
+                Log.info(string.format("item used %s: wc3 cooldown %.1f after the cast, %.1f after the start",
+                    name, wc3, started))
+                Log.flush()
+            end
         end)
+    end
+
+    -- Dota's answer to a use while the item recharges: "Recharging..." in
+    -- the red error line, the cooldown beep and the hero's "not yet".
+    local RECHARGING = "dota_hud_error_item_in_cooldown"
+    local function recharging(hero)
+        local p = GetOwningPlayer(hero)
+        if not use("roles").humans[GetPlayerId(p)] then return end
+        local msg = use("data.strings")[RECHARGING] or RECHARGING
+        if defined("dota_glyph") and use("dota_glyph").started then
+            use("dota_glyph").error(p, msg)
+        else
+            Items.msg(p, "|cffff4040" .. msg .. "|r")
+        end
+        if defined("gamesounds") then use("gamesounds").castFail(hero, "cooldown") end
+    end
+
+    -- Whether `hero` may use `it` now, refused the Dota way while the item
+    -- recharges. Every item use asks first: HUD clicks and keys, quick
+    -- cast, the TP slot, and item_actives at cast start (bots, the rest).
+    -- `via` names the path in the test-build trace, which also shows WC3's
+    -- own remaining cooldown.
+    function Items.ready(hero, it, via)
+        local left, lock = Items.cdLeft(it, hero), Items.locked(it)
+        local ok = math.max(left, lock) <= 0.05
+        if not ok then recharging(hero) end
+        if BUILD_TEST_MODE then
+            local name = nameOf[GetItemTypeId(it)]
+            local id = abilId[name]
+            Log.info(string.format("item use %s via %s: cooldown %.1f, lock %.1f, wc3 %.1f -> %s", tostring(name),
+                via, left, lock, id and BlzGetUnitAbilityCooldownRemaining(hero, id) or -1, ok and "ok" or "refused"))
+            Log.flush()
+        end
+        return ok
     end
 
     -- Before an item leaves a main inventory: WC3's value becomes the timed one.

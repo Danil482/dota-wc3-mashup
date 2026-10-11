@@ -3,7 +3,7 @@
 -- every flush, so it keeps the last MAX_LINES lines.
 define("log", function()
     local Log = {}
-    local FILE = "DotaVsCommander\\log.txt"
+    local FILE = "DotaVsWarcraft\\log.txt"
     local MAX_LINES = 600
     local CHUNK = 200
 

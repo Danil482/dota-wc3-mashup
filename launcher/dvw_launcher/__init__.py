@@ -1,4 +1,4 @@
-"""Dota vs Commander launcher: builds a personalized Warcraft III map from the
+"""Dota vs Warcraft launcher: builds a personalized Warcraft III map from the
 player's own Dota 2 install, then starts Warcraft III."""
 
 __version__ = "1.0.0"

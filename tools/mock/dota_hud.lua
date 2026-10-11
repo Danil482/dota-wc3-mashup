@@ -656,6 +656,184 @@ if not __mockHud then
         hero.dead = false
         Hud.tick()
 
+        -- top bar: a click on a hero selects it, a double click also centres
+        -- the camera on it; an enemy only while the player sees it
+        do
+            local saved, pans, ally = {}, 0, true
+            local function set(name, fn)
+                saved[name] = _G[name]
+                _G[name] = fn
+            end
+            set("ClearSelection", function() M.selection = {} end)
+            set("SelectUnit", function(u, on) if on then M.selection[#M.selection + 1] = u end end)
+            set("PanCameraToTimed", function() pans = pans + 1 end)
+            set("IsUnitAlly", function() return ally end)
+            set("IsUnitVisible", function(u) return not u.hidden end)
+            local slot = (use("roles").heroSlots or {})[2]
+            local u2 = slot and H.bySlot[slot]
+            check("top bar hero 2 known", u2 ~= nil and u2 ~= hero)
+            check("top bar heroes are buttons", F.top[2].b.kind == "GLUEBUTTON" and M.under(Kit.hit(F.top[2].b), F.fgTop))
+            M.click(F.top[2].b, p0)
+            check("a top bar click selects that hero", #M.selection == 1 and M.selection[1] == u2 and pans == 0, pans)
+            M.click(F.top[2].b, p0)
+            check("a double click centres the camera on it", pans == 1, pans)
+            advance(1)
+            M.click(F.top[2].b, p0)
+            check("a later click is a first click again", pans == 1, pans)
+            M.selection = {hero}
+            ally, u2.hidden = false, true
+            advance(1)
+            M.click(F.top[2].b, p0)
+            check("an enemy out of sight is not selected", #M.selection == 1 and M.selection[1] == hero)
+            u2.hidden = nil
+            M.click(F.top[2].b, p0)
+            check("an enemy in sight is selected", M.selection[1] == u2)
+            ally = true
+            M.selection = {hero}
+            M.click(F.top[2].b, p1)
+            check("another player's click leaves this selection", #M.selection == 1 and M.selection[1] == hero)
+            for name, fn in pairs(saved) do _G[name] = fn end
+            Hud.tick()
+        end
+
+        -- a unit the player does not control: Warcraft shows no command card,
+        -- so our icons fill the row (a Dota hero's from the build data, any
+        -- other unit's abilities as read in the synced selection event) with
+        -- levels, mana, cooldown sweep and tooltip; no learn buttons, clicks
+        -- do nothing
+        do
+            local saved = {}
+            local function set(name, fn)
+                saved[name] = _G[name]
+                _G[name] = fn
+            end
+            local CS, SL, VA, INF = FourCC("AUcs"), FourCC("AUsl"), FourCC("AUav"), FourCC("AUin")
+            local ATK, INV, ITEM, BUFF, IMMUNE = FourCC("Aatk"), FourCC("AInv"), FourCC("AIat"), FourCC("BUsl"),
+                FourCC("ACmi")
+            local BTN = "ReplaceableTextures\\CommandButtons\\BTN"
+            local icons = {[CS] = BTN .. "CarrionSwarm.blp", [SL] = BTN .. "Sleep.blp", [INF] = BTN .. "Infernal.blp",
+                           [VA] = "ReplaceableTextures\\PassiveButtons\\PASBTNVampiricAura.blp",
+                           [ITEM] = BTN .. "ClawsOfAttack.blp", [BUFF] = BTN .. "Sleep.blp", [IMMUNE] = BTN .. "Sleep.blp"}
+            M.pos[CS], M.pos[SL], M.pos[VA], M.pos[INF], M.pos[IMMUNE] = {0, 2}, {1, 2}, {2, 2}, {3, 2}, {2, 1}
+            -- the mock's abilities are a map: listed in a stable order, each
+            -- lookup a counted handle
+            set("BlzGetUnitAbilityByIndex", function(u, i)
+                local list = {}
+                for id in pairs(u.abilities or {}) do list[#list + 1] = id end
+                table.sort(list)
+                if not list[i + 1] then return nil end
+                local ab = __handle("ability")
+                ab.abil = list[i + 1]
+                return ab
+            end)
+            set("BlzGetAbilityId", function(ab) return ab.abil end)
+            set("BlzGetAbilityBooleanField", function(ab) return ab.abil == ITEM end)
+            set("BlzGetAbilityIntegerField", function(ab) return (ab.abil == VA or ab.abil == INF) and 1 or 3 end)
+            set("BlzGetAbilityIcon", function(id) return icons[id] or "" end)
+            set("BlzGetUnitAbilityManaCost", function(u, id) return id == CS and 110 or 0 end)
+            set("BlzGetUnitAbilityCooldown", function() return 10.0 end)
+            set("BlzGetAbilityTooltip", function(id) return id == CS and "Carrion Swarm" or "" end)
+            set("BlzGetAbilityExtendedTooltip", function(id) return id == CS and "Sends a horde of bats." or "" end)
+            local function selectEvent(u, p)
+                local prevUnit = GetTriggerUnit
+                GetTriggerUnit = function() return u end
+                M.trig = {player = p}
+                local n = 0
+                for _, t in ipairs(__mock.triggers) do
+                    for _, ev in ipairs(t.events or {}) do
+                        if ev == EVENT_PLAYER_UNIT_SELECTED then
+                            for _, a in ipairs(t.actions) do a() end
+                            n = n + 1
+                            break
+                        end
+                    end
+                end
+                M.trig = {}
+                GetTriggerUnit = prevUnit
+                return n
+            end
+            local lord = CreateUnit(Player(SLOT_WARCRAFT_AI), FourCC("Udre"), hero.x + 300, hero.y, 0)
+            rawset(lord, "dhud", true)
+            lord.hero, lord.level = true, 5
+            lord.life, lord.maxLife, lord.mana, lord.maxMana = 800, 800, 300, 400
+            for _, id in ipairs({CS, SL, VA, ATK, INV, ITEM, BUFF, IMMUNE}) do lord.abilities[id] = 1 end
+            lord.abilities[CS] = 2
+            lord.cd = {[CS] = 4.2}
+            check("one synced selection trigger", selectEvent(lord, p0) == 1)
+            M.selection = {lord}
+            Hud.tick()
+            check("icons for a unit the player does not control", S.mode == "icons" and S.foreign == true and S.n == 3,
+                tostring(S.mode) .. " " .. tostring(S.n))
+            local lastX = -1
+            for k, id in ipairs({CS, SL, VA}) do
+                local s = F.icons[k]
+                local x, y = M.at(s.b)
+                check("icon " .. k .. " in command card order", M.shown(s.b) and s.img.texture == icons[id], s.img.texture)
+                check("icon " .. k .. " in the row", x and math.abs(y - L.BTN_Y) < 1e-6 and x > lastX, y)
+                lastX = x or lastX
+            end
+            check("no fourth icon (items, buffs, commands and helpers left out)", not M.shown(F.icons[4].b))
+            local parked = 0
+            for i = 0, 11 do
+                local _, y = M.at(D.cmd[i])
+                if y and y < 0 then parked = parked + 1 end
+            end
+            check("Warcraft's buttons parked under our icons", parked == 12, parked)
+            check("level pips: 2 of 3", M.shown(F.pips[1][3]) and not M.shown(F.pips[1][4])
+                and F.pips[1][2].texture == Kit.tex("pip_on", Kit.C.gold) and F.pips[1][3].texture == Kit.tex("pip_off", Kit.C.dark))
+            check("no pips on a one-level aura", not M.shown(F.pips[3][1]))
+            check("mana cost", M.shown(F.mana[1].box) and string.find(F.mana[1].t.text, "110", 1, true) ~= nil, F.mana[1].t.text)
+            check("cooldown sweep with seconds", M.shown(F.icons[1].cd.box)
+                and string.find(F.icons[1].cd.text.t.text, "5", 1, true) ~= nil, F.icons[1].cd.text.t.text)
+            check("no cooldown on a ready spell", not M.shown(F.icons[2].cd.box))
+            local learnShown = 0
+            for k = 1, #F.learn do if M.shown(F.learn[k]) then learnShown = learnShown + 1 end end
+            check("no learn buttons", learnShown == 0, learnShown)
+            local hitIcon = Kit.hit(F.icons[1].b)
+            hitIcon.enabled = true
+            local mana0 = lord.mana
+            check("a click on an icon acts on nothing", M.click(F.icons[1].b, p0) >= 1 and M.selection[1] == lord
+                and lord.mana == mana0 and lord.abilities[CS] == 2 and hitIcon.enabled == true)
+            check("no tooltip without a hover", not M.shown(F.iconTip))
+            M.hover = F.icons[1].b
+            Hud.tick()
+            check("tooltip on hover", M.shown(F.iconTip) and string.find(F.iconTipText.t.text, "Carrion Swarm", 1, true) ~= nil
+                and string.find(F.iconTipText.t.text, "horde of bats", 1, true) ~= nil, F.iconTipText.t.text)
+            M.hover = nil
+            Hud.tick()
+            check("tooltip gone with the hover", not M.shown(F.iconTip))
+            local h0 = M.handles
+            for _ = 1, 3 do Hud.tick() end
+            check("no handles while showing icons", M.handles == h0, M.handles - h0)
+            lord.abilities[INF] = 1
+            Events.emit("hero_skill", lord, INF)
+            Hud.tick()
+            check("a learned spell joins on the skill event", S.n == 4 and F.icons[4].img.texture == icons[INF], S.n)
+            -- an allied Dota hero: its build-data row as icons, unlearned ones dimmed
+            local key2 = H.keyOf[other]
+            M.selection = {other}
+            Hud.tick()
+            local row2 = Hud.visibleRow(key2, other)
+            check("an allied Dota hero shows its row as icons", S.mode == "row" and S.key == key2 and S.foreign == true
+                and S.n == #row2, tostring(S.mode) .. " " .. tostring(S.n))
+            local dim, lit = nil, nil
+            for k, e in ipairs(row2) do
+                if e.id and not dim and GetUnitAbilityLevel(other, e.id) == 0 then dim = k end
+                if e.id and not lit and GetUnitAbilityLevel(other, e.id) > 0 then lit = k end
+            end
+            check("an unlearned ability dimmed", dim == nil or (M.shown(F.icons[dim].b) and F.icons[dim].img.alpha == 110))
+            check("a learned ability bright", lit == nil or (M.shown(F.icons[lit].b) and F.icons[lit].img.alpha == 255))
+            learnShown = 0
+            for k = 1, #F.learn do if M.shown(F.learn[k]) then learnShown = learnShown + 1 end end
+            check("no learn buttons for an ally", learnShown == 0, learnShown)
+            M.selection = {hero}
+            Hud.tick()
+            check("own hero: Warcraft's buttons again", S.mode == "row" and S.foreign == false
+                and not M.shown(F.icons[1].b))
+            for name, fn in pairs(saved) do _G[name] = fn end
+            RemoveUnit(lord)
+        end
+
         ---------------------------------------------------------------- item slots
         -- cooldown sweep (model and wipe), seconds and charges on the item buttons
         do
@@ -958,7 +1136,7 @@ if not __mockHud then
         hero.x, hero.y = hx, hy
 
         ---------------------------------------------------------------- views
-        check("commander keeps the WC3 UI", Hud.viewOf(Player(SLOT_COMMANDER_AI)) == nil)
+        check("the Warcraft AI keeps the WC3 UI", Hud.viewOf(Player(SLOT_WARCRAFT_AI)) == nil)
         M.observer[10] = true
         check("observers keep the WC3 UI", Hud.viewOf(Player(10)) == nil)
         M.observer[10] = nil

@@ -513,7 +513,7 @@ define("dota_shop", function()
     local function keys()
         local trig = CreateTrigger()
         local esc = CreateTrigger()
-        for slot = 0, SLOT_COMMANDER do
+        for slot = 0, SLOT_WARCRAFT do
             BlzTriggerRegisterPlayerKeyEvent(trig, Player(slot), L.KEY, 0, false)
             BlzTriggerRegisterPlayerKeyEvent(esc, Player(slot), OSKEY_ESCAPE, 0, false)
         end

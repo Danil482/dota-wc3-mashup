@@ -1,4 +1,4 @@
-"""Tests of the Dota settings export (launcher/dvc_launcher/dota_settings.py).
+"""Tests of the Dota settings export (launcher/dvw_launcher/dota_settings.py).
 
 Offline and synthetic: a fake Steam folder with three accounts and a tiny VPK
 holding a cut-down cfg/dotakeys.lst are written to a scratch folder. Checked:
@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "launcher"))
 
-from dvc_launcher import dota_settings as ds  # noqa: E402
+from dvw_launcher import dota_settings as ds  # noqa: E402
 
 failures = []
 
@@ -309,7 +309,7 @@ def test_defaults_match_map(vpk):
 
 
 def test_export(steam, dota, vpk, work):
-    out = work / "CustomMapData" / "DotaVsCommander"
+    out = work / "CustomMapData" / "DotaVsWarcraft"
     summary = ds.export(dota, vpk, out, roots=[steam])
     path = out / ds.FILE_NAME
     check("export: summary without the account", summary is not None and "202" not in summary, summary)
@@ -358,7 +358,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--work", help="scratch folder (default: a temporary one)")
     args = ap.parse_args()
-    work = Path(args.work) if args.work else Path(tempfile.mkdtemp(prefix="dvc_settings_"))
+    work = Path(args.work) if args.work else Path(tempfile.mkdtemp(prefix="dvw_settings_"))
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True)
     ds._registry = lambda path, name: None          # never the real Steam

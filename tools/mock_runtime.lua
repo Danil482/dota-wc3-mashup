@@ -76,9 +76,13 @@ function TriggerAddAction(t, fn) t.actions[#t.actions + 1] = fn return __handle(
 function TriggerRegisterPlayerUnitEvent(t, p, ev, f) t.events[#t.events + 1] = ev return __handle("event") end
 
 -- Preload file output
-__mock.files, __mock.preload = {}, {}
+__mock.files, __mock.preload, __mock.errorLines = {}, {}, {}
 function PreloadGenClear() __mock.preload = {} end
-function Preload(s) __mock.preload[#__mock.preload + 1] = s end
+-- Every ERROR line ever written, also those the log's 600-line window drops later.
+function Preload(s)
+    __mock.preload[#__mock.preload + 1] = s
+    if string.find(s, "ERROR", 1, true) then __mock.errorLines[s] = true end
+end
 function PreloadGenEnd(path) __mock.files[path] = table.concat(__mock.preload, "\n") end
 
 __mock.printed = {}

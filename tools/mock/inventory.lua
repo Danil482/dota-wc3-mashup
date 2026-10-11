@@ -13,8 +13,11 @@
 -- backpack, not another player's item; the HUD's backpack row, TP slot,
 -- stash row and Grab All button; the TP slot's targeting and a frame click
 -- that leaves a waiting item alone; drag and drop between slots, onto the
--- world and onto an allied hero; the courier (src/game/courier.lua): one for
--- the human, at the fountain and invulnerable there, Secret Shop purchases
+-- world and onto an allied hero (presses over the HUD report the ground under
+-- it), a release over the HUD's empty space, a hover that comes after the
+-- release, the click mode, quick cast while an item recharges; the courier
+-- (src/game/courier.lua): one for the human, at the fountain and
+-- invulnerable there, Secret Shop purchases
 -- on it, Deliver Items (stash, then the hero), back to the stash when the
 -- hero dies, flying at hero level 4, Speed Burst at 10, six creep attacks to
 -- kill, respawn with its items, the HUD's courier buttons and rows, and the
@@ -365,12 +368,15 @@ if __mockHud and __mockSettings and not __mockInventory then
         end
         local function enter(f, p) frameEvent(f, FRAMEEVENT_MOUSE_ENTER, p or p0) end
         local function leave(f, p) frameEvent(f, FRAMEEVENT_MOUSE_LEAVE, p or p0) end
+        -- jassdoc: a press or release over the bottom HUD reports the ground
+        -- under it, not 0, 0; only the synced hovers tell it was on a slot
+        local UX, UY = 1234, -2345
         local function drag(from, to, x, y)
             enter(from)
-            T.mouse(p0, "down", 0, 0, MOUSE_BUTTON_TYPE_LEFT)
+            T.mouse(p0, "down", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
             leave(from)
             if to then enter(to) end
-            T.mouse(p0, "up", to and 0 or x, to and 0 or y, MOUSE_BUTTON_TYPE_LEFT)
+            T.mouse(p0, "up", to and UX or x, to and UY or y, MOUSE_BUTTON_TYPE_LEFT)
             if to then
                 M.click(to, p0)            -- in case the game reports a click on the target too
                 leave(to)
@@ -382,7 +388,7 @@ if __mockHud and __mockSettings and not __mockInventory then
         advance(0.2)
         local trail = {}
         for _, m in ipairs(T.sync) do
-            if m.prefix == "dvcview" then trail[#trail + 1] = GetPlayerId(m.player) .. ":" .. m.data end
+            if m.prefix == "dvwview" then trail[#trail + 1] = GetPlayerId(m.player) .. ":" .. m.data end
         end
         check("the HUD shows the hero's items to every client", Use.view[p0] == "hero",
             tostring(Use.view[p0]) .. " after " .. table.concat(trail, " "))
@@ -407,12 +413,22 @@ if __mockHud and __mockSettings and not __mockInventory then
         check("drag out of the stash at home", UnitItemInSlot(hero, 1) == a)
         -- a click on a slot still uses its item
         enter(F.slots[1].b)
-        T.mouse(p0, "down", 0, 0, MOUSE_BUTTON_TYPE_LEFT)
-        T.mouse(p0, "up", 0, 0, MOUSE_BUTTON_TYPE_LEFT)
+        T.mouse(p0, "down", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
+        T.mouse(p0, "up", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
         advance(0.6)
         M.click(F.slots[1].b, p0)
         leave(F.slots[1].b)
         check("a press and release on one slot is a click", Use.pending[p0] ~= nil and Use.pending[p0].item == a)
+        -- the waiting item ignores a press on a slot (ground coordinates);
+        -- a slot left right after its release (no click came) keeps its item
+        local drops0 = #__mock.dropOrders
+        enter(F.slots[0].b)
+        T.mouse(p0, "down", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
+        T.mouse(p0, "up", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
+        leave(F.slots[0].b)
+        advance(0.3)
+        check("a waiting item ignores a press on a slot", Use.pending[p0] ~= nil and UnitItemInSlot(hero, 0) == b
+            and #__mock.dropOrders == drops0)
         Use.pending[p0] = nil
         -- onto the world: the hero walks there and drops it
         local drops = #__mock.dropOrders
@@ -443,6 +459,85 @@ if __mockHud and __mockSettings and not __mockInventory then
         check("a given item stays its buyer's", Items.ownerOf(a) == 0 and not Items.usableBy(a, ally))
         wipe(p1)
         atHome(ally)
+        -- released over the HUD's empty space (a click blocker): kept in place
+        wipe()
+        aliveHome()
+        Hud.tick()
+        advance(0.6)
+        local g1 = Items.make("item_gauntlets", 0)
+        Inv.put(p0, g1, "main", 2)
+        local drops1 = #__mock.dropOrders
+        enter(F.fgBottom)
+        enter(F.slots[2].b)
+        T.mouse(p0, "down", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
+        leave(F.slots[2].b)
+        T.mouse(p0, "up", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
+        leave(F.fgBottom)
+        check("a release over the HUD's empty space keeps the item", UnitItemInSlot(hero, 2) == g1
+            and #__mock.dropOrders == drops1)
+        -- hover events held back while the button is down: a release over the
+        -- source waits for the late MOUSE_ENTER of the slot under the mouse
+        enter(F.slots[2].b)
+        T.mouse(p0, "down", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
+        T.mouse(p0, "up", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
+        leave(F.slots[2].b)
+        enter(F.bag[0].b)
+        advance(0.3)
+        leave(F.bag[0].b)
+        check("a hover that comes after the release still moves the item", Inv.get(p0, "bag", 0) == g1)
+        advance(0.6)                           -- a click right after a drop on its slot is ignored
+        -- the click mode: a backpack click picks its slot, the next slot click swaps them
+        local function click(f)
+            enter(f)
+            T.mouse(p0, "down", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
+            T.mouse(p0, "up", UX, UY, MOUSE_BUTTON_TYPE_LEFT)
+            M.click(f, p0)
+            leave(f)
+            advance(0.6)
+        end
+        click(F.bag[0].b)
+        check("a backpack click picks its item", Use.picked[p0] ~= nil and Use.pending[p0] == nil)
+        click(F.slots[4].b)
+        check("the next slot click puts it there", UnitItemInSlot(hero, 4) == g1 and Use.picked[p0] == nil
+            and Use.pending[p0] == nil)
+        click(F.bag[1].b)
+        click(F.slots[4].b)
+        check("an empty slot picked first takes the clicked main item", Inv.get(p0, "bag", 1) == g1
+            and Use.pending[p0] == nil)
+        click(F.bag[1].b)
+        T.mouse(p0, "down", GetUnitX(hero) + 300, GetUnitY(hero), MOUSE_BUTTON_TYPE_LEFT)
+        T.mouse(p0, "up", GetUnitX(hero) + 300, GetUnitY(hero), MOUSE_BUTTON_TYPE_LEFT)
+        check("a press off the slots cancels the pick", Use.picked[p0] == nil and Inv.get(p0, "bag", 1) == g1)
+        -- quick cast at a unit is refused while the item recharges and works
+        -- again once it ended (the other use paths: tools/mock/items.lua)
+        wipe()
+        aliveHome()
+        local staff = Items.make("item_force_staff", 0)
+        Inv.put(p0, staff, "main", 0)
+        local quickUses = {}
+        set("UnitUseItemTarget", function(u, it, t)
+            if it == staff then quickUses[#quickUses + 1] = it end
+            return true
+        end)
+        local function quickCast()
+            BlzSendSyncData("dvwcast", string.format("qi|0|%d|%d|%d", GetHandleId(hero),
+                math.floor(GetUnitX(hero)), math.floor(GetUnitY(hero))))
+            advance(0.1)
+        end
+        Use.use(p0, 0)
+        quickCast()
+        check("quick cast at a unit when ready", #quickUses == 1 and quickUses[1] == staff, #quickUses)
+        Use.use(p0, 0)                         -- waiting for its target when the cooldown starts
+        local staffCd = Items.data("item_force_staff").cooldown
+        Items.data("item_force_staff").cooldown = 1
+        Items.used(hero, staff, "item_force_staff")
+        Items.data("item_force_staff").cooldown = staffCd
+        quickCast()
+        check("quick cast is refused while the item recharges", #quickUses == 1 and Use.pending[p0] == nil, #quickUses)
+        advance(1.1)
+        Use.use(p0, 0)
+        quickCast()
+        check("quick cast again once the cooldown ended", #quickUses == 2, #quickUses)
 
         ---------------------------------------------------------------- courier
         local Courier, Mods, U = use("courier"), use("mods"), use("util")

@@ -1,9 +1,10 @@
 -- Lane creep waves every 30 seconds. Dota creeps (Ancients slot) walk each
--- lane from the Dota base to the Commander's town hall; the Commander's
--- uncontrollable race creeps (Horde slot) walk the same lanes the other way to
--- the Ancient. Every fifth wave adds a siege creep. Walkers attack-move from
--- waypoint to waypoint and are nudged when idle. Creep aggro (lane.lua) turns
--- a walker on a hero for a moment; it then takes up its lane again.
+-- lane from the Dota base to the Warcraft player's town hall; the Warcraft
+-- player's uncontrollable race creeps (Horde slot) walk the same lanes the
+-- other way to the Ancient. Every fifth wave adds a siege creep. Walkers
+-- attack-move from waypoint to waypoint and are nudged when idle. Creep aggro
+-- (lane.lua) turns a walker on a hero for a moment; it then takes up its lane
+-- again.
 define("creeps", function()
     local Log = use("log")
     local Timer = use("timer")
@@ -40,10 +41,10 @@ define("creeps", function()
         for lane, pts in pairs(m.lanes) do
             local dota, horde = {}, {}
             for i = 1, #pts do dota[#dota + 1] = pts[i] end
-            dota[#dota + 1] = m.commander.start
+            dota[#dota + 1] = m.warcraft.start
             for i = #pts, 1, -1 do horde[#horde + 1] = pts[i] end
             horde[#horde + 1] = m.dota.ancient
-            out[lane] = {dota = dota, horde = horde, hordeSpawn = m.commander.spawns[lane]}
+            out[lane] = {dota = dota, horde = horde, hordeSpawn = m.warcraft.spawns[lane]}
         end
         return out
     end

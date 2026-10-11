@@ -10,6 +10,7 @@ define("hero_tinker", function()
     local Events = use("events")
     local U = use("util")
     local Bots = use("bots")
+    local Fx = use("fx")
     local M = {}
 
     local LASER, MARCH, TURRETS = "tinker_laser", "tinker_march_of_the_machines", "tinker_deploy_turrets"
@@ -27,12 +28,12 @@ define("hero_tinker", function()
         boom = "Abilities\\Weapons\\Mortar\\MortarMissile.mdl",
         crate = "Abilities\\Spells\\Other\\TinkerRocket\\TinkerRocketMissile.mdl",
         impact = "Abilities\\Spells\\Human\\Thunderclap\\ThunderClapCaster.mdl",
-        rocket = "Abilities\\Spells\\Other\\TinkerRocket\\TinkerRocketMissile.mdl",
+        rocket = Fx.model("tinker_heat_seeking_missile", "Abilities\\Spells\\Other\\TinkerRocket\\TinkerRocketMissile.mdl"),
         rocketHit = "Abilities\\Weapons\\RocketMissile\\RocketMissile.mdl",
         tpCaster = "Abilities\\Spells\\Human\\MassTeleport\\MassTeleportCaster.mdl",
         tpTo = "Abilities\\Spells\\Human\\MassTeleport\\MassTeleportTo.mdl",
         tpDone = "Abilities\\Spells\\Human\\MassTeleport\\MassTeleportTarget.mdl",
-        rearm = "Abilities\\Spells\\Items\\AIlm\\AIlmTarget.mdl",
+        rearm = Fx.model("tinker_rearm", "Abilities\\Spells\\Items\\AIlm\\AIlmTarget.mdl"),
         rearmDone = "Abilities\\Spells\\Items\\TomeOfRetraining\\TomeOfRetrainingCaster.mdl",
     }
     -- March robots: Dota's model when the launcher converted it (specs/models.json

@@ -1,19 +1,19 @@
--- The commander's starter base: a race-specific opening of defensive towers,
--- a production building and supply around the town hall, created finished at
--- game start. They are stock WC3 units, so every number is the game's own,
--- and the melee AI counts them as its own: its build order skips what it
--- already has and goes on from there.
+-- The Warcraft player's starter base: a race-specific opening of defensive
+-- towers, a production building and supply around the town hall, created
+-- finished at game start. They are stock WC3 units, so every number is the
+-- game's own, and the melee AI counts them as its own: its build order skips
+-- what it already has and goes on from there.
 --
 -- Spots are searched on a grid around the hall. A spot must be buildable,
 -- walkable ground, keep the hall-to-mine worker path and the paths from the
 -- hall to the lane exits (the creep spawns) open, and keep a gap to the hall,
 -- the mine and the other structures. Towers prefer the hall's front (towards
 -- the Dota Ancient), production the front sides, supply the back.
-define("commander_base", function()
+define("warcraft_base", function()
     local B = {}
 
-    -- Who starts with the base: "ai" (the AI commander only), "all" (a human
-    -- commander too) or "none".
+    -- Who starts with the base: "ai" (the Warcraft AI only), "all" (a human
+    -- Warcraft player too) or "none".
     B.FOR = "ai"
 
     -- Per race, in placement order.
@@ -112,6 +112,18 @@ define("commander_base", function()
         return true
     end
 
+    -- Trees (the Warcraft grove stands behind the hall) keep their ground
+    -- and a gap: IsTerrainPathable may not see destructables.
+    local treeRect
+    local function clearOfTrees(x, y, half)
+        local reach = half + B.GAP + 64                 -- a tree stands on 128 x 128
+        treeRect = treeRect or Rect(0, 0, 0, 0)
+        SetRect(treeRect, x - reach, y - reach, x + reach, y + reach)
+        local clear = true
+        EnumDestructablesInRect(treeRect, nil, function() clear = false end)
+        return clear
+    end
+
     -- Whole-number grid points around the hall: no trigonometry, so every
     -- client gets exactly the same spots.
     local function gridSpots(site)
@@ -159,7 +171,7 @@ define("commander_base", function()
             return a.y < b.y
         end)
         for _, c in ipairs(ranked) do
-            if groundOk(c.x, c.y, half) then return c end
+            if groundOk(c.x, c.y, half) and clearOfTrees(c.x, c.y, half) then return c end
         end
         return nil
     end

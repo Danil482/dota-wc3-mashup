@@ -471,8 +471,9 @@ define("item_actives", function()
         local h = H[c.name]
         if phase == "onChannel" then
             if Mods.flag(caster, "hex") then return cancel(c, "Muted") end
-            -- a lock WC3 may not have taken (backpack swap, Blink's damage lock)
-            if c.item and I().locked(c.item) > 0.05 then return cancel(c, "Item is on cooldown") end
+            -- Dota's cooldown and locks (backpack swap, Blink's damage lock),
+            -- which WC3 does not always enforce itself (Items.ready)
+            if c.item and not I().ready(caster, c.item, "cast") then return cancel(c) end
             -- Dota: another player's item works for an ally only if it is shareable
             if c.item and not I().usableBy(c.item, caster) then return cancel(c, "That item is not yours to use") end
         end
@@ -545,7 +546,8 @@ define("item_actives", function()
             local rule = USE[c.name]
             local id = I().abilityId(c.name)
             local data = I().data(c.name)
-            if rule and id and BlzGetUnitAbilityCooldownRemaining(u, id) <= 0 and I().locked(c.item) <= 0
+            if rule and id and BlzGetUnitAbilityCooldownRemaining(u, id) <= 0 and I().cdLeft(c.item, u) <= 0
+                and I().locked(c.item) <= 0
                 and GetUnitState(u, UNIT_STATE_MANA) >= (data.mana or 0) and rule(u, c.item, s) then
                 return true
             end

@@ -1,12 +1,15 @@
 """Map layout: one source of truth for terrain generation and the map script.
 
 Coordinates are WC3 world units. The Dota team (Radiant) sits bottom-left, the
-Commander's open half top-right, mirroring Dota 2's three-lane map at roughly
-the same scale (heroes move ~300 u/s in both games).
+Warcraft side's open half top-right, mirroring Dota 2's three-lane map at
+roughly the same scale (heroes move ~300 u/s in both games).
 """
 import math
+import os
 import random
+import sys
 
+LAUNCHER = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "launcher")
 TILES = 160                      # map width/height in tiles (128 units each)
 HALF = TILES * 128 // 2          # world spans [-HALF, HALF]
 MARGIN = 8 * 128                 # unplayable border
@@ -16,7 +19,7 @@ LANE_WIDTH = 720
 RIVER_WIDTH = 900
 PATH_WIDTH = 380
 
-# Lanes run from the Dota base to the Commander's base.
+# Lanes run from the Dota base to the Warcraft base.
 LANES = {
     "bot": [(-5300, -7000), (6900, -7000), (7000, -6900), (7000, 3300)],
     "mid": [(-5100, -5100), (4300, 4300)],
@@ -43,7 +46,7 @@ DOTA = {
     },
 }
 
-COMMANDER = {
+WARCRAFT = {
     "start": (6300, 6300),          # town hall position
     "mines": [(6050, 7550)],
     "expansions": [(1900, 6250), (6250, 1900)],
@@ -58,7 +61,7 @@ CAMPS = {
     # Dota-side jungle (between top/mid/bot lanes, below the river)
     "d_small": (-3300, -5600), "d_medium1": (-1700, -4900), "d_medium2": (-4900, -1700),
     "d_large": (-2600, -3700), "d_ancient": (-3700, -2500),
-    # Commander-side jungle
+    # Warcraft-side jungle
     "c_small": (5600, 3300), "c_medium1": (4900, 1700), "c_medium2": (1700, 4900),
     "c_large": (3700, 2600), "c_ancient": (2500, 3700),
     # outer jungles beyond the river, by the long lanes
@@ -102,27 +105,45 @@ def in_river(x, y, pad=0):
 
 
 DOTA_BASE_EDGE = -4300          # Dota base: x < edge and y < edge
-COMMANDER_BASE_EDGE = 3900      # Commander base: x > edge and y > edge
+WARCRAFT_BASE_EDGE = 3900       # Warcraft base: x > edge and y > edge
 
 
 def in_base(x, y, pad=0):
     return ((x < DOTA_BASE_EDGE + pad and y < DOTA_BASE_EDGE + pad)
-            or (x > COMMANDER_BASE_EDGE - pad and y > COMMANDER_BASE_EDGE - pad))
+            or (x > WARCRAFT_BASE_EDGE - pad and y > WARCRAFT_BASE_EDGE - pad))
 
 
 def is_clear(x, y):
     """True where no tree may stand: lanes, river, bases, camps, paths, landmarks."""
     if in_lane(x, y, 60) or in_river(x, y, 120) or in_base(x, y, 0):
         return True
-    for cx, cy in list(CAMPS.values()) + [ROSHAN] + RUNES + SIDE_SHOPS + COMMANDER["expansions"]:
+    for cx, cy in list(CAMPS.values()) + [ROSHAN] + RUNES + SIDE_SHOPS + WARCRAFT["expansions"]:
         if math.hypot(x - cx, y - cy) < 520:
             return True
     return any(polyline_dist(x, y, p) < PATH_WIDTH / 2 for p in JUNGLE_PATHS)
 
 
+def _grove_ground(x, y):
+    """A whole tile inside the Warcraft base, off the lanes and the river."""
+    return (min(x, y) - 64 > WARCRAFT_BASE_EDGE and max(abs(x), abs(y)) + 64 <= PLAY
+            and not in_lane(x, y, 124) and not in_river(x, y, 184))
+
+
+def warcraft_grove():
+    """The Warcraft grove on this layout, by the personalized map's rule
+    (grove() in the launcher's terrain/convert.py)."""
+    if LAUNCHER not in sys.path:
+        sys.path.insert(0, LAUNCHER)
+    from dvw_launcher.terrain import convert
+    c = WARCRAFT
+    return convert.grove(c["start"], c["mines"], c["spawns"].values(), DOTA["ancient"], _grove_ground,
+                         [(x, y, convert.GROVE_EXPANSION) for x, y in c["expansions"]])
+
+
 def trees(seed=7, step=128, band=5):
     """Tree positions: a dense band (band cells deep) along every clear area,
-    sparser deep forest behind it so the tree count stays manageable."""
+    sparser deep forest behind it so the tree count stays manageable, and the
+    Warcraft grove in his base."""
     rng = random.Random(seed)
     n = int(2 * PLAY // step)
     clear = [[is_clear(-PLAY + (i + 0.5) * step, -PLAY + (j + 0.5) * step) for i in range(n)] for j in range(n)]
@@ -146,7 +167,7 @@ def trees(seed=7, step=128, band=5):
             x = -PLAY + (i + 0.5) * step + rng.uniform(-20, 20)
             y = -PLAY + (j + 0.5) * step + rng.uniform(-20, 20)
             out.append((round(x), round(y)))
-    return out
+    return out + warcraft_grove()
 
 
 def ground_tile(x, y):

@@ -36,12 +36,20 @@ def main(script_path, seconds):
             main()
             __mock.advance(seconds)
         end)
-        local log = __mock.files["DotaVsCommander\\\\log.txt"] or ""
-        return ok, tostring(err), log, table.concat(__mock.printed, "\\n")
+        local log = __mock.files["DotaVsWarcraft\\\\log.txt"] or ""
+        local errs = {}
+        for line in pairs(__mock.errorLines or {}) do errs[#errs + 1] = line end
+        table.sort(errs)
+        return ok, tostring(err), log, table.concat(__mock.printed, "\\n"), table.concat(errs, "\\n")
     end""")
-    ok, err, log, printed = run(seconds)
+    ok, err, log, printed, errors = run(seconds)
     print(log)
-    failed = (not ok) or ("ERROR" in log)   # FAIL checks need the real game
+    # The log keeps only its last 600 lines: ERROR lines of early exercises count too.
+    dropped = [line for line in errors.split("\n") if line and line not in log]
+    if dropped:
+        print("ERROR lines that left the log's 600-line window:")
+        print("\n".join(dropped))
+    failed = (not ok) or ("ERROR" in log) or bool(dropped)   # FAIL checks need the real game
     if not ok:
         print("LUA ERROR:", err)
     print("MOCK RESULT:", "FAILED" if failed else "OK")

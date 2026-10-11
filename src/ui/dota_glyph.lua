@@ -215,7 +215,7 @@ define("dota_glyph", function()
             return
         end
         G.armed[slot] = true
-        G.hint(p, use("lane").text("dvc_scan_target"))
+        G.hint(p, use("lane").text("dvw_scan_target"))
     end
 
     -- A mouse button of an armed player: x, y are 0, 0 over the HUD.

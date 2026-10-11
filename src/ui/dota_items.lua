@@ -14,18 +14,29 @@
 -- inventory.lua's rules, the courier's slots among themselves); release over
 -- the world to drop the item there, or over an allied hero to give it. The
 -- hero (or the courier) walks there first; stash items drop in the fountain.
+-- A release over the HUD's empty space puts the item back.
+--
+-- Two clicks move items too, for where the engine spoils a drag: a click on
+-- a slot whose click uses nothing (backpack, stash, courier) picks it, and a
+-- click on another slot swaps the two; a press off the slots or a right
+-- click cancels. Main slots keep Dota's click: they use their item.
 --
 -- Multiplayer: the slot under each player's mouse comes from synced frame
--- MOUSE_ENTER / MOUSE_LEAVE events, presses and releases from synced mouse
--- events (registered after the game started), and which items the HUD rows
--- show (the hero's or the courier's) from a sync message the HUD sends when
--- it changes. Everything acting on items runs in those synced events.
+-- MOUSE_ENTER / MOUSE_LEAVE events (item slots, and the HUD's click blockers
+-- for its empty space): a press over the bottom HUD reports the ground under
+-- it, so its coordinates cannot tell (jassdoc, BlzGetTriggerPlayerMouseX).
+-- Presses and releases come from synced mouse events (registered after the
+-- game started), and which items the HUD rows show (the hero's or the
+-- courier's) from a sync message the HUD sends when it changes. Everything
+-- acting on items runs in those synced events.
 define("dota_items", function()
     local U = use("util")
     local Timer = use("timer")
     local Events = use("events")
     local Safe = use("safe")
-    local I = {pending = {}, view = {}, hover = {}, drag = {}, walks = {}, dropped = {}, tpClicks = {}}
+    local Log = use("log")
+    local I = {pending = {}, view = {}, hover = {}, hud = {}, drag = {}, picked = {}, walks = {}, dropped = {},
+               tpClicks = {}}
 
     I.KEYS = {OSKEY_Z, OSKEY_X, OSKEY_C, OSKEY_V, OSKEY_B, OSKEY_N}
     -- player -> true: dota_settings.lua registered this player's own Dota item keys
@@ -35,13 +46,25 @@ define("dota_items", function()
     local DOUBLE_CLICK = 0.5            -- seconds between the clicks of a double click
     local DROP_RANGE = 100              -- a walking drop happens this close to its point
     local GIVE_RANGE = 250              -- ... and a walking give this close to the ally
-    local VIEW = "dvcview"
+    local SETTLE = 0.2                  -- a release over its own slot waits this long for a late MOUSE_ENTER
+    local VIEW = "dvwview"
     local sentView = nil                -- local: the view last sent
 
     local function Inv() return use("inventory") end
     local function heroOf(p) return use("heroes").bySlot[GetPlayerId(p)] end
 
     local function say(p, text) DisplayTimedTextToPlayer(p, 0, 0, 2, text) end
+
+    -- Test builds: one flushed line per press, release, hover change while
+    -- the button is held and click-mode step, to see what the engine sends.
+    local function trace(fmt, ...)
+        if BUILD_TEST_MODE then
+            Log.info("dota_items: " .. string.format(fmt, ...))
+            Log.flush()
+        end
+    end
+
+    local function tag(h) return h and (h.row .. ":" .. tostring(h.i)) or "none" end
 
     local function fail(p, text)
         say(p, "|cffff6060" .. text .. "|r")
@@ -70,6 +93,8 @@ define("dota_items", function()
         if not hero or not U.alive(hero) then return false end
         local it = UnitItemInSlot(hero, slot)
         if not it then return false end
+        I.picked[p] = nil
+        if not use("items").ready(hero, it, "hud") then return false end
         local t = targetOf(it)
         if t == "none" then
             I.pending[p] = nil
@@ -84,10 +109,13 @@ define("dota_items", function()
     function I.useTp(p)
         local hero = heroOf(p)
         if not hero or not U.alive(hero) then return false end
-        if not Inv().get(p, "tp", 0) then
+        local tp = Inv().get(p, "tp", 0)
+        if not tp then
             fail(p, "No Town Portal Scroll")
             return false
         end
+        I.picked[p] = nil
+        if not use("items").ready(hero, tp, "tp") then return false end
         I.pending[p] = {tp = true, target = "point"}
         say(p, "|cffffcc00Choose a target|r (right-click cancels)")
         return true
@@ -105,21 +133,41 @@ define("dota_items", function()
         return Inv().teleport(p, f.x, f.y)
     end
 
+    -- The click mode: a first click picks a slot, the next one swaps it
+    -- with another slot (the item of either moves; with both full they swap).
+    local function pick(p, row, i)
+        local slot, pk = I.slotOf(p, row, i), I.picked[p]
+        I.picked[p] = nil
+        if pk then
+            local from, to = pk.slot, slot
+            if not Inv().item(p, from) then from, to = slot, pk.slot end
+            local ok, why = false, nil
+            if from ~= to then ok, why = Inv().move(p, from, to) end
+            if not ok and why then fail(p, why) end
+            trace("player %d click mode: %d to %d -> %s", GetPlayerId(p), from, to, tostring(ok))
+            return ok
+        end
+        local full = Inv().item(p, slot) ~= nil
+        I.picked[p] = {slot = slot}
+        say(p, full and "|cffffcc00Click a slot to move the item there|r (right-click cancels)"
+            or "|cffffcc00Click an item to move it here|r (right-click cancels)")
+        trace("player %d click mode: picked %s:%d (%s)", GetPlayerId(p), row, i, full and "an item" or "empty")
+        return true
+    end
+
     -- A click on a HUD slot (synced): main slots use the hero's items, the
-    -- TP slot its scroll; backpack, stash and courier items are not usable.
+    -- TP slot its scroll; any other click is the click mode's.
     function I.click(p, row, i)
         I.drag[p] = nil                     -- pressed and released on this slot
         local d = I.dropped[p]
         if d and d.row == row and d.i == i and Timer.now() - d.at < 0.5 then return false end
         local view = I.view[p] or "hero"
         if view == "other" then return false end
-        if row == "main" then
-            if view == "cour" then
-                fail(p, "Couriers cannot use items")
-                return false
-            end
+        if I.picked[p] then return pick(p, row, i) end
+        if row == "main" and view == "hero" then
             return I.use(p, i)
-        elseif row == "tp" and view == "hero" then
+        elseif row == "tp" then
+            if view ~= "hero" then return false end
             local now, last = Timer.now(), I.tpClicks[p]
             I.tpClicks[p] = now
             if last and now - last <= DOUBLE_CLICK then
@@ -128,7 +176,7 @@ define("dota_items", function()
             end
             return I.useTp(p)
         end
-        return false
+        return pick(p, row, i)
     end
 
     -- Dota's "Grab All" under the stash row.
@@ -161,12 +209,61 @@ define("dota_items", function()
 
     -- ------------------------------------------------------------ drag and drop
 
-    -- Synced: the HUD slot under the player's mouse.
-    function I.enter(p, row, i) I.hover[p] = {row = row, i = i} end
+    -- A drag pending its release (hover changes are traced meanwhile).
+    local function held(p)
+        local d = I.drag[p]
+        return d ~= nil and Timer.now() - d.at < 5
+    end
+
+    local function hoverTrace(p, what, row, i)
+        if held(p) then
+            trace("player %d %s %s:%s %s", GetPlayerId(p), what, row, tostring(i),
+                I.drag[p].up and "after the release" or "while held")
+        end
+    end
+
+    -- Synced: the HUD slot under the player's mouse; row "hud" is one of the
+    -- HUD's click blockers (its empty space), named by `i`.
+    function I.enter(p, row, i)
+        if row == "hud" then
+            I.hud[p] = I.hud[p] or {}
+            I.hud[p][i] = true
+        else
+            I.hover[p] = {row = row, i = i}
+        end
+        hoverTrace(p, "enter", row, i)
+    end
 
     function I.leave(p, row, i)
+        if row == "hud" then
+            if I.hud[p] then I.hud[p][i] = nil end
+        else
+            local h = I.hover[p]
+            if h and h.row == row and h.i == i then I.hover[p] = nil end
+        end
+        hoverTrace(p, "leave", row, i)
+    end
+
+    -- The stash row hides away from home, maybe without a MOUSE_LEAVE: its
+    -- hovers count while the HUD shows it (dota_hud's condition).
+    local function stashShown(p)
+        local hero = heroOf(p)
+        return #Inv().list(p, "stash") > 0 or (hero ~= nil and U.alive(hero) and use("items").nearHome(hero))
+    end
+
+    -- The item slot under the player's mouse, if any.
+    local function slotHover(p)
         local h = I.hover[p]
-        if h and h.row == row and h.i == i then I.hover[p] = nil end
+        if h and h.row == "stash" and not stashShown(p) then return nil end
+        return h
+    end
+
+    -- Whether the mouse is over the HUD's empty space (a click blocker).
+    local function overBlocker(p)
+        for name in pairs(I.hud[p] or {}) do
+            if name ~= "stash" or stashShown(p) then return true end
+        end
+        return false
     end
 
     -- Local, from the HUD: which items its rows show ("hero", "cour",
@@ -263,24 +360,29 @@ define("dota_items", function()
     local function onMouseDown()
         local p = GetTriggerPlayer()
         local x, y = BlzGetTriggerPlayerMouseX(), BlzGetTriggerPlayerMouseY()
-        local onFrame = x == 0 and y == 0       -- a press on a HUD frame reports 0, 0
         local left = BlzGetTriggerPlayerMouseButton() == MOUSE_BUTTON_TYPE_LEFT
+        -- on the HUD: over a slot or its empty space (the bottom HUD reports
+        -- the ground under it), or at 0, 0 (its opaque parts)
+        local h = slotHover(p)
+        local onFrame = h ~= nil or overBlocker(p) or (x == 0 and y == 0)
         if left then
-            -- a drag starts only from a press on an item slot; a press on
-            -- the world also forgets a hover whose MOUSE_LEAVE never came
-            -- (a slot hidden under the cursor)
+            -- a drag starts only from a press on an item slot
             I.drag[p] = nil
-            local h = I.hover[p]
-            if not onFrame then I.hover[p] = nil end
-            if onFrame and h and I.view[p] ~= "other" then
-                local slot = I.slotOf(p, h.row, h.i)
-                if slot and Inv().item(p, slot) then
-                    I.drag[p] = {row = h.row, i = h.i, slot = slot}
-                end
+            local slot = h and I.view[p] ~= "other" and I.slotOf(p, h.row, h.i)
+            if slot and Inv().item(p, slot) then
+                I.drag[p] = {row = h.row, i = h.i, slot = slot, at = Timer.now()}
             end
         end
+        -- a click-mode pick ends with a press off the slots or a right-click
+        local picked = I.picked[p]
+        if picked and (not left or not h) then I.picked[p] = nil end
+        if onFrame or I.drag[p] or picked or I.pending[p] then
+            trace("player %d %s press at %d,%d over %s%s -> %s", GetPlayerId(p), left and "left" or "other",
+                math.floor(x), math.floor(y), tag(h), overBlocker(p) and " (hud)" or "",
+                I.drag[p] and ("drag from " .. tag(I.drag[p])) or "no drag")
+        end
         local pend = I.pending[p]
-        -- the item keeps waiting through a press on a frame
+        -- the item keeps waiting through a press on the HUD
         if not pend or onFrame then return end
         I.pending[p] = nil
         if not left then return end
@@ -292,6 +394,7 @@ define("dota_items", function()
             return
         end
         if UnitItemInSlot(hero, pend.slot) ~= pend.item then return end
+        if not use("items").ready(hero, pend.item, "target") then return end
         if pend.target == "point" then
             UnitUseItemPoint(hero, pend.item, x, y)
         elseif pend.target == "tree" then
@@ -303,22 +406,49 @@ define("dota_items", function()
         end
     end
 
+    -- Where a drag ended: on another slot (moved there), over the HUD (put
+    -- back), or over the world at the release point (dropped or given).
+    -- `late`: decided a moment after a release over its own slot, when only
+    -- a late hover of another slot moves it (a mouse moved off after a
+    -- click must not drop the item).
+    local function resolve(p, d, late)
+        if I.drag[p] ~= d then return end          -- a click on its slot came first
+        I.drag[p] = nil
+        local h, what = slotHover(p), nil
+        if h and (h.row ~= d.row or h.i ~= d.i) then
+            I.dropped[p] = {row = h.row, i = h.i, at = Timer.now()}
+            I.picked[p] = nil
+            local ok, why = Inv().move(p, d.slot, I.slotOf(p, h.row, h.i))
+            if not ok and why then fail(p, why) end
+            what = "moved to " .. tag(h) .. " " .. tostring(ok)
+        elseif late or h or overBlocker(p) or (d.x == 0 and d.y == 0) then
+            what = h and "released on its own slot" or (late and "no other slot after the release: kept"
+                or "released over the HUD: kept")
+        else
+            I.picked[p] = nil
+            what = "released over the world " .. tostring(I.release(p, d.slot, d.x, d.y))
+        end
+        trace("player %d drag from %s: %s", GetPlayerId(p), tag(d), what)
+    end
+
     local function onMouseUp()
         local p = GetTriggerPlayer()
         if BlzGetTriggerPlayerMouseButton() ~= MOUSE_BUTTON_TYPE_LEFT then return end
-        local d = I.drag[p]
-        I.drag[p] = nil
-        if not d then return end
         local x, y = BlzGetTriggerPlayerMouseX(), BlzGetTriggerPlayerMouseY()
-        if x ~= 0 or y ~= 0 then
-            I.release(p, d.slot, x, y)                           -- released over the world
-            return
+        local d, h = I.drag[p], slotHover(p)
+        if d or h or overBlocker(p) then
+            trace("player %d left release at %d,%d over %s%s", GetPlayerId(p), math.floor(x), math.floor(y), tag(h),
+                overBlocker(p) and " (hud)" or "")
         end
-        local h = I.hover[p]
-        if not h or (h.row == d.row and h.i == d.i) then return end   -- another frame, or a click
-        I.dropped[p] = {row = h.row, i = h.i, at = Timer.now()}
-        local ok, why = Inv().move(p, d.slot, I.slotOf(p, h.row, h.i))
-        if not ok and why then fail(p, why) end
+        if not d or d.up then return end
+        d.up, d.x, d.y = true, x, y
+        -- still over its own slot: a click, or a drag whose hover events the
+        -- engine held back until the release; a late MOUSE_ENTER tells
+        if h and h.row == d.row and h.i == d.i then
+            Timer.after(SETTLE, function() resolve(p, d, true) end)
+        else
+            resolve(p, d)
+        end
     end
 
     -- A walking drop or give ends with any order the player gives.

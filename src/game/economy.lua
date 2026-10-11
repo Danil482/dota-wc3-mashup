@@ -1,7 +1,7 @@
 -- Gold and experience the Dota way: passive gold for hero players, last-hit
 -- bounties (the gold popup for the killer only), shared XP for heroes near a
 -- death, denies, hero kill gold and buyback. Native WC3 XP is switched off in
--- gameplay constants, so the commander's own heroes get XP here as well.
+-- gameplay constants, so the Warcraft player's own heroes get XP here as well.
 define("economy", function()
     local Events = use("events")
     local Timer = use("timer")
@@ -111,7 +111,7 @@ define("economy", function()
         end
     end
 
-    local function opposite(side) return side == "dota" and "commander" or "dota" end
+    local function opposite(side) return side == "dota" and "warcraft" or "dota" end
 
     local function onDeath(dying, killer)
         if not killer or killer == dying then return end
@@ -133,9 +133,9 @@ define("economy", function()
                 local paid = E.earn(p, bounty)
                 if paid > 0 then bountyText(dying, paid, p) end
             end
-        elseif killerSide == "commander" then
-            -- The commander earns half the bounty for anything his side kills
-            addGold(Player(Roles.commander), bounty * 0.5)
+        elseif killerSide == "warcraft" then
+            -- The Warcraft player earns half the bounty of his side's kills
+            addGold(Player(Roles.warcraft), bounty * 0.5)
         end
         if xp > 0 then shareXp(dying, xp, killerSide, XP_RANGE) end
     end

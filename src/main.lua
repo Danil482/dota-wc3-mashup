@@ -1,23 +1,23 @@
 -- Map entry points. WC3 calls config() while building the lobby and main()
 -- when the game starts. Slot layout:
 --   0..4  user slots, force "Dota" (hero players; empty slots get bots)
---   5     user slot, force "Commander"
+--   5     user slot, force "Warcraft"
 --   6     computer "The Ancients": Dota lane creeps
---   7     computer "Commander AI": plays the commander when no human does
---   8     computer "Horde": the commander's uncontrollable creep waves
+--   7     computer "Warcraft AI": plays Warcraft when no human does
+--   8     computer "Horde": the Warcraft player's uncontrollable creep waves
 --   10    outside the lobby: the Dota buildings, left alone by the neutral
 --         camps that lane creeps fight (roles.lua)
 PLAYER_COUNT = 9
 SLOT_DOTA_MAX = 4
-SLOT_COMMANDER = 5
+SLOT_WARCRAFT = 5
 SLOT_ANCIENTS = 6
-SLOT_COMMANDER_AI = 7
+SLOT_WARCRAFT_AI = 7
 SLOT_HORDE = 8
 SLOT_BUILDINGS = 10
 
 local function startLocations()
     local m = use("data.mapdata")
-    local f, s = m.dota.fountain, m.commander.start
+    local f, s = m.dota.fountain, m.warcraft.start
     return {
         [0] = f, [1] = f, [2] = f, [3] = f, [4] = f,
         [5] = s, [6] = m.dota.ancient, [7] = s, [8] = s,
@@ -25,8 +25,8 @@ local function startLocations()
 end
 
 function config()
-    SetMapName("Dota vs Commander")
-    SetMapDescription("Up to five Dota 2 heroes against one Warcraft III commander.")
+    SetMapName("Dota vs Warcraft")
+    SetMapDescription("Up to five Dota 2 heroes against one Warcraft III player.")
     SetPlayers(PLAYER_COUNT)
     SetTeams(PLAYER_COUNT)
     SetGamePlacement(MAP_PLACEMENT_TEAMS_TOGETHER)
@@ -40,10 +40,10 @@ function config()
         local p = Player(i)
         SetPlayerStartLocation(p, i)
         -- without it WC3 deals start locations at random, as in melee, and the
-        -- AI commander may take a start away from its hall and mine
+        -- Warcraft AI may take a start away from its hall and mine
         ForcePlayerStartLocation(p, i)
         SetPlayerColor(p, ConvertPlayerColor(i))
-        if i <= SLOT_COMMANDER then
+        if i <= SLOT_WARCRAFT then
             SetPlayerController(p, MAP_CONTROL_USER)
             SetPlayerRaceSelectable(p, true)
             SetPlayerRacePreference(p, RACE_PREF_RANDOM)
@@ -54,7 +54,7 @@ function config()
         end
     end
 
-    -- Lobby teams: 0 = Dota (slots 0-4 and the Ancients), 1 = Commander side
+    -- Lobby teams: 0 = Dota (slots 0-4 and the Ancients), 1 = Warcraft side
     for i = 0, PLAYER_COUNT - 1 do
         local team = (i <= SLOT_DOTA_MAX or i == SLOT_ANCIENTS) and 0 or 1
         SetPlayerTeam(Player(i), team)

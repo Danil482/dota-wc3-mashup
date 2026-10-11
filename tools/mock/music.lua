@@ -4,9 +4,9 @@
 -- and stop) and walks one Dota player through a game: the countdown, the
 -- horn, laning tracks, a battle with loop copies and its outro on a sync
 -- point, Roshan, death and respawn, a buyback, announcer ducking and the
--- victory stinger. Also checks that the commander hears none of it, and that
--- the deck decisions do not depend on the local player. Failed checks become
--- ERROR lines, which fail the mock run.
+-- victory stinger. Also checks that the Warcraft player hears none of it, and
+-- that the deck decisions do not depend on the local player. Failed checks
+-- become ERROR lines, which fail the mock run.
 do
     local saved = {}
     local function stub(name, fn)
@@ -187,7 +187,7 @@ do
             advance(0.6)
         end
 
-        -- creep waves start no battle; the commander's units do
+        -- creep waves start no battle; the Warcraft player's units do
         Events.emit("damaged", wave, hero)
         Events.emit("damaged", wave, hero)
         Events.emit("damaged", wave, hero)
@@ -270,7 +270,7 @@ do
         check("no respawn stinger after a buyback", created("respawn", tbb) == 0)
         check("death music gone after the buyback", #live("killed") == 0)
 
-        -- the decisions are the same on every client: as the commander's
+        -- the decisions are the same on every client: as the Warcraft player's
         -- client, the same tracks exist and are silent
         local function tracks()
             local n = 0
@@ -286,7 +286,7 @@ do
         for _, s in ipairs(sounds) do
             if keyOf(s) and not s.killed and s.vol > 0 then loud = loud + 1 end
         end
-        check("the commander hears no Dota music", loud == 0, loud)
+        check("the Warcraft player hears no Dota music", loud == 0, loud)
         check("no extra tracks for another client", tracks() == count, tracks() - count)
         listener.slot = 0
         advance(0.2)

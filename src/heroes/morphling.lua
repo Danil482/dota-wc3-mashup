@@ -23,6 +23,7 @@ define("hero_morphling", function()
     local Events = use("events")
     local U = use("util")
     local Bots = use("bots")
+    local Fx = use("fx")
     local M = {}
 
     local WAVE, STRIKE = "morphling_waveform", "morphling_adaptive_strike_agi"
@@ -42,9 +43,9 @@ define("hero_morphling", function()
     for _, code in ipairs({"AEme", "ANcr", "ANrg", "ANef"}) do BLOCKED[FourCC(code)] = true end
 
     local FX = {
-        wave = "Abilities\\Spells\\Other\\CrushingWave\\CrushingWaveMissile.mdl",
+        wave = Fx.model("morphling_waveform", "Abilities\\Spells\\Other\\CrushingWave\\CrushingWaveMissile.mdl"),
         waveHit = "Abilities\\Spells\\Other\\CrushingWave\\CrushingWaveDamage.mdl",
-        strike = "Abilities\\Weapons\\WaterElementalMissile\\WaterElementalMissile.mdl",
+        strike = Fx.model("morphling_adaptive_strike", "Abilities\\Weapons\\WaterElementalMissile\\WaterElementalMissile.mdl"),
         strikeHit = "Abilities\\Spells\\Other\\CrushingWave\\CrushingWaveDamage.mdl",
         stun = "Abilities\\Spells\\Human\\Thunderclap\\ThunderclapTarget.mdl",
         agi = "Abilities\\Spells\\Items\\AIam\\AIamTarget.mdl",

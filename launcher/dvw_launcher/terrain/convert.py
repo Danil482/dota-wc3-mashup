@@ -25,9 +25,10 @@ for a cliff tile to sit wholly on unwalkable cells, so no walkable cell is
 lost; the strips too narrow for that get rocks (doodads, visual only: the
 pathing map stays Dota's).
 
-The commander replaces the Dire: the Dire high ground (with the fountain
-platform) becomes one flat, buildable level without trees or props, and the
-commander's town hall stands where the Dire Ancient stood.
+The Warcraft player replaces the Dire: the Dire high ground (with the fountain
+platform) becomes one flat, buildable level without Dota's trees or props,
+and the Warcraft player's town hall stands where the Dire Ancient stood. A grove
+of the Dire's dead trees behind the hall gives his workers lumber.
 """
 import base64
 import math
@@ -68,7 +69,7 @@ LAYER_TILES = {
     "dire_path_cracked": ("Bdrt", "Bdsd", "Bdsr", "Bflr"),
     "dire_riverbed_path": ("Bdrt", "Bdrr", "Bdrr", "Bdrt"),
 }
-BASE_TILES = ("Bdrt", "Bdsd")                     # the commander's flattened Dire base (buildable)
+BASE_TILES = ("Bdrt", "Bdsd")                     # the Warcraft player's flattened Dire base (buildable)
 RAISED_TILES = {"radiant": ("Lrok", "Lgrd"), "dire": ("Adrd", "Bdsd")}     # tops of raised blocked ground
 # Pathing cell values as the World Editor writes them (Blizzard maps).
 LAND, WATER, BLOCKED, BOUNDARY = 0x40, 0x08, 0xCA, 0xCE
@@ -126,14 +127,15 @@ class Terrain:
         self.tex = bytearray(N * N)
         self.var = bytearray(N * N)
         self.cliff_tex = bytearray(N * N)
-        self.frozen = bytearray(N * N)     # set by ramps, pads and the commander base
-        self.base = bytearray(N * N)       # commander base corners
+        self.frozen = bytearray(N * N)     # set by ramps, pads and the Warcraft base
+        self.base = bytearray(N * N)       # Warcraft base corners
         self.raised = bytearray(N * N)     # corners of blocked ground raised into cliffs
         self.ramp_tiles = set()            # (i, j) tiles walkable as ramp interiors
         self.romp_tiles = set()            # (i, j) ramp side pieces (unwalkable)
         self.ramps = []
         self.pathing = bytearray(CELLS * CELLS)
         self.trees = []                    # (x, y, z, variation, scale, tree type, facing in radians)
+        self.grove = []                    # (x, y) of the Warcraft grove, also in trees (place_grove)
         self.tree_plan = {"types": {}, "kinds": []}    # trees.plan_trees
         self.rocks = []                    # (x, y, z, variation, scale, angle)
         self.decor = []                    # (x, y, z, variation, scale, doodad id, angle)
@@ -430,7 +432,7 @@ def place_ramps(t, desc, walk_count):
             for m, r0, r1 in _placements(claimed, along, across, width, axis):
                 cells = [(s, q) for s in range(m - 1, m + 2) for q in range(r0 - 1, r1 + 2)]
                 if low >= 2 and any(t.base[ci(*corner(s, q))] for s, q in cells):
-                    inside_base = True                 # inside the flattened commander base
+                    inside_base = True                 # inside the flattened Warcraft base
                     break
                 approach = [(s, q) for s in (m - 2, m + 2) for q in range(r0 - 1, r1 + 2)
                             if not claimed[ci(*corner(s, q))]]
@@ -465,9 +467,9 @@ def place_ramps(t, desc, walk_count):
             t.notes.append(f"ramp at {rp['center']} does not fit between other ramps: left as a cliff")
 
 
-# ------------------------------------------------------------------ commander base and pads
+# ------------------------------------------------------------------ Warcraft base and pads
 
-def commander_base(t, desc, walk_count):
+def warcraft_base(t, desc, walk_count):
     """Corners of the Dire high ground (levels 2 and 3, mostly walkable)
     connected to the Dire Ancient, plus one ring into unwalkable corners of the
     same levels (props), flattened to level 2."""
@@ -536,7 +538,7 @@ def fountain_pad(t, pos, walk_count, radius):
 def keep_points(desc, radii):
     """(x, y, radius) around every entity of the kinds in radii (KEEP_RAISE,
     KEEP_ROCKS). Dire structures, the Dire fountain and its shop are left
-    out: the commander's base replaces them."""
+    out: the Warcraft base replaces them."""
     e = desc["entities"]
     out = []
 
@@ -588,7 +590,7 @@ def raise_blocked(t, r, desc, walk_count):
     """Dota's unwalkable areas become WC3 cliffs where a cliff fits: a corner
     rises when the four tiles around it are wholly unwalkable in Dota, so every
     cliff tile it makes covers blocked cells only and the pathing does not
-    change. Ramps (and two corners around them), the commander base and the
+    change. Ramps (and two corners around them), the Warcraft base and the
     ground by structures (KEEP_RAISE) stay as they are. The first ring of
     raised corners stands RAISE_RING levels above the highest ground beside
     it, the corners further in RAISE_INNER (limit_steps settles the rest).
@@ -616,7 +618,7 @@ def raise_blocked(t, r, desc, walk_count):
             if all(full[b * TILES + a] for a in (i - 1, i) for b in (j - 1, j) if 0 <= a < TILES and 0 <= b < TILES):
                 up[k] = 1
     # The level of the walkable ground nearest to each corner (corners mostly
-    # on walkable cells, ramps and the commander base are ground): the blocked
+    # on walkable cells, ramps and the Warcraft base are ground): the blocked
     # corners beside raised ground may sit a level above it (corner_votes).
     steps = NEIGHBOURS
     gref = [None] * (N * N)
@@ -757,7 +759,7 @@ ROCK_RADIUS = 85.0                 # LRrk half width at scale 1
 def place_rocks(t, r, desc):
     """Rocks on the blocked ground that stayed level with the walkable ground
     around it (strips narrower than a cliff, small obstacles): cells blocked
-    in Dota and in the WC3 pathing (the commander base is open), not under a
+    in Dota and in the WC3 pathing (the Warcraft base is open), not under a
     cliff tile, raised ground or a tree, and away from structures
     (KEEP_ROCKS). Deepest cells first (distance to open ground); a rock's
     size follows that distance, so it barely reaches over walkable ground.
@@ -930,7 +932,7 @@ def textures(t, r, desc):
 
 
 def buildable_ground(t, spots, radius):
-    """Corners within radius of the spots (the commander's mines and
+    """Corners within radius of the spots (the Warcraft player's mines and
     expansions) on a tile WC3 builds on: unbuildable tiles there (rock,
     river stones, flagstones) become the base's ground."""
     for x0, y0 in spots:
@@ -989,7 +991,7 @@ def walkable_share(t, r):
 
 def check_reachable(t):
     """Everything the game script walks to must be reachable on foot from the
-    Radiant fountain: lanes, structures and the commander's base, or the
+    Radiant fountain: lanes, structures and the Warcraft base, or the
     conversion fails (and the launcher keeps the base layout). Camps, runes
     and the expansions only get a note."""
     md = t.mapdata
@@ -998,11 +1000,11 @@ def check_reachable(t):
     must = [(f"lane {lane} point {i}", p) for lane, ps in md["lanes"].items() for i, p in enumerate(ps)]
     must += [(f"tower {lane} {i + 1}", p) for lane, ps in md["dota"]["towers"].items() for i, p in enumerate(ps)]
     must += [(f"barracks {lane}", p) for lane, ps in md["dota"]["barracks"].items() for p in ps]
-    must += [("ancient", md["dota"]["ancient"]), ("commander start", md["commander"]["start"])]
-    must += [("gold mine", p) for p in md["commander"]["mines"]]
+    must += [("ancient", md["dota"]["ancient"]), ("Warcraft start", md["warcraft"]["start"])]
+    must += [("gold mine", p) for p in md["warcraft"]["mines"]]
     nice = [(f"camp {n}", p) for n, p in md["camps"].items()] + [("roshan", md["roshan"])]
     nice += [("rune", p) for p in md["runes"] + md.get("bounty_runes", [])]
-    nice += [("expansion", p) for p in md["commander"]["expansions"]]
+    nice += [("expansion", p) for p in md["warcraft"]["expansions"]]
     bad = [n for n, p in must if not near_reachable(seen, p["x"], p["y"], 192)]
     if bad:
         raise ConvertError(f"not reachable from the fountain: {', '.join(bad[:6])}")
@@ -1012,15 +1014,17 @@ def check_reachable(t):
     return sum(seen)
 
 
-def reachable(t, start):
-    """Pathing cells reachable on foot from start (4-neighbour flood)."""
+def reachable(t, start, pathing=None):
+    """Pathing cells reachable on foot from start (4-neighbour flood) on
+    pathing, by default the map's."""
+    p = t.pathing if pathing is None else pathing
     seen = bytearray(CELLS * CELLS)
     i, j = int((start[0] - ORIGIN) // 32), int((start[1] - ORIGIN) // 32)
     best = None
     for rad in range(0, 12):
         for a in range(i - rad, i + rad + 1):
             for b in range(j - rad, j + rad + 1):
-                if 0 <= a < CELLS and 0 <= b < CELLS and t.pathing[b * CELLS + a] in (LAND, WATER):
+                if 0 <= a < CELLS and 0 <= b < CELLS and p[b * CELLS + a] in (LAND, WATER):
                     best = b * CELLS + a
                     break
             if best is not None:
@@ -1031,7 +1035,6 @@ def reachable(t, start):
         return seen
     stack = [best]
     seen[best] = 1
-    p = t.pathing
     while stack:
         k = stack.pop()
         a, b = k % CELLS, k // CELLS
@@ -1221,7 +1224,7 @@ def gameplay(t, r, desc, base_region):
             "towers": {lane: [_pt(tw["pos"]) for tw in good_towers[lane]] for lane in LANES},
             "barracks": {lane: [_pt(good_rax[lane]["melee"]), _pt(good_rax[lane]["range"])] for lane in LANES},
         },
-        "commander": {
+        "warcraft": {
             "start": _pt(start),
             "mines": [_pt(mine)],
             "expansions": [_pt(p) for p in expansions],
@@ -1244,7 +1247,7 @@ DEGREES = 0.017453292519943295       # pi / 180
 
 def place_trees(t, desc, clear):
     """Dota's trees as WC3 tree destructables, minus those on cliffs, ramps,
-    the commander base and the cleared spots (list of (x, y, radius)). Each
+    the Warcraft base and the cleared spots (list of (x, y, radius)). Each
     keeps Dota's facing and scale, and gets the WC3 tree type and variation
     that carries its Dota model (trees.plan_trees)."""
     plan = trees.plan_trees(desc)
@@ -1274,6 +1277,124 @@ def place_trees(t, desc, clear):
     t.tree_plan = plan
 
 
+# ------------------------------------------------------------------ the Warcraft grove
+
+# Trees for the Warcraft player's workers, as on WC3 melee maps; tools/layout.py
+# gives the base layout the same grove. Distances are from the hall's centre
+# (the hall is 512 units wide, like the gold mine).
+GROVE_FRONT, GROVE_ROWS = 960, 4   # the front row stands 640 past the hall's side
+GROVE_MAX = 60                     # trees before the walkway is cut
+GROVE_SPREAD = 0.5                 # cos of the widest angle from the grove's axis (60 degrees)
+GROVE_MINE, GROVE_SPAWN, GROVE_EXPANSION = 512, 768, 640     # clear discs around them
+GROVE_BACK_HALF = False            # keep the grove behind the hall too; off for a bigger grove
+                                   # (51 trees instead of 42 on the Dire base, the user's call, 2026-10-11)
+GROVE_PATH = 384                   # half width of the walks from the hall to its mines and the spawns
+GROVE_WALK = 128                   # trees centred this close to the walkway's line go
+GROVE_POCKET = 16                  # pathing cells the grove may cut off the hall (nooks by cliffs)
+GROVE_TYPE = "BTtw"                # the Dire's dead trees
+
+
+def _unit(dx, dy):
+    n = math.hypot(dx, dy)
+    return dx / n, dy / n
+
+
+def _seg_dist(px, py, ax, ay, bx, by):
+    dx, dy = bx - ax, by - ay
+    u = 0.0 if dx == dy == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)))
+    return math.hypot(px - ax - u * dx, py - ay - u * dy)
+
+
+def grove(start, mines, spawns, front, free, avoid=()):
+    """Tree spots (tile centres) of the Warcraft grove, the trees his
+    workers cut first: a band GROVE_ROWS trees deep from GROVE_FRONT out
+    from the hall at start. Its axis points where the mines and the creep
+    spawns are farthest in angle; the band keeps within 60 degrees of it (and
+    with GROVE_BACK_HALF in the hall's back half, away from front, the Dota
+    Ancient), off the discs
+    around the mines and spawns and the walks from the hall to them, off
+    avoid [(x, y, radius)], and where free(x, y) lets a tree stand. A walkway
+    a tile wide cuts it in two. No trigonometry, so every player gets the
+    same spots."""
+    sx, sy = start
+    goals = [(p[0], p[1]) for p in list(mines) + list(spawns)]
+    dirs = [_unit(x - sx, y - sy) for x, y in goals]
+    fx, fy = _unit(front[0] - sx, front[1] - sy)
+    ox, oy = _unit(sx, sy)                    # outward from the map centre, for ties
+    discs = [(p[0], p[1], GROVE_MINE) for p in mines] + [(p[0], p[1], GROVE_SPAWN) for p in spawns] + list(avoid)
+    r0, r1 = GROVE_FRONT, GROVE_FRONT + 128 * GROVE_ROWS
+    spots = []
+    for j in range(int((sy - r1) // 128), int((sy + r1) // 128) + 1):
+        for i in range(int((sx - r1) // 128), int((sx + r1) // 128) + 1):
+            x, y = 128 * i + 64, 128 * j + 64
+            vx, vy = x - sx, y - sy
+            d2 = vx * vx + vy * vy
+            if not r0 * r0 <= d2 < r1 * r1 or (GROVE_BACK_HALF and vx * fx + vy * fy > 0):
+                continue
+            if any((x - cx) ** 2 + (y - cy) ** 2 < rad * rad for cx, cy, rad in discs):
+                continue
+            if any(_seg_dist(x, y, sx, sy, gx, gy) < GROVE_PATH for gx, gy in goals) or not free(x, y):
+                continue
+            d = math.sqrt(d2)
+            spots.append((max(vx * ux + vy * uy for ux, uy in dirs) / d, -(vx * ox + vy * oy) / d, x, y, d))
+    if not spots:
+        return []
+    ax, ay = _unit(min(spots)[2] - sx, min(spots)[3] - sy)
+    band = sorted((s for s in spots if ((s[2] - sx) * ax + (s[3] - sy) * ay) / s[4] >= GROVE_SPREAD),
+                  key=lambda s: (-((s[2] - sx) * ax + (s[3] - sy) * ay) / s[4], s[3], s[2]))[:GROVE_MAX]
+    band.sort(key=lambda s: (((s[2] - sx) * ay - (s[3] - sy) * ax) / s[4], s[3], s[2]))
+    wx, wy = _unit(band[len(band) // 2][2] - sx, band[len(band) // 2][3] - sy)
+    return [(x, y) for _c, _o, x, y, _d in band
+            if (x - sx) * wx + (y - sy) * wy <= 0 or abs((x - sx) * wy - (y - sy) * wx) >= GROVE_WALK]
+
+
+def place_grove(t):
+    """The Warcraft grove (grove()) on the flattened Dire base, as tree
+    destructables of the Dire's dead tree type. Left out, with a note, if
+    its trees would cut more than GROVE_POCKET pathing cells off the hall."""
+    md = t.mapdata
+    c = md["warcraft"]
+    sx, sy = c["start"]["x"], c["start"]["y"]
+    reach = GROVE_FRONT + 128 * GROVE_ROWS + 256
+    rocks = [(x, y) for x, y, *_rest in t.rocks if abs(x - sx) < reach and abs(y - sy) < reach]
+    ramps = {(i + a, j + b) for i, j in t.ramp_tiles | t.romp_tiles for a in range(-3, 4) for b in range(-3, 4)}
+
+    def free(x, y):
+        ti, tj = int((x - ORIGIN) // 128), int((y - ORIGIN) // 128)
+        if (ti, tj) in ramps or not all(t.base[ci(ti + a, tj + b)] for a in (0, 1) for b in (0, 1)):
+            return False
+        if any(t.pathing[(4 * tj + b) * CELLS + 4 * ti + a] != LAND for b in range(4) for a in range(4)):
+            return False
+        return not any(abs(x - rx) < 192 and abs(y - ry) < 192 for rx, ry in rocks)
+    spots = grove((sx, sy), [(p["x"], p["y"]) for p in c["mines"]], [(p["x"], p["y"]) for p in c["spawns"].values()],
+                  (md["dota"]["ancient"]["x"], md["dota"]["ancient"]["y"]), free,
+                  [(p["x"], p["y"], GROVE_EXPANSION) for p in c["expansions"]])
+    if not spots:
+        t.notes.append("no room for the Warcraft grove")
+        return
+    cells = bytearray(t.pathing)
+    for x, y in spots:
+        k = int((y - 64 - ORIGIN) // 32) * CELLS + int((x - 64 - ORIGIN) // 32)
+        for b in range(4):
+            cells[k + b * CELLS:k + b * CELLS + 4] = bytes([BLOCKED]) * 4
+    before, after = reachable(t, (sx, sy)), reachable(t, (sx, sy), cells)
+    cut = sum(1 for b, a, v in zip(before, after, cells) if b and not a and v != BLOCKED)
+    if cut > GROVE_POCKET:
+        t.notes.append(f"no grove for the Warcraft player: its {len(spots)} trees would cut {cut} pathing cells off the hall")
+        return
+    far = max(math.hypot(x - sx, y - sy) for x, y in spots)
+    nearer = sum(1 for row in t.trees if math.hypot(row[0] - sx, row[1] - sy) < far)
+    if nearer:
+        t.notes.append(f"{nearer} trees stand nearer the Warcraft player's hall than the far side of his grove")
+    types = t.tree_plan["types"]
+    kind, count = (GROVE_TYPE, len(types[GROVE_TYPE])) if types.get(GROVE_TYPE) else (TREE_ID, 10)
+    for x, y in spots:
+        h = _hash(x, y, 17)
+        t.trees.append((x, y, round(t.ground_z(x, y), 3), h % count, round(0.9 + (h >> 8) % 21 / 100.0, 3), kind,
+                        round((h >> 16) % 360 * DEGREES, 4)))
+    t.grove = spots
+
+
 # ------------------------------------------------------------------ all of it
 
 def convert(desc, log=lambda s: None):
@@ -1281,7 +1402,7 @@ def convert(desc, log=lambda s: None):
     r = Rasters(desc)
     walk_count = corner_votes(t, r)
     limit_blocked_levels(t, walk_count)
-    base_region = commander_base(t, desc, walk_count)
+    base_region = warcraft_base(t, desc, walk_count)
     fountain_pad(t, desc["entities"]["fountains"]["good"], walk_count, radius=1050)
     place_ramps(t, desc, walk_count)
     raised = raise_blocked(t, r, desc, walk_count)
@@ -1295,13 +1416,13 @@ def convert(desc, log=lambda s: None):
     pathing(t, r, base_tiles)
     t.mapdata = gameplay(t, r, desc, base_region)
     md = t.mapdata
-    clear = [(md["commander"]["start"]["x"], md["commander"]["start"]["y"], 900)]
-    clear += [(p["x"], p["y"], 640) for p in md["commander"]["mines"] + md["commander"]["expansions"]]
+    clear = [(md["warcraft"]["start"]["x"], md["warcraft"]["start"]["y"], 900)]
+    clear += [(p["x"], p["y"], 640) for p in md["warcraft"]["mines"] + md["warcraft"]["expansions"]]
     place_trees(t, desc, clear)
     decor = place_decor(t, trees.decor_kinds(t.tree_plan))
-    buildable_ground(t, [(p["x"], p["y"]) for p in md["commander"]["mines"] + md["commander"]["expansions"]], 900)
+    buildable_ground(t, [(p["x"], p["y"]) for p in md["warcraft"]["mines"] + md["warcraft"]["expansions"]], 900)
     # The expansions' ground: open and buildable around the mine and the hall.
-    for p in md["commander"]["expansions"]:
+    for p in md["warcraft"]["expansions"]:
         for b in range(-20, 21):
             for a in range(-20, 21):
                 x, y = p["x"] + 32 * a, p["y"] + 32 * b
@@ -1310,12 +1431,13 @@ def convert(desc, log=lambda s: None):
                         int((x - ORIGIN) // 128), int((y - ORIGIN) // 128)):
                     t.pathing[k] = LAND
     strips = place_rocks(t, r, desc)
+    place_grove(t)
     cells = check_reachable(t)
     odd = sorted(set(transition_names(t.level, t.ramp)) - RAMP_SIDES - FLAT_SIDES)
     if odd:
         raise ConvertError(f"cliffs ask for ramp models WC3 may not have: {', '.join(odd[:5])}")
-    log(f"terrain: {len(t.ramps)} WC3 ramps, {len(t.trees)} trees, {len(base_region)} commander base corners, "
-        f"{cells} pathing cells reachable from the fountain")
+    log(f"terrain: {len(t.ramps)} WC3 ramps, {len(t.trees)} trees ({len(t.grove)} in the Warcraft grove), "
+        f"{len(base_region)} Warcraft base corners, {cells} pathing cells reachable from the fountain")
     log(f"terrain: {raised} corners of blocked ground raised, {decor} decorative trees on them, {len(t.rocks)} "
         f"rocks on {strips} blocked cells too narrow for a cliff, {walkable_share(t, r):.2%} of Dota's walkable "
         "ground walkable")

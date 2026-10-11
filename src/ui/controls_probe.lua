@@ -6,13 +6,19 @@
 --      without a target;
 --   C: what SetUnitAcquireRange and the acquisition range field read back
 --      at once and a second later, and whether the worker type (the auto
---      attack mechanism of dota_settings.lua) can be added and removed.
+--      attack mechanism of dota_settings.lua) can be added and removed;
+--   D: where effects attached at origin, overhead, chest and head end up on a
+--      footman wearing the converted Anti-Mage model (BlzSetUnitSkin) next to
+--      a plain footman (effect minus unit position; a converted model whose
+--      attachment points work reads like the footman, with its own heights),
+--      and whether a Dota ranged creep's attack projectile art can be read
+--      and set at run time (UNIT_WEAPON_SF_ATTACK_PROJECTILE_ART).
 -- (A, synthetic probe Channels on footmen, answered on 2026-10-11 and is gone.)
 -- Every order goes by string, then by order id, and the footman stops right
 -- after each, so a taken order never starts a cast; the B footmen are
 -- removed in the same call, before the next frame, and the C footman is
 -- hidden. The table goes to log.txt (not on screen) and to
--- DotaVsCommander\controls_probe.txt, which survives the log rolling over.
+-- DotaVsWarcraft\controls_probe.txt, which survives the log rolling over.
 -- "++" taken by string and by id, "--" refused by both.
 --
 -- Start in game.lua begin(), test builds: use("controls_probe").run()
@@ -21,7 +27,7 @@ define("controls_probe", function()
     local Timer = use("timer")
     local P = {}
 
-    local FILE = "DotaVsCommander\\controls_probe.txt"
+    local FILE = "DotaVsWarcraft\\controls_probe.txt"
     local STOP = 851972
     local FOOTMAN = FourCC("hfoo")
 
@@ -96,6 +102,47 @@ define("controls_probe", function()
         end)
     end
 
+    local ATTACH = {"origin", "overhead", "chest", "head"}
+    local MARK = "Abilities\\Spells\\Other\\TalkToMe\\TalkToMe.mdl"
+    local PROBE_MISSILE = "Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl"
+
+    local function attachments(p, x, y, done)
+        local ids = use("data.ids")
+        local units = {{name = "footman", u = CreateUnit(p, FOOTMAN, x - 150, y - 300, 270)}}
+        if ids.heroes.antimage then
+            local u = CreateUnit(p, FOOTMAN, x + 150, y - 300, 270)
+            BlzSetUnitSkin(u, FourCC(ids.heroes.antimage))
+            units[#units + 1] = {name = "antimage model", u = u}
+        end
+        local marks = {}
+        for _, e in ipairs(units) do
+            PauseUnit(e.u, true)
+            for _, a in ipairs(ATTACH) do
+                marks[#marks + 1] = {e = e, a = a, fx = AddSpecialEffectTarget(MARK, e.u, a)}
+            end
+        end
+        local ranged = ids.units.dota_ranged and CreateUnit(p, FourCC(ids.units.dota_ranged), x, y - 450, 0)
+        Timer.after(0.5, function()
+            local out = {"D: attached effect minus unit (x y z)"}
+            for _, m in ipairs(marks) do
+                local u = m.e.u
+                out[#out + 1] = string.format("%s %s %.0f %.0f %.0f", m.e.name, m.a,
+                    BlzGetLocalSpecialEffectX(m.fx) - GetUnitX(u), BlzGetLocalSpecialEffectY(m.fx) - GetUnitY(u),
+                    BlzGetLocalSpecialEffectZ(m.fx) - BlzGetUnitZ(u))
+                DestroyEffect(m.fx)
+            end
+            if ranged then
+                local before = BlzGetUnitWeaponStringField(ranged, UNIT_WEAPON_SF_ATTACK_PROJECTILE_ART, 0)
+                local set = BlzSetUnitWeaponStringField(ranged, UNIT_WEAPON_SF_ATTACK_PROJECTILE_ART, 0, PROBE_MISSILE)
+                out[#out + 1] = string.format("projectile art %s, set %s, now %s", tostring(before), tostring(set),
+                    tostring(BlzGetUnitWeaponStringField(ranged, UNIT_WEAPON_SF_ATTACK_PROJECTILE_ART, 0)))
+                RemoveUnit(ranged)
+            end
+            for _, e in ipairs(units) do RemoveUnit(e.u) end
+            done(table.concat(out, "; "))
+        end)
+    end
+
     -- Preload lines are cut like the log's (Log.flush).
     local function save(lines)
         PreloadGenClear()
@@ -113,6 +160,7 @@ define("controls_probe", function()
         local p = Player(PLAYER_NEUTRAL_PASSIVE)
         local lines = {"controls probe: order by string and by id, + taken, - refused"}
         heroChannels(lines, p, f.x, f.y)
+        attachments(p, f.x, f.y, function(line) lines[#lines + 1] = line end)   -- 0.5 s, before C saves
         acquisition(p, f.x, f.y, function(line)
             lines[#lines + 1] = line
             P.lines = lines

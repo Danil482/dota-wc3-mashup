@@ -232,7 +232,7 @@ define("world_roshan", function()
         Ro.respawnAt = W.clock() + GetRandomReal(Ro.RESPAWN[1], Ro.RESPAWN[2])
         local by = killer and use("roles").side(GetPlayerId(GetOwningPlayer(killer))) or "none"
         W.announce("|cffff8000Roshan|r has been slain" .. (by == "dota" and " by the Dota heroes"
-            or by == "commander" and " by the Commander" or "") .. ". The Aegis lies in the pit.")
+            or by == "warcraft" and " by the Warcraft side" or "") .. ". The Aegis lies in the pit.")
         Log.info("world: Roshan kill " .. Ro.kills)
     end
 

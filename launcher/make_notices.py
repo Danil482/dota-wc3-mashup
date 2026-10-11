@@ -1,4 +1,4 @@
-"""Write THIRD_PARTY_NOTICES.txt for dist/DotaVsCommander/.
+"""Write THIRD_PARTY_NOTICES.txt for dist/DotaVsWarcraft/.
 
 Licence texts come from launcher/licenses/ (VRF, StormLib) and from the
 installed packages that PyInstaller bundles (PyInstaller, Pillow, Python), so
@@ -65,7 +65,7 @@ def main(out_path):
     storm_license = (HERE / "licenses" / "StormLib-LICENSE.txt").read_text(encoding="utf-8")
 
     parts = [f"""\
-THIRD-PARTY NOTICES - Dota vs Commander launcher
+THIRD-PARTY NOTICES - Dota vs Warcraft launcher
 ================================================
 
 This folder redistributes the third-party software listed below. No Dota 2 or
@@ -76,7 +76,7 @@ player's own Dota 2 installation on the player's PC.
   vrf\\libSkiaSharp.dll       SkiaSharp native library (from the VRF CLI release)  MIT; Skia: BSD-3-Clause
   vrf\\spirv-cross.dll        SPIRV-Cross (from the VRF CLI release)               Apache-2.0
   StormLib.dll               StormLib {STORMLIB_VERSION}, by Ladislav Zezula                   MIT
-  DotaVsCommander.exe        built with PyInstaller {pyinstaller}                   GPL-2.0+ with bootloader exception
+  DotaVsWarcraft.exe         built with PyInstaller {pyinstaller}                   GPL-2.0+ with bootloader exception
                              contains Python {python}                            PSF License (+ bundled libraries)
                              contains Pillow {pillow}                            MIT-CMU (+ bundled libraries)
 
@@ -117,7 +117,7 @@ Binary:  https://github.com/ladislav-zezula/StormLib/releases/download/v{STORMLI
 {storm_license.strip()}"""))
     parts.append(section(
         f"PyInstaller {pyinstaller} (bootloader)",
-        "DotaVsCommander.exe is a PyInstaller one-file executable. Its bootloader is\n"
+        "DotaVsWarcraft.exe is a PyInstaller one-file executable. Its bootloader is\n"
         "covered by the GPL bootloader exception quoted below, which allows\n"
         "distribution of the combined executable without restriction.\n\n"
         + dist_license("pyinstaller", "COPYING.txt")))

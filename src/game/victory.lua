@@ -1,20 +1,32 @@
--- Win conditions: the Dota side wins when the commander has no town hall left;
--- the commander wins when the Ancient falls. The fountain heals its allies.
+-- Win conditions: the Dota side wins when Warcraft has no town hall left;
+-- Warcraft wins when the Ancient falls. The fountain heals its allies.
 define("victory", function()
     local Log = use("log")
     local Events = use("events")
     local Timer = use("timer")
     local Roles = use("roles")
     local U = use("util")
-    local V = {over = false}
+    local V = {over = false, noEnd = false, pending = nil}
 
     local function finish(winnerSide)
         if V.over then return end
+        if V.noEnd then
+            -- the -noend cheat keeps a decided game going; say so once per winner
+            if V.pending ~= winnerSide then
+                V.pending = winnerSide
+                Log.info("game over held by -noend, winner: " .. winnerSide)
+                for i = 0, bj_MAX_PLAYERS - 1 do
+                    DisplayTimedTextToPlayer(Player(i), 0, 0, 10, "|cffffcc00" .. (winnerSide == "dota"
+                        and "The Dota side" or "The Warcraft side") .. " has won; -noend keeps the game going.|r")
+                end
+            end
+            return
+        end
         V.over = true
         Log.info("game over, winner: " .. winnerSide)
         Log.flush()
         use("safe").call(function() use("announcer").gameOver(winnerSide) end)   -- "Radiant/Dire victory!" + music stinger
-        for slot = 0, SLOT_COMMANDER do
+        for slot = 0, SLOT_WARCRAFT do
             local p = Player(slot)
             if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then
                 if Roles.side(slot) == winnerSide then
@@ -26,21 +38,29 @@ define("victory", function()
         end
     end
 
+    -- The -noend cheat (test builds and solo games): on, a decided game goes
+    -- on; off again, a game decided meanwhile ends.
+    function V.setNoEnd(on)
+        V.noEnd = on
+        if not on and V.pending then finish(V.pending) end
+    end
+
     function V.init()
         local S = use("structures")
-        local Cmd = use("commander")
+        local Cmd = use("warcraft")
         Events.on("death", function(dying)
-            if dying == S.ancient and not BUILD_TEST_MODE then finish("commander") end
+            if dying == S.ancient then finish("warcraft") end
         end)
-        -- The Dota side wins once the commander has had a town hall and lost
-        -- them all. Test builds never end the game on their own.
+        -- The Dota side wins once the Warcraft player has had a town hall and
+        -- lost them all. Test builds end the game too (the user's call,
+        -- 2026-10-11); -noend keeps a test game going.
         local hadHall = false
         Timer.every(2, function()
             if V.over then return true end
             local n = Cmd.halls()
             if n > 0 then
                 hadHall = true
-            elseif hadHall and not BUILD_TEST_MODE then
+            elseif hadHall then
                 finish("dota")
             end
         end)

@@ -16,7 +16,7 @@ define("hero_bot", function()
         local m = use("data.mapdata")
         local path = {}
         for _, p in ipairs(m.lanes[lane]) do path[#path + 1] = p end
-        path[#path + 1] = m.commander.start
+        path[#path + 1] = m.warcraft.start
         return path
     end
 

@@ -13,7 +13,7 @@ define("game", function()
                 use("safe").call(function() use("hero_" .. key) end)
             end
         end
-        local Cmd = use("commander")
+        local Cmd = use("warcraft")
         Cmd.setup(raceKey)
         use("structures").create()
         use("items").init()
@@ -24,7 +24,7 @@ define("game", function()
         use("heroes").init()
         use("voice").init()
         use("safe").call(function() use("gamesounds").init() end)   -- Dota's coins, denies, level-ups, rune and Aegis sounds
-        use("safe").call(function() use("music").init() end)        -- Dota music for Dota players; the commander keeps Warcraft's
+        use("safe").call(function() use("music").init() end)        -- Dota music for Dota players; the Warcraft player keeps Warcraft's
         use("hero_bot").init()
         use("cheats").init()
         use("dummy").init()
@@ -49,8 +49,8 @@ define("game", function()
 
     -- A lone human chooses a side; everyone else uses the lobby slots.
     local function chooseRole(done)
-        if BUILD_TEST_MODE or Roles.humanCount ~= 1 or Roles.soloSlot == SLOT_COMMANDER then
-            done(BUILD_TEST_MODE and AUTOTEST_ROLE == "commander", nil)
+        if BUILD_TEST_MODE or Roles.humanCount ~= 1 or Roles.soloSlot == SLOT_WARCRAFT then
+            done(BUILD_TEST_MODE and AUTOTEST_ROLE == "warcraft", nil)
             return
         end
         local p = Player(Roles.soloSlot)
@@ -58,10 +58,10 @@ define("game", function()
         DialogSetMessage(d, "Play as")
         local hero = DialogAddButton(d, "A Dota hero (with bot teammates)", 0)
         local races = {
-            [DialogAddButton(d, "Commander: Human", 0)] = "human",
-            [DialogAddButton(d, "Commander: Orc", 0)] = "orc",
-            [DialogAddButton(d, "Commander: Undead", 0)] = "undead",
-            [DialogAddButton(d, "Commander: Night Elf", 0)] = "nightelf",
+            [DialogAddButton(d, "Warcraft: Human", 0)] = "human",
+            [DialogAddButton(d, "Warcraft: Orc", 0)] = "orc",
+            [DialogAddButton(d, "Warcraft: Undead", 0)] = "undead",
+            [DialogAddButton(d, "Warcraft: Night Elf", 0)] = "nightelf",
         }
         local trig = CreateTrigger()
         TriggerRegisterDialogEvent(trig, d)
@@ -82,7 +82,7 @@ define("game", function()
 
     function Game.start()
         Log.clock = Timer.now
-        Log.debug = BUILD_TEST_MODE
+        Log.debug = false                   -- lines go to the file only; -log shows them on screen (test builds)
         Log.ready = true
         Log.info("game start, test mode " .. tostring(BUILD_TEST_MODE))
 
@@ -97,8 +97,8 @@ define("game", function()
         end)
         -- Dialogs need the game to be running, so wait a moment.
         Timer.after(0.1, function()
-            chooseRole(function(command, raceKey)
-                Roles.assign(command)
+            chooseRole(function(wantsWarcraft, raceKey)
+                Roles.assign(wantsWarcraft)
                 Roles.setupAlliances()
                 begin(raceKey)
             end)

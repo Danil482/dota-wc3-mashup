@@ -48,7 +48,7 @@ def data_chunks(override=None):
             chunk = f"define({json.dumps(module)}, function()\n    return {lua_literal(data, 4)}\nend)\n"
             # Marked, so the launcher can swap a module in the personalized map: it
             # replaces data.mapdata with Dota's layout (docs/FRAMEWORK.md, "Data modules").
-            chunks.append(f"-- @dvc-data-begin {module}\n{chunk}-- @dvc-data-end {module}\n")
+            chunks.append(f"-- @dvw-data-begin {module}\n{chunk}-- @dvw-data-end {module}\n")
     return "\n".join(chunks)
 
 

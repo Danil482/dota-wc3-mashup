@@ -41,7 +41,7 @@ def _markers(draw, md, size):
     dot(d["ancient"], (0, 255, 0), 6)
     dot(d["fountain"], (0, 255, 255), 5)
     dot(d["shop"], (255, 255, 0))
-    c = md["commander"]
+    c = md["warcraft"]
     dot(c["start"], (255, 40, 40), 7)
     for p in c["mines"] + c["expansions"]:
         dot(p, (255, 215, 0), 5)

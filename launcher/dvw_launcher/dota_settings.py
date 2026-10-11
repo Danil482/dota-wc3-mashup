@@ -10,7 +10,7 @@ usually ARROW) from cfg/dotakeys.lst in the Dota 2 VPK.
 
 Output contract, read by src/ui/dota_settings.lua. It is never part of the
 map, since every player in a lobby needs the same map file:
-    Documents\\Warcraft III\\CustomMapData\\DotaVsCommander\\dota_settings.txt
+    Documents\\Warcraft III\\CustomMapData\\DotaVsWarcraft\\dota_settings.txt
 A Preload script, shaped like the files the game writes itself, that stores
 the settings in the tooltip of the unused ability 'ANdc':
     function PreloadFiles takes nothing returns nothing

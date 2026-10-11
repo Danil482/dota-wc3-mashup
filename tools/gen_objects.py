@@ -13,6 +13,10 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import w3obj  # noqa: E402
 
+# The launcher's model converter names each hero's cast sequences; abilities ask for them.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "launcher"))
+from dvw_launcher.mdx import units as mdx_units  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "src", "data")
 
@@ -34,6 +38,7 @@ ORDERS = {
 CELL_KEYS = {(0, 2): "Q", (1, 2): "W", (2, 2): "E", (3, 2): "R", (1, 1): "D", (2, 1): "F", (0, 1): "G", (3, 1): "T"}
 MODELS = {}
 STANDINS = True
+MISSILES = {}   # unit key -> Dota missile model (specs/effects.json), empty with stand-ins
 
 
 def load(name):
@@ -77,7 +82,19 @@ def apply_model(fields, models, key):
         if "walk" in m:
             fields["uwal"] = m["walk"]      # speed the walk cycle was animated for
             fields["urun"] = m["walk"]      # WC3 keeps run = walk; the models have no Walk Fast
+    if key in MISSILES and fields.get("ua1w", "missile") in ("missile", "msplash", "artillery", "mbounce", "mline"):
+        fields["ua1m"] = MISSILES[key]      # the launcher always writes it (a glow if not converted)
     return fields
+
+
+def load_missiles():
+    """specs/effects.json "missiles": {unit key: war3mapImported\\Dota\\fx\\<effect>.mdx}."""
+    path = os.path.join(ROOT, "specs", "effects.json")
+    if not os.path.exists(path):
+        return {}
+    with open(path, encoding="utf-8") as f:
+        missiles = json.load(f).get("missiles", {})
+    return {u: f"war3mapImported\\Dota\\fx\\{key}.mdx" for key, e in missiles.items() for u in e.get("units", [])}
 
 
 def load_specs():
@@ -115,10 +132,22 @@ def is_innate(ab):
 # src/game/talents.lua. They take Dota's D/F cell of their slot (a passive
 # innate moves aside); a sub-ability shares the cell of the ability it stands
 # in for (MegaMeepo Fling while MegaMeepo is up). An ally-targeted one gets
-# allied targets.
+# allied targets, buildings included (Fire Shield can be cast on towers).
 GRANT_CELLS = {4: (1, 1), 5: (2, 1)}
 GRANT_SHARES = {"meepo_megameepo_fling": "meepo_megameepo"}
-TEAM_TARGETS = {"FRIENDLY": "air,ground,friend,self,vuln,invu"}
+# Upgrade forms Dota keeps inside another ability's data: object -> (ability
+# whose cell it shares, ability whose data and icon it takes, Dota behavior
+# or None, tooltip). The hero module adds them: Techies' M.A.D. turns active
+# with the Shard, and Detonate M.A.D. takes its button while a charge is
+# planted (src/heroes/techies.lua).
+GRANT_FORMS = {
+    "techies_mad_plant": ("techies_mutually_assured_destruction", "techies_mutually_assured_destruction",
+                          "DOTA_ABILITY_BEHAVIOR_POINT | DOTA_ABILITY_BEHAVIOR_AOE",
+                          "Plants an M.A.D. charge at the target point. Only one can be planted at a time."),
+    "techies_mad_detonate": ("techies_mutually_assured_destruction", "techies_focused_detonate", None,
+                             "Sets off the planted M.A.D. charge."),
+}
+TEAM_TARGETS = {"FRIENDLY": "air,ground,structure,friend,self,vuln,invu"}
 
 
 def is_granted(ab):
@@ -184,6 +213,20 @@ def pool_order(target, used):
             used.add(order)
             return order
     raise SystemExit(f"no free Channel order for target type {target}: add one to ORDERS")
+
+
+# Native bases that never play a cast animation (instant or passive); Dota's
+# instant casts are upper-body gestures, which a full WC3 sequence is not.
+NO_CAST_BASES = {"AEev", "Absk", "AEim", "ANms"}
+
+
+def cast_anim(ab, chosen=None):
+    """Art - Animation Names (aani): the sequence of the ability's Dota cast
+    activity (launcher/dvw_launcher/mdx/units.py cast_anim), unless the spec
+    chose another one. A spec's plain "spell" means "its cast" and gets it too."""
+    if chosen is not None and chosen != "spell":
+        return chosen
+    return mdx_units.cast_anim(ab.get("AbilityCastAnimation"))
 
 
 def ability_object(abils, ids, hero, ab, spec, slot_index, ult, orders_used=None):
@@ -262,6 +305,8 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, orders_used=None
         f.update({"acdn": cds, "amcs": manas, "aran": ranges})
         for fid, vals in (spec.get("fields") or {}).items():
             f[fid] = vals
+        if base not in NO_CAST_BASES:
+            f["aani"] = cast_anim(ab, f.get("aani", spec.get("anim")))
     else:
         base = "ANcl"            # Channel: configurable targeting, effect in Lua
         if "CHANNELLED" in flags or spec.get("channel"):
@@ -301,6 +346,7 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, orders_used=None
             f["acas"] = [spec["castPoint"]] * levels       # casting time before the effect
         for fid, vals in (spec.get("fields") or {}).items():
             f[fid] = vals
+        f["aani"] = cast_anim(ab, f["aani"])
         if (innate or granted) and kind == "active":
             f["arlv"], f["alsk"] = 1, 0
     if base == "ANcl":
@@ -312,7 +358,8 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, orders_used=None
         ids.out["orders"][ab["name"]] = spec["order"]
     abils.add(base, code, f)
     if base not in ("ANcl", "AEev"):
-        rubick_copy(abils, ids, code, base, f)
+        # Rubick casts a stolen spell with his stolen-spell cast, his "Spell" (mdx/units.py)
+        rubick_copy(abils, ids, code, base, dict(f, aani="spell") if "aani" in f else f)
     return code, innate
 
 
@@ -321,7 +368,7 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, orders_used=None
 # hotkey can't change at run time, so each of those gets a copy with the D
 # hotkey and cell (src/heroes/rubick.lua, data.ids.rubick_copies).
 D_CELL = {"ahky": "D", "auhk": "D", "abpx": 1, "abpy": 1, "aubx": 1, "auby": 1}
-COMMANDER_RACES = ("human", "orc", "undead", "nightelf")
+WARCRAFT_RACES = ("human", "orc", "undead", "nightelf")
 
 
 def rubick_copy(abils, ids, code, base, fields):
@@ -330,11 +377,11 @@ def rubick_copy(abils, ids, code, base, fields):
     ids.out.setdefault("rubick_copies", {})[code] = copy
 
 
-def commander_spell_copies(abils, ids):
-    """D-cell copies of every hero spell of the commander's races."""
+def warcraft_spell_copies(abils, ids):
+    """D-cell copies of every hero spell of the Warcraft player's races."""
     rows = w3obj.parse_slk(os.path.join(w3obj.SLK_DIR, "abilitydata.slk"))
     for r in rows:
-        if str(r.get("hero")) == "1" and r.get("race") in COMMANDER_RACES and str(r.get("useInEditor")) == "1":
+        if str(r.get("hero")) == "1" and r.get("race") in WARCRAFT_RACES and str(r.get("useInEditor")) == "1":
             rubick_copy(abils, ids, r["alias"], r["alias"], {})
 
 
@@ -398,6 +445,17 @@ def heroes(units, abils, buffs, ids, herodata, specs):
                 learnable.append(acode)
                 if not ult:
                     slot_index += 1
+        data_of = {ab["name"]: ab for ab in info["abilities"]}
+        for name, (parent, source, behavior, desc) in GRANT_FORMS.items():
+            cell = ids.out.get("ability_cells", {}).get(parent)
+            if parent in data_of and source in data_of and cell is not None:
+                form = dict(data_of[source], name=name)
+                if behavior:
+                    form["AbilityBehavior"] = behavior
+                icon = ICON.format(source)
+                ability_object(abils, ids, hero, form, {"_granted": True, "_cell": (cell % 4, cell // 4), "desc": desc,
+                                                        "fields": {"aart": icon, "arar": icon}},
+                               slot_index, False, orders_used)
         dmin, dmax = int(float(s["AttackDamageMin"])), int(float(s["AttackDamageMax"]))
         ranged = s["AttackCapabilities"] == "DOTA_UNIT_CAP_RANGED_ATTACK"
         primary = {"DOTA_ATTRIBUTE_STRENGTH": "STR", "DOTA_ATTRIBUTE_AGILITY": "AGI"}.get(s["AttributePrimary"], "INT")
@@ -446,7 +504,14 @@ def extras(units, abils, buffs, ids, spec):
         ids.out["abilities"][key] = code
         if a.get("order"):
             ids.out["orders"][key] = a["order"]
-        abils.add(a["base"], code, a.get("fields", {}))
+        fields = a.get("fields", {})
+        # a form that takes a hero button (Detonate Tazer, a stolen-spell slot):
+        # Lua keys find it by cell and quick cast by target kind (dota_settings)
+        if "abpx" in fields and "abpy" in fields:
+            ids.out.setdefault("ability_cells", {})[key] = fields["abpy"] * 4 + fields["abpx"]
+        if a["base"] == "ANcl" and fields.get("Ncl2"):
+            ids.out.setdefault("ability_targets", {})[key] = fields["Ncl2"][0]
+        abils.add(a["base"], code, fields)
     for key, b in (spec.get("buffs") or {}).items():
         code = ids.new("B")
         ids.out["buffs"][key] = code
@@ -516,8 +581,8 @@ def structures(units, ids):
         "human": ("hfoo", "hrif", "hmtm"), "orc": ("ogru", "ohun", "ocat"),
         "undead": ("ugho", "ucry", "umtw"), "nightelf": ("esen", "earc", "ebal"),
     }
-    # Horde creeps keep their race's upgrade list so the commander's research
-    # (mirrored onto the Horde player) strengthens them too.
+    # Horde creeps keep their race's upgrade list so the Warcraft player's
+    # research (mirrored onto the Horde player) strengthens them too.
     def horde(fields, name):
         return {k: v for k, v in dict(fields, unam=name).items() if k not in ("upgr", "ua1z")}
 
@@ -753,7 +818,8 @@ def item_active_fields(e, spec, order):
         "Ncl1": [channel], "Ncl2": [target], "Ncl3": [1 | (8 if spec.get("universal") else 0)],
         # Ncl5 0: as in Dota, Stop or a move interrupts a channelled item (TP scroll)
         "Ncl4": [0.0], "Ncl5": [0], "Ncl6": [order],
-        "aani": "", "acat": "", "atat": "", "aeat": "", "asat": "",
+        # a channelled item (the TP scroll) plays Dota's teleport channel (mdx/units.py "Stand Channel")
+        "aani": "stand,channel" if channel else "", "acat": "", "atat": "", "aeat": "", "asat": "",
     }
     if spec["target"] in ("unit", "tree"):
         f["atar"] = ["tree" if spec["target"] == "tree" else spec["targets"]]
@@ -1089,8 +1155,9 @@ def main(out_dir=None, standins=False):
     """Writes objects.json and ids.json into out_dir (default: build/ and src/data/).
     standins keeps the WC3 stand-in models: the Dota ones only exist in maps the
     launcher has personalized."""
-    global MODELS, STANDINS
+    global MODELS, STANDINS, MISSILES
     MODELS = {} if standins else load_models()
+    MISSILES = {} if standins else load_missiles()
     STANDINS = standins
     U, A, B, Q = w3obj.metas()
     herodata = load("heroes.json")
@@ -1105,7 +1172,7 @@ def main(out_dir=None, standins=False):
     helpers(abils)
     structures(units, ids)
     heroes(units, abils, buffs, ids, herodata, specs)
-    commander_spell_copies(abils, ids)
+    warcraft_spell_copies(abils, ids)
     item_objects = items(units, abils, ids)
     world(units, abils, ids, item_objects)
     courier(units, abils, ids)

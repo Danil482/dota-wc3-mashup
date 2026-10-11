@@ -271,4 +271,91 @@ __heroesA.at(22, function()
             use("log").info("heroesA nevermore exercise done")
         end)
     end)
+
+    -- Talents, Aghanim's Scepter (Requiem) and Shard (Shadowraze), away from
+    -- the units above
+    local T, Dmg = use("talents"), use("damage")
+    local Y2 = Y + 3000
+    local foe2, foe3, started, requiemFrom
+    H.after(12.0, function()
+        if not T.started then T.init() end
+        use("heroes").keyOf[sf] = "nevermore"
+        sf.tal, sf.level, sf.face = true, 30, 0
+        T.register(sf)
+        SetUnitPosition(sf, X, Y2)
+        for _, n in ipairs({"special_bonus_unique_nevermore_7", "special_bonus_unique_nevermore_4",
+                            "special_bonus_unique_nevermore_3", "special_bonus_unique_nevermore_frenzy_max_collection_count",
+                            "special_bonus_unique_nevermore_1", "special_bonus_unique_nevermore_6",
+                            "special_bonus_unique_nevermore_frenzy_castspeed",
+                            "special_bonus_unique_nevermore_raze_procsattacks"}) do
+            H.check("sf talent " .. n, T.pick(sf, n))
+        end
+        for i = 1, 6 do H.kill(H.unit(11, "Hamg", X - 2500, Y2 + 100 * i, {hero = true, life = 100}), sf) end
+        H.check("sf talent +5 max souls", SF.souls(sf) == 25, SF.souls(sf))
+        local code = ids.items.item_ultimate_scepter
+        UnitAddItem(sf, CreateItem(FourCC(code), 0, 0))
+        use("items").refresh(sf)
+        H.check("sf scepter", T.hasScepter(sf))
+        local cd = BlzGetUnitAbilityCooldown(sf, A.id("nevermore_requiem"), 2)
+        H.check("sf scepter requiem cooldown -30", math.abs(cd - 70) < 0.01, cd)
+        H.check("sf shard", T.consumeShard(sf))
+        -- two medium razes: +30 per stack, attack damage on top, 12 % slow per stack
+        foe2 = H.unit(11, "Hblm", X + 450, Y2, {hero = true, life = 6000})
+        local start = BlzStartUnitAbilityCooldown
+        BlzStartUnitAbilityCooldown = function(u, id, v)
+            if u == sf then started = v end
+            return start(u, id, v)
+        end
+        local function expect(stacks)
+            local phys = BlzGetUnitBaseDamage(sf, 0) + BlzGetUnitDiceNumber(sf, 0) * (BlzGetUnitDiceSides(sf, 0) + 1) / 2
+                + GetHeroAgi(sf, true) + Mods.sum(sf, "damage")
+            return (280 + 2 * 25 + 110 * stacks) * 0.75 + phys * Dmg.armorFactor(BlzGetUnitArmor(foe2)), phys
+        end
+        local want, phys = expect(0)
+        H.cast(sf, "nevermore_shadowraze2")
+        H.check("sf talent raze applies attack damage", phys > 0 and math.abs((foe2.taken or 0) - want) < 0.01,
+            (foe2.taken or 0) .. " vs " .. want)
+        local before = foe2.taken or 0
+        want = expect(1)
+        H.cast(sf, "nevermore_shadowraze2")
+        H.check("sf talent +30 raze stack damage", math.abs((foe2.taken or 0) - before - want) < 0.01,
+            ((foe2.taken or 0) - before) .. " vs " .. want)
+        local m = Mods.get(foe2, "nevermore_shadowraze")
+        H.check("sf shard raze slow stacks", m ~= nil and m.props and math.abs(m.props.move_pct + 0.24) < 1e-9,
+            m and m.props and m.props.move_pct)
+        H.after(0.05, function()
+            BlzStartUnitAbilityCooldown = start
+        end)
+    end)
+    H.after(12.3, function()
+        H.check("sf shard raze cooldown -2s per hero", started ~= nil and math.abs(started - 7) < 0.01, started)
+        H.check("sf talent presence -1.5 armor", Mods.sum(foe2, "armor") == -8.5, Mods.sum(foe2, "armor"))
+        local souls = SF.souls(sf)
+        H.cast(sf, "nevermore_frenzy")
+        H.check("sf talent feast +30 attack speed", Mods.sum(sf, "attack_speed") == 110, Mods.sum(sf, "attack_speed"))
+        H.check("sf talent feast +30% cast speed", math.abs(SF.castPoint(sf) - 0.3 / 1.3) < 1e-9, SF.castPoint(sf))
+        H.check("sf talent feast +2 souls per hero", SF.souls(sf) - souls == 5, SF.souls(sf) - souls)
+        foe3 = H.unit(11, "Hamg", X + 300, Y2, {hero = true, life = 6000})
+        sf.life = 500
+        requiemFrom = foe3.taken or 0
+        H.cast(sf, "nevermore_requiem")
+        H.endCast(sf, "nevermore_requiem")
+    end)
+    H.after(12.6, function()
+        -- three lines crossed foe3 by now: 3 x 0.8 s, over the old 2.15 s cap
+        H.check("sf talent requiem fear +0.2 per line", Mods.remaining(foe3, "nevermore_requiem") > 2.2,
+            Mods.remaining(foe3, "nevermore_requiem"))
+    end)
+    H.after(16.0, function()
+        local taken = (foe3.taken or 0) - requiemFrom
+        -- six line hits: 120, then 138 each under the line's -15 % magic resistance
+        H.check("sf scepter requiem lines fly back", math.abs(taken - (120 + 5 * 160 * 0.75 * 1.15)) < 0.01, taken)
+        H.check("sf scepter requiem heals", sf.life >= 500 + 3 * 160 * 0.75, sf.life)
+    end)
+    H.after(21.0, function()
+        H.check("sf feast over restores the cast point", math.abs(SF.castPoint(sf) - 0.3) < 1e-9, SF.castPoint(sf))
+        T.forget(sf)
+        use("heroes").keyOf[sf] = nil
+        use("log").info("heroesA nevermore talents done")
+    end)
 end)

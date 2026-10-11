@@ -15,6 +15,7 @@ define("hero_meepo", function()
     local Safe = use("safe")
     local Log = use("log")
     local Bots = use("bots")
+    local Fx = use("fx")
     local M = {}
 
     local EARTHBIND, POOF, RANSACK = "meepo_earthbind", "meepo_poof", "meepo_ransack"
@@ -290,7 +291,7 @@ define("hero_meepo", function()
             for i = 1, nets do
                 local off = (i - (nets + 1) / 2) * ctx.v("megameepo_net_offset")
                 local tx, ty = U.polar(ctx.x, ctx.y, off, a + math.pi / 2)
-                missile({model = "Abilities\\Spells\\Orc\\Ensnare\\EnsnareMissile.mdl",
+                missile({model = Fx.model("meepo_earthbind", "Abilities\\Spells\\Orc\\Ensnare\\EnsnareMissile.mdl"),
                     x = GetUnitX(c), y = GetUnitY(c), tx = tx, ty = ty, speed = ctx.v("speed"),
                     onHit = function(x, y)
                         fx("Abilities\\Spells\\Orc\\Ensnare\\ensnareTarget.mdl", x, y)
@@ -359,12 +360,12 @@ define("hero_meepo", function()
             if not U.alive(c) then return end
             local dest = destination(c, p.target, p.x, p.y)
             -- departure and arrival are separate hits, so a self-Poof hits twice
-            fx("Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl", GetUnitX(c), GetUnitY(c))
+            fx(Fx.model("meepo_poof_start", "Abilities\\Spells\\NightElf\\Blink\\BlinkCaster.mdl"), GetUnitX(c), GetUnitY(c))
             poofBlast(c, ctx.level, GetUnitX(c), GetUnitY(c))
             if dest ~= c then
                 SetUnitPosition(c, GetUnitX(dest), GetUnitY(dest))
             end
-            fx("Abilities\\Spells\\NightElf\\Blink\\BlinkTarget.mdl", GetUnitX(c), GetUnitY(c))
+            fx(Fx.model("meepo_poof_end", "Abilities\\Spells\\NightElf\\Blink\\BlinkTarget.mdl"), GetUnitX(c), GetUnitY(c))
             poofBlast(c, ctx.level, GetUnitX(c), GetUnitY(c))
         end,
     })

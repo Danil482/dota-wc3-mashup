@@ -1,4 +1,4 @@
-# Build dependencies of DotaVsCommander.exe, pinned: Pillow's resampling and
+# Build dependencies of DotaVsWarcraft.exe, pinned: Pillow's resampling and
 # quantization feed the map bytes, so every launcher build must use the same
 # version for players' maps to match.
 pillow==12.3.0

@@ -1,12 +1,12 @@
--- Offline exercise for the commander (src/game/commander.lua) and its starter
--- base (src/game/commander_base.lua). At 5 s of mock time it checks that the
--- AI commander's setup ran (starter structures created, the melee AI
+-- Offline exercise for the Warcraft player (src/game/warcraft.lua) and its
+-- starter base (src/game/warcraft_base.lua). At 5 s of mock time it checks that
+-- the Warcraft AI's setup ran (starter structures created, the melee AI
 -- started, the diagnostics summary builds), then plans every race's starter
--- base on the base layout, on a layout shaped like the personalized map's
--- (mine 700 units from the hall) and on cramped ground, and checks that no
--- structure overlaps the hall, the mine or another structure, stands on the
--- hall-to-mine path or an exit path, or covers unbuildable ground. Failed
--- checks become ERROR lines, which fail the mock run.
+-- base on the base layout, on a layout shaped like the personalized map's (mine
+-- 700 units from the hall) and on cramped ground, and checks that no structure
+-- overlaps the hall, the mine or another structure, stands on the hall-to-mine
+-- path or an exit path, or covers unbuildable ground. Failed checks become
+-- ERROR lines, which fail the mock run.
 do
     local RACES = {"human", "orc", "undead", "nightelf"}
 
@@ -16,34 +16,34 @@ do
 
     local function exercise()
         local Log = use("log")
-        local B = use("commander_base")
-        local Cmd = use("commander")
+        local B = use("warcraft_base")
+        local Cmd = use("warcraft")
         local md = use("data.mapdata")
         local failures = 0
         local function check(name, ok, detail)
             if not ok then
                 failures = failures + 1
-                Log.error("commander exercise: " .. name .. (detail and (" - " .. tostring(detail)) or ""))
+                Log.error("warcraft exercise: " .. name .. (detail and (" - " .. tostring(detail)) or ""))
             end
         end
 
-        -- the AI commander's setup in this mock game (slot 7, no human commander)
-        check("AI commander", Cmd.player == Player(SLOT_COMMANDER_AI), Cmd.player and GetPlayerId(Cmd.player))
+        -- the Warcraft AI's setup in this mock game (slot 7, no Warcraft human)
+        check("Warcraft AI", Cmd.player == Player(SLOT_WARCRAFT_AI), Cmd.player and GetPlayerId(Cmd.player))
 
         -- a game started straight from the map: its one computer plays in user
-        -- slot 1, the empty "Commander AI" slot can't run the melee AI
+        -- slot 1, the empty "Warcraft AI" slot can't run the melee AI
         local Roles = use("roles")
-        local saved = {Roles.commander, Roles.commanderIsAI, Roles.heroSlots}
+        local saved = {Roles.warcraft, Roles.warcraftIsAI, Roles.heroSlots}
         __mock.computers = {[1] = true}
         Roles.assign(false)
-        check("AI commander in the playing computer's slot", Roles.commander == 1, Roles.commander)
+        check("Warcraft AI in the playing computer's slot", Roles.warcraft == 1, Roles.warcraft)
         check("the other user slots field heroes", table.concat(Roles.heroSlots, ",") == "0,2,3,4,5",
             table.concat(Roles.heroSlots, ","))
-        __mock.computers = {[SLOT_COMMANDER] = true, [1] = true}
+        __mock.computers = {[SLOT_WARCRAFT] = true, [1] = true}
         Roles.assign(false)
-        check("a computer in the commander slot comes first", Roles.commander == SLOT_COMMANDER, Roles.commander)
+        check("a computer in the Warcraft slot comes first", Roles.warcraft == SLOT_WARCRAFT, Roles.warcraft)
         __mock.computers = {}
-        Roles.commander, Roles.commanderIsAI, Roles.heroSlots = saved[1], saved[2], saved[3]
+        Roles.warcraft, Roles.warcraftIsAI, Roles.heroSlots = saved[1], saved[2], saved[3]
         check("melee AI started", (__mock.calls.StartMeleeAI or 0) == 1, __mock.calls.StartMeleeAI)
         check("starter base created", Cmd.starters == B.count(Cmd.raceKey) and Cmd.starters > 0,
             Cmd.starters .. " of " .. B.count(Cmd.raceKey))
@@ -51,12 +51,12 @@ do
         for _, u in ipairs(__mock.units) do
             if u.owner == Cmd.player and B.HALF[string.pack(">I4", u.typeId)] then made = made + 1 end
         end
-        check("starter structures owned by the commander", made == Cmd.starters, made)
+        check("starter structures owned by the Warcraft player", made == Cmd.starters, made)
         local line = Cmd.summary()
-        check("summary", line:find("^commander AI: gold %d+, lumber %d+, food %d+/%d+, workers") ~= nil, line)
+        check("summary", line:find("^Warcraft AI: gold %d+, lumber %d+, food %d+/%d+, workers") ~= nil, line)
         check("starter base for the AI only", B.enabled(true) and not B.enabled(false))
 
-        -- footprint checks, independent of commander_base's own geometry
+        -- footprint checks, independent of warcraft_base's own geometry
         local function segDist(px, py, a, b)
             local dx, dy = b.x - a.x, b.y - a.y
             local t = math.max(0, math.min(1, ((px - a.x) * dx + (py - a.y) * dy) / (dx * dx + dy * dy)))
@@ -120,7 +120,7 @@ do
                 front = math.atan(enemy.y - hall.y, enemy.x - hall.x),
             }
         end
-        local c = md.commander
+        local c = md.warcraft
         local baseExits = {}
         for _, lane in ipairs({"bot", "mid", "top"}) do baseExits[#baseExits + 1] = c.spawns[lane] end
         local dotaShaped = {
@@ -146,13 +146,13 @@ do
         end
         IsTerrainPathable = saved
 
-        Log.info("commander exercise: " .. failures .. " failed checks")
+        Log.info("warcraft exercise: " .. failures .. " failed checks")
     end
 
     local function run()
-        if not defined or not defined("commander") then return end
+        if not defined or not defined("warcraft") then return end
         local ok, err = xpcall(exercise, debug and debug.traceback or tostring)
-        if not ok then use("log").error("commander exercise crashed: " .. tostring(err)) end
+        if not ok then use("log").error("warcraft exercise crashed: " .. tostring(err)) end
         use("log").flush()
     end
 

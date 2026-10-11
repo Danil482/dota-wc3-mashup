@@ -1,5 +1,5 @@
 -- Chen: Penitence, Holy Persuasion, Divine Favor, the Zealot innate and Hand
--- of God. Persuasion takes over lane creeps, neutrals and the commander's
+-- of God. Persuasion takes over lane creeps, neutrals and the Warcraft player's
 -- non-hero units (Ancients too with Aghanim's Shard). The Zealot is a creep
 -- that joins Chen and can sacrifice itself with Martyrdom; the innate's
 -- active teleports Chen's units to him. With Aghanim's Scepter Hand of God is
@@ -13,6 +13,7 @@ define("hero_chen", function()
     local U = use("util")
     local Log = use("log")
     local Bots = use("bots")
+    local Fx = use("fx")
     local C = {}
 
     local PENITENCE, PERSUASION, FAVOR = "chen_penitence", "chen_holy_persuasion", "chen_divine_favor"
@@ -96,7 +97,7 @@ define("hero_chen", function()
 
     local function isBotOwned(u)
         local slot = GetPlayerId(GetOwningPlayer(u))
-        return slot <= SLOT_COMMANDER and use("roles").isBot(slot)
+        return slot <= SLOT_WARCRAFT and use("roles").isBot(slot)
     end
 
     ---------------------------------------------------------------- state
@@ -117,7 +118,7 @@ define("hero_chen", function()
             if not t then return end
             local dmg, duration = ctx.v("damage"), ctx.v("duration")
             local slow, haste = ctx.v("bonus_movement_speed"), ctx.v("bonus_attack_speed")
-            homing({model = "Abilities\\Weapons\\PriestMissile\\PriestMissile.mdl", x = GetUnitX(c), y = GetUnitY(c),
+            homing({model = Fx.model("chen_penitence", "Abilities\\Weapons\\PriestMissile\\PriestMissile.mdl"), x = GetUnitX(c), y = GetUnitY(c),
                 target = t, speed = ctx.v("speed"), onHit = function()
                     if U.isMagicImmune(t) then return end
                     fxOn("Abilities\\Spells\\Human\\HolyBolt\\HolyBoltSpecialArt.mdl", t, "chest")
@@ -403,7 +404,7 @@ define("hero_chen", function()
                 else
                     Damage.heal(u, heal * amp)
                 end
-                fxOn("Abilities\\Spells\\Human\\HolyBolt\\HolyBoltSpecialArt.mdl", u, "origin")
+                fxOn(Fx.model("chen_hand_of_god", "Abilities\\Spells\\Human\\HolyBolt\\HolyBoltSpecialArt.mdl"), u, "origin")
                 Mods.add(u, "chen_hand_of_god", {duration = duration, source = c, props = {hp_regen = hps * amp},
                     effect = "Abilities\\Spells\\NightElf\\Rejuvenation\\RejuvenationTarget.mdl", attach = "chest"})
             end

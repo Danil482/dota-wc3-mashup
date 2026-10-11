@@ -1,6 +1,6 @@
-"""End-to-end test of the packaged launcher (dist/DotaVsCommander/).
+"""End-to-end test of the packaged launcher (dist/DotaVsWarcraft/).
 
-Runs DotaVsCommander.exe --prepare-only against a snapshot of the test map and
+Runs DotaVsWarcraft.exe --prepare-only against a snapshot of the test map and
 checks the output map. Never starts Warcraft III, Dota 2 or Steam.
 
 Usage: python launcher/tests/test_dist.py --dota "<Dota 2 root>" --game "<WC3 root>"
@@ -26,10 +26,10 @@ sys.path.insert(0, str(ROOT / "launcher"))
 import mpyq  # noqa: E402
 from PIL import Image, ImageChops, ImageStat  # noqa: E402
 
-from dvc_launcher import assets, blp, cli, models, stormlib, terrain, vrf  # noqa: E402
+from dvw_launcher import assets, blp, cli, effects, models, stormlib, terrain, vrf  # noqa: E402
 
-DIST = ROOT / "dist" / "DotaVsCommander"
-EXE = DIST / "DotaVsCommander.exe"
+DIST = ROOT / "dist" / "DotaVsWarcraft"
+EXE = DIST / "DotaVsWarcraft.exe"
 DLL = DIST / "StormLib.dll"
 CACHE = cli.user_dir() / "cache"
 LOG = cli.user_dir() / "logs" / "launcher.log"
@@ -129,7 +129,7 @@ def main():
     ap.add_argument("--dota", required=True)
     ap.add_argument("--game", required=True)
     ap.add_argument("--work", required=True)
-    ap.add_argument("--base", default=str(ROOT / "build" / "test" / "DotaVsCommander_test.w3x"))
+    ap.add_argument("--base", default=str(ROOT / "build" / "test" / "DotaVsWarcraft_test.w3x"))
     args = ap.parse_args()
     # -I ignores PYTHONIOENCODING: keep the non-ASCII --out path printable on a cp1252 stdout.
     sys.stdout.reconfigure(errors="backslashreplace")
@@ -142,20 +142,20 @@ def main():
 
     # 1. cold cache, 2. warm cache, 3. cold again, 4. non-ASCII output path
     shutil.rmtree(CACHE, ignore_errors=True)
-    code1, t_cold = run_exe(common + ["--out", str(work / "run1" / "DotaVsCommander.w3x")])
+    code1, t_cold = run_exe(common + ["--out", str(work / "run1" / "DotaVsWarcraft.w3x")])
     check("cold run exit code 0", code1 == 0, f"{t_cold:.1f} s")
-    code2, t_warm = run_exe(common + ["--out", str(work / "run2" / "DotaVsCommander.w3x")])
+    code2, t_warm = run_exe(common + ["--out", str(work / "run2" / "DotaVsWarcraft.w3x")])
     check("warm run exit code 0", code2 == 0, f"{t_warm:.1f} s")
     shutil.rmtree(CACHE, ignore_errors=True)
-    code3, t_cold2 = run_exe(common + ["--out", str(work / "run3" / "DotaVsCommander.w3x")])
+    code3, t_cold2 = run_exe(common + ["--out", str(work / "run3" / "DotaVsWarcraft.w3x")])
     check("second cold run exit code 0", code3 == 0, f"{t_cold2:.1f} s")
-    unicode_out = work / "Документы тест" / "Карты" / "DotaVsCommander.w3x"
+    unicode_out = work / "Документы тест" / "Карты" / "DotaVsWarcraft.w3x"
     code4, _ = run_exe(common + ["--out", str(unicode_out)])
-    out = work / "run1" / "DotaVsCommander.w3x"
+    out = work / "run1" / "DotaVsWarcraft.w3x"
     data = out.read_bytes()
     check("warm output byte-identical to cold output",
-          data == (work / "run2" / "DotaVsCommander.w3x").read_bytes(), sha(data))
-    check("second cold output byte-identical", data == (work / "run3" / "DotaVsCommander.w3x").read_bytes())
+          data == (work / "run2" / "DotaVsWarcraft.w3x").read_bytes(), sha(data))
+    check("second cold output byte-identical", data == (work / "run3" / "DotaVsWarcraft.w3x").read_bytes())
     check("non-ASCII --out path works", code4 == 0 and unicode_out.read_bytes() == data, str(unicode_out))
     results["timing"] = {"cold_s": round(t_cold, 1), "warm_s": round(t_warm, 1), "cold2_s": round(t_cold2, 1)}
     results["map"] = {"bytes": len(data), "sha256": sha(data)}
@@ -238,6 +238,14 @@ def main():
     missing_tex = [t for t in model_textures if t not in out_files]
     check("every texture the models use is in the map", not missing_tex,
           f"{len(model_textures)} textures" + (f", missing {missing_tex[:3]}" if missing_tex else ""))
+    # Effects: every missile model of specs/effects.json (the object data names them) and their textures.
+    fx_missing = sorted(effects.expected_files(effects.load_spec(ROOT / "specs" / "effects.json")) - set(out_files))
+    check("every missile model of effects.json is in the map", not fx_missing, ", ".join(fx_missing[:3]))
+    fx_textures = sorted({t for n, d in out_files.items() if n.startswith(effects.FX_DIR) and n.endswith(".mdx")
+                          for t in mdx_texture_paths(d)})
+    fx_missing = [t for t in fx_textures if t not in out_files]
+    check("every texture the effects use is in the map", not fx_missing,
+          f"{len(fx_textures)} textures" + (f", missing {fx_missing[:3]}" if fx_missing else ""))
     model_dir = work / "models"
     for n in mdx_names + model_textures:
         if n in out_files:
@@ -392,7 +400,7 @@ def main():
     if model_keys:
         for d in CACHE.glob(f"*/{models.CACHE_PREFIX}*"):
             shutil.rmtree(d, ignore_errors=True)
-        no_map = work / "no_map" / "DotaVsCommander.w3x"
+        no_map = work / "no_map" / "DotaVsWarcraft.w3x"
         code, _ = run_exe(common + ["--out", str(no_map), "--vrf", str(work / "missing" / "vrf.exe")])
         check("error path: model conversion fails -> 5, no map written", code == 5 and not no_map.exists(),
               f"exit {code}, map {'written' if no_map.exists() else 'not written'}")

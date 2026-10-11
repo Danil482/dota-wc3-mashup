@@ -140,15 +140,15 @@ define("world", function()
     end
 
     -- Players who share a team reward with p: every Dota hero player, or the
-    -- commander alone.
+    -- Warcraft player alone.
     function W.teamPlayers(p)
         local Roles = use("roles")
         local side = Roles.side(GetPlayerId(p))
         local out = {}
         if side == "dota" then
             for _, slot in ipairs(Roles.heroSlots) do out[#out + 1] = Player(slot) end
-        elseif side == "commander" and Roles.commander then
-            out[1] = Player(Roles.commander)
+        elseif side == "warcraft" and Roles.warcraft then
+            out[1] = Player(Roles.warcraft)
         else
             out[1] = p
         end

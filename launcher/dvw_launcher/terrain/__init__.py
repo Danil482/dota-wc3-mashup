@@ -14,7 +14,7 @@ Steps (source -> convert -> w3x):
      w3e, wpm, doo and minimap (w3x; preview wc3.png).
   4. The base map's war3map.w3i and war3mapUnits.doo get the new start
      locations, and its war3map.lua the new data.mapdata module (the block
-     between the "-- @dvc-data-begin/end data.mapdata" markers).
+     between the "-- @dvw-data-begin/end data.mapdata" markers).
   5. Dota's tree models replace the WC3 tree models (trees.py): MDX files,
      war3map.w3b, and war3map.w3d for the decorative trees on raised ground.
      If that fails, the trees stay WC3 summer trees, without decoration.
@@ -22,7 +22,7 @@ Steps (source -> convert -> w3x):
      uses (ground.py). If that fails, the tiles keep Warcraft III's look.
 
 Steps 1-3 are cached per dota.vpk content and CONVERTER_VERSION in
-%LOCALAPPDATA%\\DotaVsCommander\\cache\\<Dota build>\\terrain-<version>-<hash>,
+%LOCALAPPDATA%\\DotaVsWarcraft\\cache\\<Dota build>\\terrain-<version>-<hash>,
 step 5 per tree plan and TREES_VERSION in ...\\<Dota build>\\trees-<version>-<hash>,
 step 6 per tile set and GROUND_VERSION in ...\\<Dota build>\\ground-<version>-<hash>.
 The output is deterministic, so players with the same Dota 2 build and mod
@@ -40,7 +40,7 @@ from .. import installs, stormlib
 
 # Bump whenever the output changes for the same dota.vpk (cached files are
 # keyed by it, and players must all get the same map).
-CONVERTER_VERSION = 7
+CONVERTER_VERSION = 9
 CACHE_PREFIX = "terrain-"
 TERRAIN_FILES = ("war3map.w3e", "war3map.wpm", "war3map.doo", "war3mapMap.blp")
 PATCHED_FILES = ("war3map.w3i", "war3mapUnits.doo", "war3map.lua")
@@ -48,9 +48,9 @@ MAP_FILES = TERRAIN_FILES + PATCHED_FILES
 # Cached beside the map files: the gameplay data, the tree plan (trees.py)
 # and war3map.doo with plain WC3 trees, used when the tree models fail.
 CACHE_ONLY = ("mapdata.json", "trees.json", "war3map_wc3trees.doo")
-# Slots as in tools/build_map.js: 0-4 Dota, 5 commander, 6 the Ancients,
-# 7 commander AI, 8 Horde.
-DOTA_SLOTS, COMMANDER_SLOTS, ANCIENTS_SLOT = (0, 1, 2, 3, 4), (5, 7, 8), 6
+# Slots as in tools/build_map.js: 0-4 Dota, 5 Warcraft, 6 the Ancients,
+# 7 Warcraft AI, 8 Horde.
+DOTA_SLOTS, WARCRAFT_SLOTS, ANCIENTS_SLOT = (0, 1, 2, 3, 4), (5, 7, 8), 6
 
 
 class TerrainError(Exception):
@@ -145,9 +145,9 @@ def build_terrain(vpk, vrf_exe, folder, log):
 
 
 def start_locations(mapdata):
-    f, s, a = mapdata["dota"]["fountain"], mapdata["commander"]["start"], mapdata["dota"]["ancient"]
+    f, s, a = mapdata["dota"]["fountain"], mapdata["warcraft"]["start"], mapdata["dota"]["ancient"]
     starts = {slot: (f["x"], f["y"]) for slot in DOTA_SLOTS}
-    starts.update({slot: (s["x"], s["y"]) for slot in COMMANDER_SLOTS})
+    starts.update({slot: (s["x"], s["y"]) for slot in WARCRAFT_SLOTS})
     starts[ANCIENTS_SLOT] = (a["x"], a["y"])
     return starts
 

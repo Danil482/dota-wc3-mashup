@@ -479,7 +479,9 @@ define("inventory", function()
         local hero = Inv.hero(p)
         local order = (use("data.ids").orders or {}).item_tpscroll
         if not hero or not U.alive(hero) or not order then return false end
-        if not Inv.get(p, "tp", 0) then return false, "No Town Portal Scroll" end
+        local tp = Inv.get(p, "tp", 0)
+        if not tp then return false, "No Town Portal Scroll" end
+        if not I().ready(hero, tp, "tp") then return false end
         return IssuePointOrder(hero, order, x, y)
     end
 

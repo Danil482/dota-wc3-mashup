@@ -40,7 +40,7 @@ def main(out):
     for name, p in L.CAMPS.items():
         x, y = px(*p)
         d.ellipse((x - 3, y - 3, x + 3, y + 3), fill=(255, 200, 0))
-    for p in [L.DOTA["ancient"], L.COMMANDER["start"], L.ROSHAN] + L.RUNES:
+    for p in [L.DOTA["ancient"], L.WARCRAFT["start"], L.ROSHAN] + L.RUNES:
         x, y = px(*p)
         d.ellipse((x - 5, y - 5, x + 5, y + 5), outline=(255, 0, 0))
     img.save(out)

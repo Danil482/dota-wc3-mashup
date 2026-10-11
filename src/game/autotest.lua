@@ -11,14 +11,15 @@ define("autotest", function()
     local steps = {}
     local deaths = 0
     local botCasts = 0
+    local RETRY, RETRY_FOR = 0.5, 60    -- the hero pick ends at 45 s at the latest (heroes.pickAll)
 
     function T.at(seconds, name, fn)
         steps[#steps + 1] = {at = seconds, name = name, fn = fn}
     end
 
     T.at(1, "roles assigned", function()
-        return Roles.commander ~= nil and #Roles.heroSlots == 5,
-            "commander " .. tostring(Roles.commander) .. ", heroes " .. #Roles.heroSlots
+        return Roles.warcraft ~= nil and #Roles.heroSlots == 5,
+            "Warcraft slot " .. tostring(Roles.warcraft) .. ", heroes " .. #Roles.heroSlots
     end)
 
     T.at(1, "dota structures", function()
@@ -38,33 +39,35 @@ define("autotest", function()
         return H.count() >= 5 - Roles.humanCount, "heroes " .. H.count()
     end)
 
-    T.at(2, "commander base", function()
-        local Cmd = use("commander")
+    T.at(2, "Warcraft base", function()
+        local Cmd = use("warcraft")
         return Cmd.halls() >= 1, "halls " .. Cmd.halls() .. ", race " .. tostring(Cmd.raceKey)
     end)
 
-    T.at(2, "commander start location", function()
-        local Cmd = use("commander")
-        local s = use("data.mapdata").commander.start
+    T.at(2, "Warcraft start location", function()
+        local Cmd = use("warcraft")
+        local s = use("data.mapdata").warcraft.start
         local k = GetPlayerStartLocation(Cmd.player)
         local d = U.dist(GetStartLocationX(k), GetStartLocationY(k), s.x, s.y)
         return d < 64, "slot " .. GetPlayerId(Cmd.player) .. " start location " .. k .. ", " .. math.floor(d) .. " from the base"
     end)
 
-    T.at(3, "commander starter base", function()
-        local Cmd = use("commander")
+    T.at(3, "Warcraft starter base", function()
+        local Cmd = use("warcraft")
         return Cmd.starters == Cmd.starterTarget, "structures " .. Cmd.starters .. " of " .. Cmd.starterTarget
     end)
 
-    T.at(90, "commander AI builds", function()
-        local a = use("commander").activity
-        if not Roles.commanderIsAI then return true, "human commander" end
+    T.at(90, "Warcraft AI builds", function()
+        local a = use("warcraft").activity
+        if not Roles.warcraftIsAI then return true, "human Warcraft player" end
         return a.builds > 0, "orders " .. a.orders .. ", builds " .. a.builds .. ", trained " .. a.trained
     end)
 
-    -- Gameplay constants: Dota hero HP = 120 + 22 per strength point.
+    -- Gameplay constants: Dota hero HP = 120 + 22 per strength point, once
+    -- every hero is picked (a human may still be choosing at 3 s).
     T.at(3, "dota attribute constants", function()
         local H = use("heroes")
+        if H.count() < #Roles.heroSlots then return nil, "heroes " .. H.count() end
         for _, u in pairs(H.bySlot) do
             local expect = 120 + 22 * GetHeroStr(u, true)
             local hp = BlzGetUnitMaxHP(u)
@@ -126,10 +129,19 @@ define("autotest", function()
         local last = 0
         for _, s in ipairs(steps) do
             last = math.max(last, s.at)
-            Timer.after(s.at, function()
+            -- a check that returns nil is not due yet: again every RETRY
+            -- seconds, for RETRY_FOR at most (then it fails)
+            local tries = math.floor(RETRY_FOR / RETRY)
+            local function attempt()
                 local ok, detail = s.fn()
+                if ok == nil and tries > 0 then
+                    tries = tries - 1
+                    Timer.after(RETRY, attempt)
+                    return
+                end
                 Log.check(s.name, ok, detail)
-            end)
+            end
+            Timer.after(s.at, attempt)
         end
         Timer.after(last + 1, function()
             Log.info("TEST DONE")

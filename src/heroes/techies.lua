@@ -1,5 +1,8 @@
 -- Techies: Sticky Bomb, Reactive Tazer (with its Detonate sub-ability),
--- Blast Off!, Proximity Mines and the M.A.D. innate.
+-- Blast Off!, Proximity Mines and the M.A.D. innate; Aghanim's Scepter
+-- Minefield Sign and Aghanim's Shard M.A.D. (plant and Detonate M.A.D.).
+-- Values are read with the caster, so its talents and upgrades apply
+-- (src/game/talents.lua).
 define("hero_techies", function()
     local A = use("abilities")
     local Mods = use("mods")
@@ -10,13 +13,17 @@ define("hero_techies", function()
     local Safe = use("safe")
     local Log = use("log")
     local Bots = use("bots")
+    local Fx = use("fx")
     local T = {}
 
     local STICKY, TAZER, BLAST = "techies_sticky_bomb", "techies_reactive_tazer", "techies_suicide"
     local MINES, MAD, DETONATE = "techies_land_mines", "techies_mutually_assured_destruction", "techies_tazer_detonate"
+    local SIGN, PLANT, MAD_DETONATE = "techies_minefield_sign", "techies_mad_plant", "techies_mad_detonate"
     local UNIT_CAST_POINT = 0.3       -- "ucpt" of every hero, see gen_objects.py
     local MINE_CHARGES = 3            -- techies_land_mines AbilityCharges (Dota KV, not in heroes.json)
     local MAD_REGEN_PER_LEVEL = 0.01  -- bonus_mana_as_mana_regen "hero_levelup" (Dota KV)
+    local MAD_CHARGE_HP = 200         -- npc_dota_techies_innate_mine StatusHealth (Dota npc_units)
+    local SIGN_FX = "Abilities\\Spells\\Other\\TalkToMe\\TalkToMe.mdl"
     local BOMB = "Abilities\\Weapons\\Mortar\\MortarMissile.mdl"
     local BLAST_HEIGHT = 350
     local TREE_TYPES = {"ATtr", "BTtw", "CTtr", "FTtw", "LTlt", "NTtw", "WTtw", "WTst", "YTct", "YTwt",
@@ -106,11 +113,11 @@ define("hero_techies", function()
     ---------------------------------------------------------------- Sticky Bomb
     local function stickyExplode(c, lvl, x, y, stuck)
         if stuck then Mods.remove(stuck, "techies_sticky_bomb") end
-        fx("Abilities\\Spells\\Other\\Incinerate\\FireLordDeathExplode.mdl", x, y)
-        local dmg = A.value(STICKY, "damage", lvl)
-        local slow = A.value(STICKY, "secondary_slow", lvl) / 100
-        local duration = A.value(STICKY, "secondary_slow_duration", lvl)
-        for _, t in ipairs(U.enemiesOf(GetOwningPlayer(c), x, y, A.value(STICKY, "explosion_radius", lvl))) do
+        fx(Fx.model("techies_mine_explode", "Abilities\\Spells\\Other\\Incinerate\\FireLordDeathExplode.mdl"), x, y)
+        local dmg = A.value(STICKY, "damage", lvl, c)
+        local slow = A.value(STICKY, "secondary_slow", lvl, c) / 100
+        local duration = A.value(STICKY, "secondary_slow_duration", lvl, c)
+        for _, t in ipairs(U.enemiesOf(GetOwningPlayer(c), x, y, A.value(STICKY, "explosion_radius", lvl, c))) do
             Damage.deal(c, t, dmg, "magical")
             if U.alive(t) and not U.isMagicImmune(t) then
                 Mods.add(t, "techies_sticky_bomb_slow", {duration = duration, source = c, debuff = true,
@@ -122,9 +129,9 @@ define("hero_techies", function()
     -- Stuck to a hero: it slows the hero and blows up after the countdown.
     local function stick(c, lvl, e, hero)
         DestroyEffect(e)
-        local countdown = A.value(STICKY, "countdown", lvl)
+        local countdown = A.value(STICKY, "countdown", lvl, c)
         Mods.add(hero, "techies_sticky_bomb", {duration = countdown + 0.1, source = c, debuff = true,
-            props = {move_pct = -A.value(STICKY, "slow", lvl) / 100}, effect = BOMB, attach = "chest"})
+            props = {move_pct = -A.value(STICKY, "slow", lvl, c) / 100}, effect = BOMB, attach = "chest"})
         -- remember where the hero was last seen alive: the bomb blows up there
         local lx, ly = GetUnitX(hero), GetUnitY(hero)
         local done = false
@@ -143,7 +150,7 @@ define("hero_techies", function()
     -- Landed: chase the nearest enemy hero in range, else wait and explode.
     local function landed(c, lvl, e, x, y)
         local best = nil
-        for _, h in ipairs(U.enemiesOf(GetOwningPlayer(c), x, y, A.value(STICKY, "radius", lvl))) do
+        for _, h in ipairs(U.enemiesOf(GetOwningPlayer(c), x, y, A.value(STICKY, "radius", lvl, c))) do
             if U.isHero(h) and not U.isMagicImmune(h) then
                 if not best or U.dist(x, y, GetUnitX(h), GetUnitY(h)) < U.dist(x, y, GetUnitX(best), GetUnitY(best)) then
                     best = h
@@ -151,14 +158,14 @@ define("hero_techies", function()
             end
         end
         if not best then
-            Timer.after(A.value(STICKY, "countdown", lvl), function()
+            Timer.after(A.value(STICKY, "countdown", lvl, c), function()
                 DestroyEffect(e)
                 stickyExplode(c, lvl, x, y, nil)
             end)
             return
         end
-        local speed, accel = A.value(STICKY, "speed", lvl), A.value(STICKY, "acceleration", lvl)
-        local wait, maxChase = A.value(STICKY, "pre_chase_time", lvl), A.value(STICKY, "max_chase_time", lvl)
+        local speed, accel = A.value(STICKY, "speed", lvl, c), A.value(STICKY, "acceleration", lvl, c)
+        local wait, maxChase = A.value(STICKY, "pre_chase_time", lvl, c), A.value(STICKY, "max_chase_time", lvl, c)
         local bx, by, age = x, y, 0
         Timer.onFrame(function(dt)
             age = age + dt
@@ -301,8 +308,8 @@ define("hero_techies", function()
     ---------------------------------------------------------------- Blast Off!
     -- Dota's 1 s cast point is a Channel follow-through; the leap starts once
     -- it completes and an interrupted cast is refunded.
-    local function blastTime(lvl)
-        return A.value(BLAST, "AbilityCastPoint", lvl) - UNIT_CAST_POINT
+    local function blastTime(c, lvl)
+        return A.value(BLAST, "AbilityCastPoint", lvl, c) - UNIT_CAST_POINT
     end
 
     local function land(c, lvl, x, y)
@@ -310,8 +317,8 @@ define("hero_techies", function()
         Mods.remove(c, "techies_blast_off")
         SetUnitPosition(c, x, y)
         fx("Objects\\Spawnmodels\\Human\\HCancelDeath\\HCancelDeath.mdl", x, y)
-        local radius = A.value(BLAST, "radius", lvl)
-        local dmg, stun = A.value(BLAST, "damage", lvl), A.value(BLAST, "stun_duration", lvl)
+        local radius = A.value(BLAST, "radius", lvl, c)
+        local dmg, stun = A.value(BLAST, "damage", lvl, c), A.value(BLAST, "stun_duration", lvl, c)
         for _, t in ipairs(U.enemiesOf(GetOwningPlayer(c), x, y, radius)) do
             Damage.deal(c, t, dmg, "magical")
             if U.alive(t) and not U.isMagicImmune(t) then
@@ -324,13 +331,13 @@ define("hero_techies", function()
         for _, d in ipairs(treesIn(x, y, math.min(radius, 175))) do KillDestructable(d) end
         -- pure, non-lethal self damage from current health
         local hp = GetWidgetLife(c)
-        SetWidgetLife(c, math.max(1, hp - hp * A.value(BLAST, "hp_cost", lvl) / 100))
+        SetWidgetLife(c, math.max(1, hp - hp * A.value(BLAST, "hp_cost", lvl, c) / 100))
     end
 
     local function leap(c, lvl, tx, ty)
         tx, ty = clampToMap(tx, ty)
         local sx, sy = GetUnitX(c), GetUnitY(c)
-        local duration = math.max(0.1, A.value(BLAST, "duration", lvl))
+        local duration = math.max(0.1, A.value(BLAST, "duration", lvl, c))
         UnitAddAbility(c, FourCC("Amrf"))
         UnitRemoveAbility(c, FourCC("Amrf"))
         Mods.add(c, "techies_blast_off", {duration = duration + 0.25, dispel = "none", props = {stun = true}})
@@ -368,7 +375,7 @@ define("hero_techies", function()
             local p = blasting[c]
             if not p then return end
             blasting[c] = nil
-            if Timer.now() - p.start < blastTime(ctx.level) - 0.1 then
+            if Timer.now() - p.start < blastTime(c, ctx.level) - 0.1 then
                 refund(ctx)
                 return
             end
@@ -386,16 +393,103 @@ define("hero_techies", function()
         return ch
     end
 
+    -- Aghanim's Scepter: + cast_range_scepter_bonus cast range.
+    local function minesRange(c)
+        local id = A.id(MINES)
+        if id then
+            A.setRangeBonus(c, id, "scepter", A.value(MINES, "cast_range_scepter_bonus", math.max(1, level(c, MINES)), c))
+        end
+    end
+
+    ---------------------------------------------------------------- Minefield Sign
+    -- Aghanim's Scepter (Dota 7.41 techies_minefield_sign): one sign per
+    -- Techies for `lifetime` seconds. Proximity Mines within aura_radius of it
+    -- are invulnerable and deal bonus_mine_damage_pct % more. An enemy hero
+    -- within trigger_radius turns the area into a minefield for
+    -- minefield_duration seconds: enemy heroes in it take scepter_move_damage
+    -- for every scepter_move_amt units they move. Then the sign is gone.
+    local signs = {}          -- Techies -> {unit, fx, x, y, endsAt, field = {hero -> {x, y, moved}}}
+
+    local function removeSign(c)
+        local s = signs[c]
+        if not s then return end
+        signs[c] = nil
+        DestroyEffect(s.fx)
+        if U.alive(s.unit) then RemoveUnit(s.unit) end
+    end
+
+    local function signCovers(c, x, y)
+        local s = signs[c]
+        return s ~= nil and U.alive(s.unit) and U.dist(x, y, s.x, s.y) <= A.value(SIGN, "aura_radius", 1, c)
+    end
+
+    A.define(SIGN, {
+        onCast = function(ctx)
+            local c = ctx.caster
+            track(c)
+            local code = use("data.ids").units.techies_mine
+            if not code then return end
+            removeSign(c)
+            local sign = CreateUnit(ctx.owner, FourCC(code), ctx.x, ctx.y, 270)
+            UnitRemoveAbility(sign, FourCC("Apiv"))      -- a sign stands in plain sight
+            signs[c] = {unit = sign, fx = AddSpecialEffectTarget(SIGN_FX, sign, "overhead"), x = ctx.x, y = ctx.y,
+                        endsAt = Timer.now() + ctx.v("lifetime")}
+        end,
+    })
+
+    local function signTick(c, s, now)
+        if not U.alive(s.unit) or now >= s.endsAt then
+            removeSign(c)
+            return
+        end
+        local owner = GetOwningPlayer(c)
+        if not s.field then
+            for _, h in ipairs(U.enemiesOf(owner, s.x, s.y, A.value(SIGN, "trigger_radius", 1, c))) do
+                if U.isHero(h) then
+                    s.field, s.endsAt = {}, now + A.value(SIGN, "minefield_duration", 1, c)
+                    fx("Abilities\\Spells\\Human\\Thunderclap\\ThunderClapCaster.mdl", s.x, s.y)
+                    break
+                end
+            end
+            if not s.field then return end
+        end
+        local step, dmg = A.value(SIGN, "scepter_move_amt", 1, c), A.value(SIGN, "scepter_move_damage", 1, c)
+        local inside = {}
+        for _, h in ipairs(U.enemiesOf(owner, s.x, s.y, A.value(SIGN, "aura_radius", 1, c))) do
+            if U.isHero(h) then
+                inside[h] = true
+                local hx, hy = GetUnitX(h), GetUnitY(h)
+                local m = s.field[h]
+                if m then
+                    m.moved = m.moved + U.dist(m.x, m.y, hx, hy)
+                    m.x, m.y = hx, hy
+                    local n = step > 0 and math.floor(m.moved / step) or 0
+                    if n > 0 then
+                        m.moved = m.moved - n * step
+                        Damage.deal(c, h, n * dmg, "magical")
+                    end
+                else
+                    s.field[h] = {x = hx, y = hy, moved = 0}
+                end
+            end
+        end
+        for h in pairs(s.field) do
+            if not inside[h] then s.field[h] = nil end
+        end
+    end
+
+    ---------------------------------------------------------------- mines
     local function mineExplode(mine, info)
         mines[mine] = nil
         local lvl, c = info.level, info.techies
         local x, y = GetUnitX(mine), GetUnitY(mine)
-        local radius, full = A.value(MINES, "radius", lvl), A.value(MINES, "min_distance", lvl)
-        local outer = A.value(MINES, "outer_damage", lvl) / 100
-        local dmg = A.value(MINES, "damage", lvl)
-        local building = A.value(MINES, "building_damage_pct", lvl) / 100
-        local mres, burn = A.value(MINES, "mres_reduction", lvl) / 100, A.value(MINES, "burn_duration", lvl)
-        fx("Abilities\\Spells\\Other\\Incinerate\\FireLordDeathExplode.mdl", x, y)
+        local radius, full = A.value(MINES, "radius", lvl, c), A.value(MINES, "min_distance", lvl, c)
+        local outer = A.value(MINES, "outer_damage", lvl, c) / 100
+        local dmg = A.value(MINES, "damage", lvl, c)
+        if signCovers(c, x, y) then dmg = dmg * (1 + A.value(SIGN, "bonus_mine_damage_pct", 1, c) / 100) end
+        local building = A.value(MINES, "building_damage_pct", lvl, c) / 100
+        local mres, burn = A.value(MINES, "mres_reduction", lvl, c) / 100, A.value(MINES, "burn_duration", lvl, c)
+        fx(Fx.model("techies_mine_explode", "Abilities\\Spells\\Other\\Incinerate\\FireLordDeathExplode.mdl"), x, y)
         for _, t in ipairs(U.enemiesOf(GetOwningPlayer(mine), x, y, radius, true)) do
             -- full damage near the mine, falling to outer_damage % at the edge
             local d = U.dist(x, y, GetUnitX(t), GetUnitY(t))
@@ -411,27 +505,37 @@ define("hero_techies", function()
         KillUnit(mine)
     end
 
+    local planted = {}        -- Techies -> planted M.A.D. charge (Aghanim's Shard)
+    local madButtons, madDetonateNear
+
     local function mineTick()
         local now = Timer.now()
         local DT = 0.1
         for mine, info in pairs(mines) do
             if not U.alive(mine) then
                 mines[mine] = nil
-            elseif now >= info.armAt then
-                local lvl = info.level
-                local near = #U.enemiesOf(GetOwningPlayer(mine), GetUnitX(mine), GetUnitY(mine),
-                    A.value(MINES, "radius", lvl)) > 0
-                -- invisible unless an enemy is inside its radius
-                if near and info.hidden then
-                    UnitRemoveAbility(mine, FourCC("Apiv"))
-                    info.hidden = false
-                elseif not near and not info.hidden then
-                    UnitAddAbility(mine, FourCC("Apiv"))
-                    info.hidden = true
+            else
+                local guarded = signCovers(info.techies, GetUnitX(mine), GetUnitY(mine))
+                if guarded ~= (info.guarded == true) then
+                    info.guarded = guarded
+                    SetUnitInvulnerable(mine, guarded)
                 end
-                info.near = near and info.near + DT or 0
-                if info.near >= A.value(MINES, "proximity_threshold", lvl) - 0.01 then
-                    mineExplode(mine, info)
+                if now >= info.armAt then
+                    local lvl, c = info.level, info.techies
+                    local near = #U.enemiesOf(GetOwningPlayer(mine), GetUnitX(mine), GetUnitY(mine),
+                        A.value(MINES, "radius", lvl, c)) > 0
+                    -- invisible unless an enemy is inside its radius
+                    if near and info.hidden then
+                        UnitRemoveAbility(mine, FourCC("Apiv"))
+                        info.hidden = false
+                    elseif not near and not info.hidden then
+                        UnitAddAbility(mine, FourCC("Apiv"))
+                        info.hidden = true
+                    end
+                    info.near = near and info.near + DT or 0
+                    if info.near >= A.value(MINES, "proximity_threshold", lvl, c) - 0.01 then
+                        mineExplode(mine, info)
+                    end
                 end
             end
         end
@@ -440,9 +544,18 @@ define("hero_techies", function()
             if ch.nextAt and now >= ch.nextAt then
                 ch.n = ch.n + 1
                 local lvl = math.max(1, level(c, MINES))
-                ch.nextAt = ch.n < MINE_CHARGES and now + A.value(MINES, "AbilityChargeRestoreTime", lvl) or nil
+                ch.nextAt = ch.n < MINE_CHARGES and now + A.value(MINES, "AbilityChargeRestoreTime", lvl, c) or nil
                 local id = A.id(MINES)
                 if ch.n == 1 and id then BlzEndUnitAbilityCooldown(c, id) end
+            end
+        end
+        for c, s in pairs(signs) do signTick(c, s, now) end
+        for c, m in pairs(planted) do
+            if not U.alive(m) then
+                planted[c] = nil
+                madButtons(c)
+            else
+                madDetonateNear(c, m)
             end
         end
     end
@@ -451,6 +564,7 @@ define("hero_techies", function()
         onLearn = function(hero)
             track(hero)
             charge(hero)
+            minesRange(hero)
         end,
         onChannel = function(ctx)
             local c = ctx.caster
@@ -486,13 +600,17 @@ define("hero_techies", function()
         end,
     })
 
+    Events.on("scepter", function(hero)
+        if techies[hero] then minesRange(hero) end
+    end)
+
     ---------------------------------------------------------------- M.A.D.
     local madRegen = {}
 
     local function madTick()
         for u in pairs(techies) do
             if U.alive(u) and level(u, MAD) > 0 then
-                local pct = A.value(MAD, "bonus_mana_as_mana_regen", 1) + MAD_REGEN_PER_LEVEL * GetHeroLevel(u)
+                local pct = A.value(MAD, "bonus_mana_as_mana_regen", 1, u) + MAD_REGEN_PER_LEVEL * GetHeroLevel(u)
                 local regen = BlzGetUnitMaxMana(u) * pct / 100
                 if madRegen[u] ~= regen then
                     madRegen[u] = regen
@@ -502,22 +620,109 @@ define("hero_techies", function()
         end
     end
 
+    -- base_damage + max_mana_pct_as_damage % of Techies' max mana (+10 % with
+    -- the Shard, through the value lookup).
+    local function madDamage(c)
+        return A.value(MAD, "base_damage", 1, c)
+            + BlzGetUnitMaxMana(c) * A.value(MAD, "max_mana_pct_as_damage", 1, c) / 100
+    end
+
+    local function madBlast(c, owner, x, y, dmg)
+        fx("Objects\\Spawnmodels\\Human\\HCancelDeath\\HCancelDeath.mdl", x, y)
+        for _, t in ipairs(U.enemiesOf(owner, x, y, A.value(MAD, "radius", 1, c))) do
+            Damage.deal(c, t, dmg, "magical")
+        end
+    end
+
     -- Dying leaves a barrel that blows up a moment later.
     Events.on("death", function(dying)
         if not techies[dying] or level(dying, MAD) <= 0 or IsUnitIllusion(dying) then return end
         local x, y = GetUnitX(dying), GetUnitY(dying)
-        local dmg = A.value(MAD, "base_damage", 1)
-            + BlzGetUnitMaxMana(dying) * A.value(MAD, "max_mana_pct_as_damage", 1) / 100
-        local radius = A.value(MAD, "radius", 1)
-        local owner = GetOwningPlayer(dying)
+        local dmg, owner = madDamage(dying), GetOwningPlayer(dying)
         local barrel = AddSpecialEffect("Units\\Other\\TNTBarrel\\TNTBarrel.mdl", x, y)
-        Timer.after(A.value(MAD, "explosion_delay", 1), function()
+        Timer.after(A.value(MAD, "explosion_delay", 1, dying), function()
             DestroyEffect(barrel)
-            fx("Objects\\Spawnmodels\\Human\\HCancelDeath\\HCancelDeath.mdl", x, y)
-            for _, t in ipairs(U.enemiesOf(owner, x, y, radius)) do
-                Damage.deal(dying, t, dmg, "magical")
-            end
+            madBlast(dying, owner, x, y, dmg)
         end)
+    end)
+
+    -- Aghanim's Shard (Dota 7.41): M.A.D. turns active, with the cooldown and
+    -- cast range of its Shard values, and plants one charge
+    -- (npc_dota_techies_innate_mine) that Detonate M.A.D. sets off. Detonate
+    -- takes M.A.D.'s button while the charge is out. Not confirmed from Dota's
+    -- code: the planted charge goes off at once, without the death barrel's
+    -- explosion_delay, and stays invisible like a Proximity Mine.
+    madButtons = function(c)
+        local mad, plant, det = A.id(MAD), A.id(PLANT), A.id(MAD_DETONATE)
+        if not (mad and plant and det) or level(c, MAD) <= 0 or not use("talents").hasShard(c) then return end
+        if GetUnitAbilityLevel(c, plant) == 0 then
+            UnitAddAbility(c, plant)
+            UnitMakeAbilityPermanent(c, true, plant)
+            BlzSetUnitAbilityCooldown(c, plant, 0, A.value(MAD, "AbilityCooldown", 1, c))
+            local ab = BlzGetUnitAbility(c, plant)
+            if ab then BlzSetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, 0, A.value(MAD, "AbilityCastRange", 1, c)) end
+            BlzUnitHideAbility(c, mad, true)
+        end
+        local out = planted[c] ~= nil
+        if out and GetUnitAbilityLevel(c, det) == 0 then
+            UnitAddAbility(c, det)
+            UnitMakeAbilityPermanent(c, true, det)
+            BlzUnitHideAbility(c, plant, true)
+        elseif not out and GetUnitAbilityLevel(c, det) > 0 then
+            UnitRemoveAbility(c, det)
+            BlzUnitHideAbility(c, plant, false)
+        end
+    end
+
+    local function isBotOwned(u)
+        local slot = GetPlayerId(GetOwningPlayer(u))
+        return slot <= SLOT_WARCRAFT and use("roles").isBot(slot)
+    end
+
+    -- Bots set their charge off once an enemy hero stands in its radius.
+    madDetonateNear = function(c, m)
+        local det = A.id(MAD_DETONATE)
+        if not det or GetUnitAbilityLevel(c, det) == 0 or not U.alive(c) or not isBotOwned(c) then return end
+        for _, h in ipairs(U.enemiesOf(GetOwningPlayer(c), GetUnitX(m), GetUnitY(m), A.value(MAD, "radius", 1, c))) do
+            if U.isHero(h) then
+                IssueImmediateOrder(c, use("data.ids").orders[MAD_DETONATE] or "")
+                return
+            end
+        end
+    end
+
+    A.define(PLANT, {
+        onCast = function(ctx)
+            local c = ctx.caster
+            track(c)
+            local code = use("data.ids").units.techies_mine
+            if not code then return end
+            local old = planted[c]
+            if old and U.alive(old) then RemoveUnit(old) end
+            local m = CreateUnit(ctx.owner, FourCC(code), ctx.x, ctx.y, 270)
+            BlzSetUnitMaxHP(m, MAD_CHARGE_HP)
+            SetWidgetLife(m, MAD_CHARGE_HP)
+            planted[c] = m
+            -- deferred: hiding a button inside its own cast event is unsafe
+            Timer.after(0, function() madButtons(c) end)
+        end,
+    })
+
+    A.define(MAD_DETONATE, {
+        onCast = function(ctx)
+            local c = ctx.caster
+            local m = planted[c]
+            planted[c] = nil
+            if m and U.alive(m) then
+                madBlast(c, GetOwningPlayer(c), GetUnitX(m), GetUnitY(m), madDamage(c))
+                RemoveUnit(m)
+            end
+            Timer.after(0, function() madButtons(c) end)
+        end,
+    })
+
+    Events.on("shard", function(hero)
+        if techies[hero] then madButtons(hero) end
     end)
 
     Events.on("hero_spawned", function(u, key)
@@ -537,8 +742,11 @@ define("hero_techies", function()
     Bots.hint(BLAST, {target = "enemyHero", point = true})
     Bots.hint(MINES, {target = "point"})
     Bots.hint(DETONATE, {target = "none", radius = 400, minEnemies = 2})
+    Bots.hint(SIGN, {target = "point"})
+    Bots.hint(PLANT, {target = "enemyHero", point = true})
 
     -- exposed for tests
     T.mines, T.charges, T.mineTick, T.madTick, T.leap, T.mineExplode = mines, charges, mineTick, madTick, leap, mineExplode
+    T.signs, T.planted = signs, planted
     return T
 end)

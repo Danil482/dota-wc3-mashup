@@ -1,10 +1,10 @@
 -- Dota's music for the Dota players, from the player's own Dota 2 (the
 -- default pack, data.audio.music; tools/select_vo.py): the pre-game countdown
 -- until the horn, laning tracks with silences between them, battle music
--- while the player's hero fights the commander's army or heroes, Roshan's
+-- while the player's hero fights the Warcraft player's army or heroes, Roshan's
 -- music while it fights Roshan, the death music while it is dead, the
 -- respawn and buyback stingers, and the victory or defeat stinger. Durations,
--- volumes, loop and sync points are Dota's own. The commander keeps
+-- volumes, loop and sync points are Dota's own. The Warcraft player keeps
 -- Warcraft's music.
 --
 -- How it plays: Warcraft's PlayMusic replays only the first track it was
@@ -152,12 +152,12 @@ define("music", function()
     end
 
     -- How much a unit counts for battle music against this listener: the
-    -- commander's own units and heroes do; his creep waves (Dota's lane
+    -- Warcraft player's own units and heroes do; his creep waves (Dota's lane
     -- creeps), buildings and neutrals do not.
     local function foeWeight(u)
         if not u then return 0 end
         local slot = GetPlayerId(GetOwningPlayer(u))
-        if slot == SLOT_HORDE or Roles.side(slot) ~= "commander" then return 0 end
+        if slot == SLOT_HORDE or Roles.side(slot) ~= "warcraft" then return 0 end
         if IsUnitType(u, UNIT_TYPE_STRUCTURE) then return 0 end
         return IsUnitType(u, UNIT_TYPE_HERO) and 2 or 1
     end
@@ -480,7 +480,7 @@ define("music", function()
     -- channel of new tracks, -musicgain X scales the music.
     local function testCommands()
         local trig = CreateTrigger()
-        for i = 0, SLOT_COMMANDER do
+        for i = 0, SLOT_WARCRAFT do
             TriggerRegisterPlayerChatEvent(trig, Player(i), "-music", false)
         end
         TriggerAddAction(trig, function()

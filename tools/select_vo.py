@@ -35,7 +35,7 @@ import wave
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "launcher"))
 
-from dvc_launcher import vpkdir  # noqa: E402
+from dvw_launcher import vpkdir  # noqa: E402
 
 # Lines per event: order responses play most often, so they get the most variety.
 MAX_PER_EVENT = {"move": 8, "attack": 8, "kill": 4, "death": 4, "spawn": 4, "levelup": 4, "laugh": 4,

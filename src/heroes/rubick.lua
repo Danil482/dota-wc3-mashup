@@ -24,6 +24,7 @@ define("hero_rubick", function()
     local Events = use("events")
     local U = use("util")
     local Bots = use("bots")
+    local Fx = use("fx")
     local M = {}
 
     -- The extra objects (Land, stolen-spell slots) use keys that are not Dota
@@ -43,14 +44,14 @@ define("hero_rubick", function()
     for _, code in ipairs({"AEme", "ANcr", "ANrg", "ANef"}) do BLOCKED[FourCC(code)] = true end
 
     local FX = {
-        lifted = "Abilities\\Spells\\Human\\AerialShackles\\AerialShacklesTarget.mdl",
+        lifted = Fx.model("rubick_telekinesis", "Abilities\\Spells\\Human\\AerialShackles\\AerialShacklesTarget.mdl"),
         landing = "Abilities\\Spells\\Orc\\WarStomp\\WarStompCaster.mdl",
         landMark = "Abilities\\Spells\\Other\\Aneu\\AneuTarget.mdl",
         stun = "Abilities\\Spells\\Human\\Thunderclap\\ThunderclapTarget.mdl",
         bolt = "CLPB",
         boltHit = "Abilities\\Spells\\Human\\Feedback\\SpellBreakerAttack.mdl",
         weakened = "Abilities\\Spells\\Undead\\Cripple\\CrippleTarget.mdl",
-        stealMissile = "Abilities\\Spells\\Human\\SpellSteal\\SpellStealMissile.mdl",
+        stealMissile = Fx.model("rubick_spell_steal", "Abilities\\Spells\\Human\\SpellSteal\\SpellStealMissile.mdl"),
         stolen = "Abilities\\Spells\\Human\\SpellSteal\\SpellStealTarget.mdl",
     }
     local CROW = FourCC("Amrf")

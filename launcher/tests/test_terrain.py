@@ -1,4 +1,4 @@
-"""Tests of Dota's map layout in the personalized map (launcher/dvc_launcher/terrain).
+"""Tests of Dota's map layout in the personalized map (launcher/dvw_launcher/terrain).
 
 Offline part (no Dota 2 needed):
   - the w3e writer gives the bytes of tools/build_map.js writeW3e (node);
@@ -6,18 +6,23 @@ Offline part (no Dota 2 needed):
     the ramp side models Blizzard's ladder maps use;
   - the data.mapdata block of war3map.lua is swapped between the build's
     markers, keeps build_lua.py's syntax and still compiles (lupa);
-  - start locations in war3map.w3i and war3mapUnits.doo are patched in place.
+  - start locations in war3map.w3i and war3mapUnits.doo are patched in place;
+  - the Warcraft grove on the base layout and on open ground shaped like
+    the Dire base: 40-70 trees, a band 4 deep from 640 past the hall's side,
+    off the mine, spawn and expansion discs and the walks to them, nearest
+    the hall, cut by a walkway, every path open, the front row in reach.
 
 With --dota, on a base map from tools/build.py: the real pipeline runs cold
 twice into a scratch cache and must give byte-identical files, then warm from
 the cache. The personalized map is written with StormLib and checked: the
 archive opens, file versions, the minimap, every structure, camp, rune and
-lane point on walkable ground and reachable from the fountain, the commander
-reaching the Ancient, only known ramp models, and the map script running on
-the mock WC3 API with the new layout. Blocked ground: the raised cliffs and
+lane point on walkable ground and reachable from the fountain, the Warcraft
+player reaching the Ancient, only known ramp models, and the map script running
+on the mock WC3 API with the new layout. Blocked ground: the raised cliffs and
 rocks leave the pathing byte for byte as without them, at least 97% of the
-blocked cells look blocked, the commander base is flat with its town hall,
-mine and expansions in place. Pictures: <work>/dota.png, <work>/wc3.png.
+blocked cells look blocked, the Warcraft base is flat with its town hall, mine
+and expansions in place, and its grove of Dire dead trees passes the grove
+checks with Dota's trees standing. Pictures: <work>/dota.png, <work>/wc3.png.
 
 Usage: python -I launcher/tests/test_terrain.py [--dota "<Dota 2 root>"] [--base <map.w3x>] [--work <folder>]
 Never starts Warcraft III, Dota 2 or Steam.
@@ -41,14 +46,14 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 from PIL import Image  # noqa: E402
 
-from dvc_launcher import stormlib, terrain  # noqa: E402
-from dvc_launcher.blp import decode as blp_decode  # noqa: E402
-from dvc_launcher.terrain import convert, ground, trees, w3x  # noqa: E402
+from dvw_launcher import stormlib, terrain  # noqa: E402
+from dvw_launcher.blp import decode as blp_decode  # noqa: E402
+from dvw_launcher.terrain import convert, ground, trees, w3x  # noqa: E402
 
 DLL = next((p for p in (ROOT / "launcher" / "vendor" / "stormlib" / "x64" / "StormLib.dll",
-                        ROOT / "dist" / "DotaVsCommander" / "StormLib.dll") if p.is_file()), None)
+                        ROOT / "dist" / "DotaVsWarcraft" / "StormLib.dll") if p.is_file()), None)
 VRF = next((p for p in (ROOT / "launcher" / "vendor" / "vrf" / "Source2Viewer-CLI.exe",
-                        ROOT / "dist" / "DotaVsCommander" / "vrf" / "Source2Viewer-CLI.exe") if p.is_file()), None)
+                        ROOT / "dist" / "DotaVsWarcraft" / "vrf" / "Source2Viewer-CLI.exe") if p.is_file()), None)
 # Ramp side models: the canonical ones of a straight ramp, and the flat ones
 # that every Blizzard ladder map asks for (no model; the game skips them).
 RAMP_SIDES = {"HLHBA", "HABHL", "HHLAB", "HBALH", "VBHLA", "VHBAL", "VALHB", "VLABH"}
@@ -182,16 +187,16 @@ def test_ramp_shape():
 
 
 def test_lua_patch():
-    script = ("before\n-- @dvc-data-begin data.heroes\ndefine(\"data.heroes\", function()\n    return {}\nend)\n"
-              "-- @dvc-data-end data.heroes\n\n-- @dvc-data-begin data.mapdata\ndefine(\"data.mapdata\", function()\n"
-              "    return {\n     old = 1\n    }\nend)\n-- @dvc-data-end data.mapdata\nafter\n")
+    script = ("before\n-- @dvw-data-begin data.heroes\ndefine(\"data.heroes\", function()\n    return {}\nend)\n"
+              "-- @dvw-data-end data.heroes\n\n-- @dvw-data-begin data.mapdata\ndefine(\"data.mapdata\", function()\n"
+              "    return {\n     old = 1\n    }\nend)\n-- @dvw-data-end data.mapdata\nafter\n")
     md = {"bounds": {"min": -9216, "max": 9216}, "camps": {"d_small1": {"x": 10, "y": -20}},
           "lanes": {"mid": [{"x": 1, "y": 2}, {"x": 3, "y": 4}]}, "runes": []}
     out = w3x.patch_lua(script, md)
     again = w3x.patch_lua(out, md)
-    kept = out.startswith("before\n-- @dvc-data-begin data.heroes") and out.endswith("-- @dvc-data-end data.mapdata\nafter\n")
+    kept = out.startswith("before\n-- @dvw-data-begin data.heroes") and out.endswith("-- @dvw-data-end data.mapdata\nafter\n")
     check("data.mapdata block replaced between the markers, the rest kept, repeatable",
-          kept and "old = 1" not in out and out.count("@dvc-data-begin data.mapdata") == 1 and again == out)
+          kept and "old = 1" not in out and out.count("@dvw-data-begin data.mapdata") == 1 and again == out)
     try:
         import build_lua
         same = build_lua.lua_literal(md, 4) == w3x.lua_literal(md, 4)
@@ -490,7 +495,7 @@ def looks_blocked(t, r):
 def test_blocked_ground(folder, wpm_cells, w3e):
     """Raised blocked ground and rocks, on the cached description: the
     pathing is exactly the one without them, blocked ground looks blocked,
-    the commander base stays flat and complete."""
+    the Warcraft base stays flat and complete."""
     desc = json.loads((folder / "description.json").read_text(encoding="utf-8"))
     r = convert.Rasters(desc)
     t = convert.convert(desc)
@@ -514,20 +519,170 @@ def test_blocked_ground(folder, wpm_cells, w3e):
     w, h, _ox, _oy, layers, _ramps, end = parse_w3e(w3e)
     heights = [struct.unpack_from("<h", w3e, end - 7 * w * h + 7 * k)[0] for k in range(w * h)]
     base = [k for k in range(w * h) if t.base[k] and not t.frozen[k]]       # frozen: its entrance ramps
-    check("the commander base is flat: one cliff level, no height offsets",
+    check("the Warcraft base is flat: one cliff level, no height offsets",
           base and len({layers[k] for k in base}) == 1 and all(heights[k] == 8192 for k in base),
           f"{len(base)} corners, {sum(t.base) - len(base)} on its entrance ramps")
     md = t.mapdata
-    start, fort = md["commander"]["start"], desc["entities"]["forts"]["bad"]
-    mine = md["commander"]["mines"][0]
+    start, fort = md["warcraft"]["start"], desc["entities"]["forts"]["bad"]
+    mine = md["warcraft"]["mines"][0]
     t2 = [tw["pos"] for lane in ("top", "bot") for tw in desc["entities"]["towers"]["bad"].get(lane, [])
           if tw["tier"] == 2]
-    exp = md["commander"]["expansions"]
+    exp = md["warcraft"]["expansions"]
     near = all(min(((p["x"] - q[0]) ** 2 + (p["y"] - q[1]) ** 2) ** 0.5 for q in t2) <= 1800 for p in exp)
     check("town hall at the Dire Ancient, gold mine 700 away, expansions by the Dire tier-2 towers",
           abs(start["x"] - fort[0]) <= 32 and abs(start["y"] - fort[1]) <= 32
           and 600 <= ((mine["x"] - start["x"]) ** 2 + (mine["y"] - start["y"]) ** 2) ** 0.5 <= 800
           and len(exp) == 2 and near, f"start {start}, mine {mine}, expansions {exp}")
+    test_grove(t)
+
+
+def seg_dist(p, a, b):
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    u = max(0.0, min(1.0, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy)))
+    return ((a[0] + u * dx - p[0]) ** 2 + (a[1] + u * dy - p[1]) ** 2) ** 0.5
+
+
+def with_trees(wpm, points):
+    """A copy of 640 x 640 pathing cells with a tree's 4 x 4 cells blocked at each point."""
+    cells = bytearray(wpm)
+    for x, y in points:
+        i0, j0 = int((x - 64 + 10240) // 32), int((y - 64 + 10240) // 32)
+        for b in range(4):
+            for a in range(4):
+                if 0 <= i0 + a < 640 and 0 <= j0 + b < 640:
+                    cells[(j0 + b) * 640 + i0 + a] = 0xCA
+    return cells
+
+
+def grove_checks(tag, start, mines, spawns, expansions, front, grove, others, wpm, keys):
+    """The Warcraft grove as placed on a map: its size and distance, clear
+    of the mines, spawns, expansions and the walks from the hall to them, the
+    trees nearest the hall, cut by a walkway, every path from the hall still
+    open and the front row in the workers' reach. wpm: the map's 640 x 640
+    pathing cells without trees; others: every other tree; keys [(name,
+    (x, y))] must stay reachable from the hall."""
+    sx, sy = start
+    dist = [((x - sx) ** 2 + (y - sy) ** 2) ** 0.5 for x, y in grove]
+    within = sum(1 for x, y in list(grove) + list(others) if (x - sx) ** 2 + (y - sy) ** 2 <= 1500 ** 2)
+    check(f"{tag}: the Warcraft grove holds 40-70 trees", 40 <= len(grove) <= 70,
+          f"{len(grove)} trees; {within} trees within 1500 of the Warcraft start")
+    if not grove:
+        return
+    r0, r1 = convert.GROVE_FRONT, convert.GROVE_FRONT + 128 * convert.GROVE_ROWS
+    gap = min(dist) - 64 - 256
+    check(f"{tag}: grove {convert.GROVE_ROWS} trees deep, its front 450-700 past the hall's side",
+          all(r0 <= d < r1 for d in dist) and 450 <= gap <= 700,
+          f"{min(dist):.0f}-{max(dist):.0f} from the hall's centre, {gap:.0f} past its side")
+    fx, fy = front[0] - sx, front[1] - sy
+
+    def off(p, points, radius):
+        return all(((p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2) ** 0.5 >= radius for q in points)
+
+    def fits(p):
+        return (off(p, mines, convert.GROVE_MINE) and off(p, spawns, convert.GROVE_SPAWN)
+                and off(p, expansions, convert.GROVE_EXPANSION)
+                and (not convert.GROVE_BACK_HALF or (p[0] - sx) * fx + (p[1] - sy) * fy <= 0)
+                and all(seg_dist(p, start, q) >= convert.GROVE_PATH for q in list(mines) + list(spawns)))
+    bad = [p for p in grove if not fits(p)]
+    check(f"{tag}: grove off the mine, spawn and expansion discs and the walks to them", not bad,
+          f"{len(bad)} trees" if bad else "")
+    nearest = min((((x - sx) ** 2 + (y - sy) ** 2) ** 0.5 for x, y in others), default=float("inf"))
+    check(f"{tag}: the grove is the tree group nearest the hall", nearest > max(dist), f"next tree {nearest:.0f} away")
+    tiles = {(int((x + 10240) // 128), int((y + 10240) // 128)) for x, y in grove}
+    clumps, seen_tiles = 0, set()
+    for tile in sorted(tiles):
+        if tile in seen_tiles:
+            continue
+        clumps += 1
+        stack = [tile]
+        seen_tiles.add(tile)
+        while stack:
+            i, j = stack.pop()
+            for n in ((i + a, j + b) for a in (-1, 0, 1) for b in (-1, 0, 1)):
+                if n in tiles and n not in seen_tiles:
+                    seen_tiles.add(n)
+                    stack.append(n)
+    check(f"{tag}: a walkway cuts the grove", clumps >= 2, f"{clumps} clumps")
+    cells = with_trees(wpm, list(others) + list(grove))
+    seen = flood(cells, 640, start)
+    seen_before = flood(with_trees(wpm, others), 640, start)
+    cut = sum(1 for k in range(640 * 640) if seen_before[k] and not seen[k] and cells[k] != 0xCA)
+    lost = [n for n, p in keys if not near(seen, 640, {"x": p[0], "y": p[1]})]
+    check(f"{tag}: with every tree standing the hall reaches the spawns, mines, expansions and the Dota base, and "
+          f"the grove cuts off at most {convert.GROVE_POCKET} cells", not lost and cut <= convert.GROVE_POCKET,
+          f"{cut} cells cut off" + (f", not reachable {lost}" if lost else ""))
+    reach = front_row = hidden = 0
+    for (x, y), d in zip(grove, dist):
+        i0, j0 = int((x - 64 + 10240) // 32), int((y - 64 + 10240) // 32)
+        ring = [(i0 + a, j0 + b) for a in range(-1, 5) for b in (-1, 4)]     # a worker cuts from beside or a corner
+        ring += [(i0 + a, j0 + b) for a in (-1, 4) for b in range(4)]
+        ok = any(seen[j * 640 + i] for i, j in ring)
+        reach += ok
+        if d < r0 + 128:
+            front_row += 1
+            hidden += not ok
+    check(f"{tag}: workers reach every front-row tree and a third of the grove", not hidden and 3 * reach >= len(grove),
+          f"{reach} of {len(grove)} trees in reach, front row {front_row - hidden} of {front_row}")
+
+
+def open_cells(play):
+    """640 x 640 pathing cells: open land in the playable area."""
+    cells = bytearray([0xCE]) * (640 * 640)
+    lo, hi = int((10240 - play) // 32), int((10240 + play) // 32)
+    for j in range(lo, hi):
+        cells[j * 640 + lo:j * 640 + hi] = bytes([0x40]) * (hi - lo)
+    return cells
+
+
+def test_grove_rule():
+    """The Warcraft grove on the base layout (tools/layout.py places it by
+    the personalized map's rule) and on open ground shaped like Dota's Dire
+    base: hall, mine 700 away towards the corner, three exits."""
+    import layout
+    c = layout.WARCRAFT
+    grove = layout.warcraft_grove()
+    taken = set(grove)
+    others = [p for p in layout.trees() if p not in taken]
+    keys = [(f"spawn {lane}", p) for lane, p in c["spawns"].items()]
+    keys += [("gold mine", p) for p in c["mines"] + c["expansions"]]
+    keys += [("Dota fountain", layout.DOTA["fountain"]), ("Dota Ancient", layout.DOTA["ancient"])]
+    grove_checks("base layout", c["start"], c["mines"], list(c["spawns"].values()), c["expansions"],
+                 layout.DOTA["ancient"], grove, others, open_cells(layout.PLAY), keys)
+    hall, mines, spawns = (5536, 4992), [(6048, 5472)], [(3168, 5792), (4096, 3584), (6272, 3648)]
+
+    def inside(x, y):
+        return max(abs(x), abs(y)) + 64 <= convert.PLAY
+    spots = convert.grove(hall, mines, spawns, (-6300, -6300), inside)
+    check("Dire-shaped open ground: the grove is the same on every run",
+          spots == convert.grove(hall, mines, spawns, (-6300, -6300), inside))
+    keys = [("spawn", p) for p in spawns] + [("gold mine", p) for p in mines]
+    grove_checks("Dire-shaped open ground", hall, mines, spawns, [], (-6300, -6300), spots, [],
+                 open_cells(convert.PLAY), keys)
+
+
+def test_grove(t):
+    """The Warcraft grove on the converted map: Dire dead trees, by the
+    rule's checks (grove_checks) with Dota's trees standing."""
+    md = t.mapdata
+    c = md["warcraft"]
+
+    def xy(p):
+        return p["x"], p["y"]
+    taken = set(t.grove)
+    rows = [r for r in t.trees if (r[0], r[1]) in taken]
+    types = t.tree_plan["types"]
+    kind = convert.GROVE_TYPE if types.get(convert.GROVE_TYPE) else convert.TREE_ID
+    count = len(types[kind]) if types.get(kind) else 10
+    check("the grove is the Dire's dead trees, one tree per spot",
+          len(rows) == len(t.grove) and all(r[5] == kind and 0 <= r[3] < count for r in rows),
+          f"{len(rows)} {kind} trees")
+    f = md["dota"]["fountain"]
+    keys = [(f"spawn {lane}", xy(p)) for lane, p in c["spawns"].items()]
+    keys += [("gold mine", xy(p)) for p in c["mines"] + c["expansions"]]
+    keys += [("Radiant fountain", (f["x"] + 350, f["y"] + 350)), ("Radiant Ancient", xy(md["dota"]["ancient"]))]
+    grove_checks("personalized map", xy(c["start"]), [xy(p) for p in c["mines"]],
+                 [xy(p) for p in c["spawns"].values()], [xy(p) for p in c["expansions"]], xy(md["dota"]["ancient"]),
+                 list(t.grove), [(r[0], r[1]) for r in t.trees if (r[0], r[1]) not in taken], bytes(t.pathing), keys)
 
 
 def mock_run(script, work):
@@ -547,7 +702,7 @@ def mock_run(script, work):
     lua.execute(script)
     run = lua.eval("""function(seconds)
         local ok, err = pcall(function() config() main() __mock.advance(seconds) end)
-        return ok, tostring(err), __mock.files["DotaVsCommander\\\\log.txt"] or ""
+        return ok, tostring(err), __mock.files["DotaVsWarcraft\\\\log.txt"] or ""
     end""")
     ok, err, log = run(75)
     (work / "mock_log.txt").write_text(log + ("\n" + err if not ok else ""), encoding="utf-8")
@@ -620,19 +775,19 @@ def test_dota(dota, base, work):
     seen = flood(cells, 640, (md["dota"]["fountain"]["x"] + 350, md["dota"]["fountain"]["y"] + 350))
     points = [("fountain spawn", {"x": md["dota"]["fountain"]["x"] + 350, "y": md["dota"]["fountain"]["y"] + 350})]
     points += [("ancient", md["dota"]["ancient"]), ("shop", md["dota"]["shop"]), ("roshan", md["roshan"]),
-               ("commander start", md["commander"]["start"])]
+               ("Warcraft start", md["warcraft"]["start"])]
     points += [(f"tower {lane} {i + 1}", p) for lane, ps in md["dota"]["towers"].items() for i, p in enumerate(ps)]
     points += [(f"barracks {lane} {i}", p) for lane, ps in md["dota"]["barracks"].items() for i, p in enumerate(ps)]
     points += [(f"lane {lane} point {i}", p) for lane, ps in md["lanes"].items() for i, p in enumerate(ps)]
-    points += [(f"spawn {lane}", p) for lane, p in md["commander"]["spawns"].items()]
+    points += [(f"spawn {lane}", p) for lane, p in md["warcraft"]["spawns"].items()]
     points += [(f"camp {n}", p) for n, p in md["camps"].items()]
     points += [("rune", p) for p in md["runes"] + md.get("bounty_runes", [])]
-    points += [("gold mine", p) for p in md["commander"]["mines"] + md["commander"]["expansions"]]
+    points += [("gold mine", p) for p in md["warcraft"]["mines"] + md["warcraft"]["expansions"]]
     off = [n for n, p in points if not near(seen, 640, p)]
     check("every structure, camp, rune, mine and lane point is reachable on foot from the fountain", not off,
           f"{len(points)} points, {sum(seen)} reachable cells" + (f", not reachable {off[:6]}" if off else ""))
-    check("the commander's base exists: town hall, a gold mine and two expansions",
-          len(md["commander"]["mines"]) == 1 and len(md["commander"]["expansions"]) == 2)
+    check("the Warcraft base exists: town hall, a gold mine and two expansions",
+          len(md["warcraft"]["mines"]) == 1 and len(md["warcraft"]["expansions"]) == 2)
     check("Dota's layout: 3 lanes, 11 towers, 6 barracks, 28 camps, 2 power and 2 bounty runes",
           sorted(md["lanes"]) == ["bot", "mid", "top"] and sum(len(v) for v in md["dota"]["towers"].values()) == 11
           and sum(len(v) for v in md["dota"]["barracks"].values()) == 6 and len(md["camps"]) == 28
@@ -653,13 +808,13 @@ def test_dota(dota, base, work):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dota")
-    ap.add_argument("--base", help="base map built by tools/build.py (default: build/test/DotaVsCommander_test.w3x)")
+    ap.add_argument("--base", help="base map built by tools/build.py (default: build/test/DotaVsWarcraft_test.w3x)")
     ap.add_argument("--work")
     args = ap.parse_args()
-    work = (Path(args.work) if args.work else Path(tempfile.mkdtemp(prefix="dvc_terrain_"))).resolve()
+    work = (Path(args.work) if args.work else Path(tempfile.mkdtemp(prefix="dvw_terrain_"))).resolve()
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True)
-    base = (Path(args.base) if args.base else ROOT / "build" / "test" / "DotaVsCommander_test.w3x").resolve()
+    base = (Path(args.base) if args.base else ROOT / "build" / "test" / "DotaVsWarcraft_test.w3x").resolve()
     if not base.is_file():
         base = None
     test_ramp_shape()
@@ -668,6 +823,7 @@ def main():
     test_tree_plan()
     test_object_merge()
     test_tile_shapes()
+    test_grove_rule()
     if base and DLL:
         test_start_patches(base)
     else:

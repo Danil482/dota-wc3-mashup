@@ -5,17 +5,21 @@
 -- hero's rune line for its player), the Aegis (the hero's line on pickup,
 -- the reincarnation stinger on the revive). Hooks for the modules that own
 -- the shop, ability keys and the Town Portal: buy, sell, combine, error,
--- castFail, tpStart and tpEnd.
+-- castFail, tpStart and tpEnd. At the start of the game it loads every
+-- effect file (sound.lua S.warmup) and mutes Warcraft's interface sounds for
+-- Dota players.
 define("gamesounds", function()
     local Timer = use("timer")
     local Events = use("events")
     local Roles = use("roles")
     local Sound = use("sound")
+    local Log = use("log")
     local G = {started = false}
 
     G.COIN_GAP = 0.15           -- one coin at a time per player (Dota: General.Coins, limiter 1)
     G.LINE_GAP = 4              -- seconds between a hero's "not yet" / "no mana" lines
     G.LEVEL_GAP = 1             -- several level-ups at once ring once
+    G.MUTE_WC3_UI = true        -- Warcraft's interface sounds are muted for Dota players
 
     local lastCoin, lastLevel, lastLearn, lastLine = {}, {}, {}, {}
     local aegisCode = nil
@@ -43,7 +47,7 @@ define("gamesounds", function()
         local t = now()
         if t - (lastCoin[slot] or -1) < G.COIN_GAP then return end
         lastCoin[slot] = t
-        Sound.sfx("coins", kp)
+        Sound.sfx("coins", kp, nil, nil, 1, {why = "lasthit"})
     end
 
     local function onLevel(u)
@@ -86,7 +90,7 @@ define("gamesounds", function()
     -- Shop feedback for one player: a purchase, a sale, a finished recipe,
     -- Dota's "no" click (not enough gold, no stock, out of range).
     function G.buy(p) if p then Sound.sfx("buy", p) end end
-    function G.sell(p) if p then Sound.sfx("coins", p) end end
+    function G.sell(p) if p then Sound.sfx("coins", p, nil, nil, 1, {why = "sell"}) end end
     function G.combine(p) if p then Sound.sfx("combine", p) end end
     function G.error(p) if p then Sound.sfx("error", p) end end
 
@@ -147,9 +151,69 @@ define("gamesounds", function()
         end
     end
 
+    -- ------------------------------------------------------------ Warcraft's own sounds
+
+    -- Warcraft's interface sounds (sound channel 8, volume group UI): the
+    -- advisor's "inventory is full", "not enough gold" / "mana", "under
+    -- attack", "your hero has fallen", the error click, item pickup and drop,
+    -- minimap pings, quest, hint and chat sounds. Dota players hear none of
+    -- them; the Warcraft player keeps them all. Our sounds play on channel 0,
+    -- outside that group. Only the volume is per client; no handles.
+    local uiMuted = {}          -- slot -> true while the player's Warcraft UI sounds are muted
+
+    function G.muteWarcraftUi(p, on)
+        uiMuted[GetPlayerId(p)] = on or nil
+        if GetLocalPlayer() == p then VolumeGroupSetVolume(SOUND_VOLUMEGROUP_UI, on and 0 or 1) end
+    end
+
+    function G.warcraftUiMuted(p)
+        return uiMuted[GetPlayerId(p)] == true
+    end
+
+    -- Test builds: "-sfx <key>" plays an effect for the typing player ("-sfx
+    -- <key> 3d": at their hero, for everyone near), "-sfxch N" moves our
+    -- sounds to Warcraft channel N, "-wc3ui" switches the player's Warcraft
+    -- interface sounds on or off. Each logs what it did.
+    local function testCommands()
+        local trig = CreateTrigger()
+        for i = 0, SLOT_WARCRAFT do
+            TriggerRegisterPlayerChatEvent(trig, Player(i), "-sfx", false)
+            TriggerRegisterPlayerChatEvent(trig, Player(i), "-wc3ui", true)
+        end
+        TriggerAddAction(trig, function()
+            use("safe").call(function()
+                local p, msg = GetTriggerPlayer(), GetEventPlayerChatString()
+                local slot = GetPlayerId(p)
+                local ch = string.match(msg, "^%-sfxch%s+(%d+)")
+                local key, mode = string.match(msg, "^%-sfx%s+(%S+)%s*(%S*)")
+                if msg == "-wc3ui" then
+                    G.muteWarcraftUi(p, not G.warcraftUiMuted(p))
+                    Log.info("sound: Warcraft UI sounds " .. (G.warcraftUiMuted(p) and "muted" or "on") .. " for player " .. slot)
+                elseif ch then
+                    Sound.CHANNEL = tonumber(ch)
+                    Log.info("sound: our sounds now use channel " .. Sound.CHANNEL)
+                elseif key and mode == "3d" then
+                    local hero = defined("heroes") and use("heroes").bySlot[slot] or nil
+                    Sound.sfx(key, nil, hero and GetUnitX(hero) or 0, hero and GetUnitY(hero) or 0, 1,
+                              {near = 800, far = 3500, why = "test"})
+                elseif key then
+                    Sound.sfx(key, p, nil, nil, 1, {why = "test"})
+                end
+                Log.flush()
+            end)
+        end)
+    end
+
     function G.init()
         if G.started then return end
         G.started = true
+        Sound.warmup()
+        if G.MUTE_WC3_UI then
+            for _, slot in ipairs(Roles.heroSlots) do
+                if Roles.humans[slot] and Roles.side(slot) == "dota" then G.muteWarcraftUi(Player(slot), true) end
+            end
+        end
+        if BUILD_TEST_MODE then testCommands() end
         if defined("world") then aegisCode = use("world").code("items", "aegis") end
         Events.on("death", onDeath)
         Events.on("hero_level", onLevel)

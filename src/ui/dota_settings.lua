@@ -6,8 +6,8 @@
 -- toward the cursor while the button is held and shows the holder a move
 -- marker at each repeated move.
 --
--- File: Documents\Warcraft III\CustomMapData\DotaVsCommander\dota_settings.txt,
--- written per PC by launcher\dvc_launcher\dota_settings.py (format there). It
+-- File: Documents\Warcraft III\CustomMapData\DotaVsWarcraft\dota_settings.txt,
+-- written per PC by launcher\dvw_launcher\dota_settings.py (format there). It
 -- is a Preload script that puts one "key=value;..." string into the tooltip of
 -- the unused ability STASH; Preloader runs it here, after loading (never while
 -- the map loads). Hero players without the file get Dota's defaults.
@@ -44,10 +44,10 @@ define("dota_settings", function()
     local Safe = use("safe")
     local S = {started = false}
 
-    local FILE = "DotaVsCommander\\dota_settings.txt"
+    local FILE = "DotaVsWarcraft\\dota_settings.txt"
     local STASH = FourCC("ANdc")            -- Dark Conversion: not in this map
-    local EMPTY = "dvc-no-settings"
-    local SYNC, CAST, SEL = "dvcset", "dvccast", "dvcsel"
+    local EMPTY = "dvw-no-settings"
+    local SYNC, CAST, SEL = "dvwset", "dvwcast", "dvwsel"
     local VERSION = "1"
     -- Dota's keybind template ARROW and game defaults; cd is Dota's camera distance.
     S.DEFAULTS = "v=1;a1=81;a2=87;a3=69;a4=68;a5=70;a6=82;i1=90;i2=88;i3=67;i4=86;i5=66;i6=78;tp=84;"
@@ -215,7 +215,10 @@ define("dota_settings", function()
     local function abilityName(id)
         if not nameById then
             nameById = {}
-            for name, code in pairs(use("data.ids").abilities or {}) do nameById[FourCC(code)] = name end
+            local ids = use("data.ids")
+            for name, code in pairs(ids.abilities or {}) do nameById[FourCC(code)] = name end
+            -- Rubick's D-cell copy of a stolen Dota spell casts by that spell's data
+            for orig, copy in pairs(ids.rubick_copies or {}) do nameById[FourCC(copy)] = nameById[FourCC(orig)] end
         end
         return nameById[id]
     end
@@ -233,18 +236,15 @@ define("dota_settings", function()
         return string.find(f, "UNIT_TARGET") ~= nil, string.find(f, "POINT") ~= nil
     end
 
-    -- The hero's own ability in `cell` (y * 4 + x) by the build data's cell
-    -- (ids.ability_cells): the same on every client, so synced code may ask.
-    -- Warcraft's button positions can be local (Rubick moves a stolen spell's
-    -- button for its owner only).
+    -- The ability the hero shows in `cell` (y * 4 + x) by the build data's
+    -- cells, forms and stolen spells included (dota_hud.abilityIn): the same
+    -- on every client, so synced code may ask. {name, id}; name is nil for a
+    -- stolen Warcraft spell, which keeps Warcraft's own targeting.
     local function abilityAt(hero, cell)
-        local key = heroes().keyOf[hero]
-        local cells = use("data.ids").ability_cells or {}
-        for _, e in ipairs(key and use("dota_hud").rowOf(key) or {}) do
-            if e.id and cells[e.name] == cell and GetUnitAbilityLevel(hero, e.id) > 0 then return e end
-        end
-        return nil
+        if not heroes().keyOf[hero] then return nil end
+        return use("dota_hud").abilityIn(hero, cell)
     end
+    S.abilityAt = abilityAt
 
     local function hovered()
         local u = BlzGetMouseFocusUnit()
@@ -286,7 +286,16 @@ define("dota_settings", function()
         local level = GetUnitAbilityLevel(hero, id)
         local name = abilityName(id)
         local order, kind = name and use("data.ids").orders[name], buildKind(name)
-        local from = (order and "build" or "field") .. "/" .. (kind and "build" or "field")
+        local kindFrom = kind and "build" or "field"
+        if not kind and name then
+            -- A native ability (Anti-Mage's Blink, ...) is no Channel: the build
+            -- data lists no target kind and the Channel field reads 0, which
+            -- refused every Blink quick cast in game (2026-10-11). Dota's
+            -- behaviour flags give the kind, as in targets().
+            local unitT, pointT = targets({name = name})
+            if unitT or pointT then kind, kindFrom = unitT and (pointT and 3 or 1) or 2, "flags" end
+        end
+        local from = (order and "build" or "field") .. "/" .. kindFrom
         if level >= 1 and not (order and kind) then
             local ab = BlzGetUnitAbility(hero, id)
             if ab and not order then order = BlzGetAbilityStringLevelField(ab, ABILITY_SLF_BASE_ORDER_ID_NCL6, level - 1) end
@@ -319,6 +328,7 @@ define("dota_settings", function()
         local pend = Items.pending[p]
         if not pend or pend.slot ~= slot or UnitItemInSlot(hero, slot) ~= pend.item then return false end
         Items.pending[p] = nil
+        if not use("items").ready(hero, pend.item, "quick") then return false end
         if pend.target == "unit" then return UnitUseItemTarget(hero, pend.item, target) end
         if pend.target == "point" then return UnitUseItemPoint(hero, pend.item, GetUnitX(target), GetUnitY(target)) end
         return false
@@ -404,7 +414,8 @@ define("dota_settings", function()
                 what = why .. "Warcraft's own key " .. b.letter
             end
         end
-        trace("key %s press: %s%s%s, quick %s -> %s", b.field, e and e.name or "no ability of the selected hero",
+        trace("key %s press: %s%s%s, quick %s -> %s", b.field,
+            e and (e.name or "a stolen Warcraft spell " .. e.id) or "no ability of the selected hero",
             unitT and " (unit)" or "", pointT and " (point)" or "", tostring(b.quick), what)
     end
 

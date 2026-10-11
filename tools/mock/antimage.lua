@@ -268,7 +268,7 @@ __heroesA.at(21, function()
         if not T.started then T.init() end
         use("heroes").keyOf[am] = "antimage"
         T.register(am)
-        am.level = 25
+        am.tal, am.level = true, 30         -- per-unit ability fields (tools/mock/talents.lua)
         H.check("am persecutor talent", T.pick(am, "special_bonus_unique_antimage_5")
             and A.value("antimage_persectur", "move_slow_min", 1, am) == A.value("antimage_persectur", "move_slow_min", 1) + 9)
         local code = ids.items.item_ultimate_scepter
@@ -281,8 +281,9 @@ __heroesA.at(21, function()
         H.check("am blink empowers the next mana break", Mods.has(am, "antimage_empowered_break"))
         foe.mana, foe.maxMana = 500, 500
         H.hit(am, foe, 40)
-        -- 4.5 % + 1.5 % (scepter) + 20 % (empowered) of 500, plus the flat burn
-        H.check("am empowered mana break", foe.mana < 500 - 130 and not Mods.has(am, "antimage_empowered_break"), foe.mana)
+        -- 40 flat, 4.5 % + 1.5 % (scepter) and 20 % (empowered) of 500
+        H.check("am empowered mana break", math.abs(foe.mana - 330) < 0.01 and not Mods.has(am, "antimage_empowered_break"),
+            foe.mana)
         H.check("am mana lock", Mods.has(foe, "antimage_mana_lock"))
         foe.lockedAt = foe.mana
         foe.mana = foe.mana + 100
@@ -304,6 +305,32 @@ __heroesA.at(21, function()
             if u.typeId == FourCC(ids.units.itemdummy) then after = after + 1 end
         end
         H.check("am shard sends an image at the caster", after == before + 1, after - before)
+    end)
+    -- the other talents: Blink and Mana Void
+    H.after(4.2, function()
+        for _, n in ipairs({"special_bonus_unique_antimage_manavoid_aoe", "special_bonus_unique_antimage_6",
+                            "special_bonus_unique_antimage_3", "special_bonus_unique_antimage_8",
+                            "special_bonus_unique_antimage", "special_bonus_unique_antimage_2"}) do
+            H.check("am talent " .. n, T.pick(am, n))
+        end
+        local blink, void = A.id("antimage_blink"), A.id("antimage_mana_void")
+        local cd = BlzGetUnitAbilityCooldown(am, blink, 3)
+        H.check("am talent blink cooldown -1", math.abs(cd - 5) < 0.01, cd)
+        cd = BlzGetUnitAbilityCooldown(am, void, 2)
+        H.check("am talent mana void cooldown -50", math.abs(cd - 20) < 0.01, cd)
+        local ab = BlzGetUnitAbility(am, blink)
+        local reach = BlzGetAbilityRealLevelField(ab, ABILITY_RLF_MAXIMUM_RANGE, 3)
+        local range = BlzGetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, 3)
+        H.check("am talent blink +125 range", math.abs(reach - 1225) < 0.01 and math.abs(range - 1225) < 0.01,
+            reach .. " " .. range)
+        -- Mana Void: 1.2 damage per missing mana, 700 radius, 1.1 s stun
+        local target = H.unit(11, "Hamg", X + 300, Y + 2000, {hero = true, life = 5000, mana = 100, maxMana = 500})
+        local edge = H.unit(11, "Hamg", X + 950, Y + 2000, {hero = true, life = 5000, mana = 500, maxMana = 500})
+        H.cast(am, "antimage_mana_void", target)
+        H.check("am talent mana void damage x1.2", math.abs((target.taken or 0) - 400 * 1.2 * 0.75) < 0.01, target.taken)
+        H.check("am talent mana void radius +200", math.abs((edge.taken or 0) - 400 * 1.2 * 0.75) < 0.01, edge.taken)
+        H.check("am talent mana void stun +0.8", math.abs(Mods.remaining(target, "antimage_mana_void") - 1.1) < 0.01,
+            Mods.remaining(target, "antimage_mana_void"))
         T.forget(am)
         use("heroes").keyOf[am] = nil
         use("log").info("heroesA antimage exercise done")

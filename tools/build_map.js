@@ -31,9 +31,9 @@ function buildInfo() {
   w3i.saves = 1;
   w3i.editorVersion = 6115;
   w3i.buildVersion.set([1, 35, 0, 19887]);
-  w3i.name = 'Dota vs Commander';
+  w3i.name = 'Dota vs Warcraft';
   w3i.author = 'Melty mashup';
-  w3i.description = 'Up to five Dota 2 heroes against one Warcraft III commander. Needs Dota 2 installed for hero icons and voices.';
+  w3i.description = 'Up to five Dota 2 heroes against one Warcraft III player. Needs Dota 2 installed for hero icons and voices.';
   w3i.recommendedPlayers = '1-6';
   // camera margins as the World Editor sets them: 512 left/right, 256 top/bottom
   const cx = PLAY - 512, cy = PLAY - 256;
@@ -54,11 +54,11 @@ function buildInfo() {
   w3i.graphicsMode = 3;   // SD and HD
   w3i.unknown1 = 1;       // game data: The Frozen Throne
 
-  const f = mapdata.dota.fountain, s = mapdata.commander.start, a = mapdata.dota.ancient;
+  const f = mapdata.dota.fountain, s = mapdata.warcraft.start, a = mapdata.dota.ancient;
   const slots = [
     [0, 1, 1, 'Dota 1', f], [1, 1, 1, 'Dota 2', f], [2, 1, 1, 'Dota 3', f], [3, 1, 1, 'Dota 4', f],
-    [4, 1, 1, 'Dota 5', f], [5, 1, 1, 'Commander', s],
-    [6, 2, 4, 'The Ancients', a], [7, 2, 1, 'Commander AI', s], [8, 2, 2, 'Horde', s],
+    [4, 1, 1, 'Dota 5', f], [5, 1, 1, 'Warcraft', s],
+    [6, 2, 4, 'The Ancients', a], [7, 2, 1, 'Warcraft AI', s], [8, 2, 2, 'Horde', s],
   ];
   for (const [id, type, race, name, pos] of slots) {
     const p = new W3IPlayer();
@@ -77,7 +77,7 @@ function buildInfo() {
   const cmd = new W3IForce();
   cmd.flags = 0x07;
   cmd.playerMasks = 0b110100000;           // slots 5, 7, 8
-  cmd.name = 'Commander';
+  cmd.name = 'Warcraft';
   w3i.forces.push(dota, cmd);
   infoForUnits = w3i;
   return w3i.save();

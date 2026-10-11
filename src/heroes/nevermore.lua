@@ -1,6 +1,9 @@
 -- Shadow Fiend (npc_dota_hero_nevermore): Shadowraze x3, Feast of Souls
 -- (nevermore_frenzy), Presence of the Dark Lord, Requiem of Souls and the
--- innate Necromastery, using the Dota 2 values from data.heroes.
+-- innate Necromastery, using the Dota 2 values from data.heroes. Values are
+-- read with the caster, so its talents, Aghanim's Scepter (Requiem lines fly
+-- back and heal) and Aghanim's Shard (Shadowraze slow and cooldown) apply
+-- (src/game/talents.lua).
 -- WC3 objects: specs/heroes/nevermore.json.
 define("hero_nevermore", function()
     local A = use("abilities")
@@ -22,13 +25,15 @@ define("hero_nevermore", function()
     -- Necromastery damage per soul rises by this much every SOUL_LEVELS hero
     -- levels (Dota "hero_levelup"/"levelup_interval", not in data.heroes).
     local SOUL_DAMAGE_STEP, SOUL_LEVELS = 0.8, 6
+    local UNIT_CAST_POINT = 0.3       -- "ucpt" of every hero, see gen_objects.py
 
+    local Fx = use("fx")
     local FX = {
-        raze = "Abilities\\Spells\\Other\\Doom\\DoomDeath.mdl",
+        raze = Fx.model("nevermore_shadowraze", "Abilities\\Spells\\Other\\Doom\\DoomDeath.mdl"),
         soul = "Abilities\\Weapons\\AvengerMissile\\AvengerMissile.mdl",
         feast = "Abilities\\Spells\\Undead\\UnholyFrenzy\\UnholyFrenzyTarget.mdl",
         charge = "Abilities\\Spells\\Undead\\DarkRitual\\DarkRitualCaster.mdl",
-        burst = "Abilities\\Spells\\Other\\HowlOfTerror\\HowlCaster.mdl",
+        burst = Fx.model("nevermore_requiem", "Abilities\\Spells\\Other\\HowlOfTerror\\HowlCaster.mdl"),
         line = "Abilities\\Spells\\Undead\\CarrionSwarm\\CarrionSwarmMissile.mdl",
         fear = "Abilities\\Spells\\Other\\HowlOfTerror\\HowlTarget.mdl",
     }
@@ -75,12 +80,12 @@ define("hero_nevermore", function()
         return s.souls + s.linger + feastSouls(s)
     end
 
-    local function maxSouls()
-        return A.value(NECRO, "necromastery_max_souls", 1)
+    local function maxSouls(u)
+        return A.value(NECRO, "necromastery_max_souls", 1, u)
     end
 
     local function damagePerSoul(u)
-        return A.value(NECRO, "necromastery_damage_per_soul", 1)
+        return A.value(NECRO, "necromastery_damage_per_soul", 1, u)
             + SOUL_DAMAGE_STEP * math.floor(GetHeroLevel(u) / SOUL_LEVELS)
     end
 
@@ -117,7 +122,7 @@ define("hero_nevermore", function()
     local function gainSouls(u, n)
         if level(u, NECRO) <= 0 or Mods.flag(u, "break") then return false end
         local s = st(u)
-        local cap = maxSouls()
+        local cap = maxSouls(u)
         if s.souls >= cap then return false end
         s.souls = math.min(cap, s.souls + n)
         refreshSouls(u)
@@ -143,7 +148,7 @@ define("hero_nevermore", function()
                     if not s.lingering[entry] then return end
                     s.lingering[entry] = nil
                     s.linger = s.linger - kept
-                    s.souls = math.min(maxSouls(), s.souls + kept)
+                    s.souls = math.min(maxSouls(u), s.souls + kept)
                     refreshSouls(u)
                 end)
             end
@@ -178,6 +183,19 @@ define("hero_nevermore", function()
         if picked > 0 then refreshSouls(u) end
     end
 
+    -- Level 25 talent: Feast of Souls raises cast speed to cast_speed_pct %.
+    -- SIMPLIFIED: heroes here share one unit cast point instead of Dota's
+    -- per-ability ones; it shrinks by the same share.
+    local function castSpeed(u, pct)
+        local s = st(u)
+        local cp = UNIT_CAST_POINT * 100 / math.max(1, pct)
+        if (s.castPoint or UNIT_CAST_POINT) ~= cp then
+            s.castPoint = cp
+            BlzSetUnitRealField(u, UNIT_RF_CAST_POINT, cp)
+        end
+    end
+    M.castPoint = function(u) return st(u).castPoint or UNIT_CAST_POINT end
+
     A.define(FEAST, {
         onCast = function(ctx)
             local u = ctx.caster
@@ -186,7 +204,9 @@ define("hero_nevermore", function()
             local dur = ctx.v("duration")
             Mods.add(u, "nevermore_frenzy", {duration = dur, source = u, effect = FX.feast, attach = "chest",
                                              props = {attack_speed = ctx.v("bonus_attack_speed"),
-                                                      move_pct = ctx.v("bonus_move_speed") / 100}})
+                                                      move_pct = ctx.v("bonus_move_speed") / 100},
+                                             onRemove = function(mod) castSpeed(mod.unit, 100) end})
+            castSpeed(u, ctx.v("cast_speed_pct"))
             endFeast(u, s, false)
             local f = {list = {}, seen = {}, count = 0, max = ctx.v("max_collection_count"),
                        radius = ctx.v("soul_collection_radius"), perInterval = ctx.v("soul_collection_per_interval"),
@@ -207,6 +227,17 @@ define("hero_nevermore", function()
     })
 
     -- Shadowraze ---------------------------------------------------------------------
+    -- Average attack damage: base, dice, agility (primary) and green bonuses.
+    local function attackDamage(u)
+        return BlzGetUnitBaseDamage(u, 0) + BlzGetUnitDiceNumber(u, 0) * (BlzGetUnitDiceSides(u, 0) + 1) / 2
+            + GetHeroAgi(u, true) + Mods.sum(u, "damage")
+    end
+
+    -- Aghanim's Shard (Dota 7.41): every stack also slows by
+    -- movement_speed_debuff %, and each enemy hero hit takes
+    -- cooldown_reduction_on_hero_hit seconds off this raze's cooldown.
+    -- Level 25 talent (procs_attack): the raze also deals Shadow Fiend's
+    -- attack damage. SIMPLIFIED: as physical damage, without attack effects.
     local function raze(ctx)
         local u = ctx.caster
         M.register(u)
@@ -214,13 +245,26 @@ define("hero_nevermore", function()
         DestroyEffect(AddSpecialEffect(FX.raze, x, y))
         local base = ctx.v("shadowraze_damage") + ctx.v("damage_per_soul") * M.souls(u)
         local per, dur = ctx.v("stack_bonus_damage"), ctx.v("duration")
+        local slow, attack = ctx.v("movement_speed_debuff") / 100, ctx.v("procs_attack") > 0
+        local heroes = 0
         for _, e in ipairs(U.enemiesOf(ctx.owner, x, y, ctx.v("shadowraze_radius"))) do
             if not U.isMagicImmune(e) then
                 local m = Mods.get(e, "nevermore_shadowraze")
                 local n = m and m.stacks or 0
                 Damage.deal(u, e, base + per * n, Damage.MAGICAL)
-                Mods.add(e, "nevermore_shadowraze", {duration = dur, stacks = n + 1, source = u, debuff = true})
+                if attack and U.alive(e) then Damage.deal(u, e, attackDamage(u), Damage.PHYSICAL, {noAmp = true}) end
+                Mods.add(e, "nevermore_shadowraze", {duration = dur, stacks = n + 1, source = u, debuff = true,
+                                                     props = slow > 0 and {move_pct = -slow * (n + 1)} or nil})
+                if U.isHero(e) then heroes = heroes + 1 end
             end
+        end
+        local cut = ctx.v("cooldown_reduction_on_hero_hit") * heroes
+        if cut > 0 then
+            local id, li = ctx.castId or ctx.def.id, ctx.level - 1
+            -- after the engine starts the cooldown of this cast
+            Timer.after(0, function()
+                BlzStartUnitAbilityCooldown(u, id, math.max(0, BlzGetUnitAbilityCooldown(u, id, li) - cut))
+            end)
         end
     end
 
@@ -276,10 +320,10 @@ define("hero_nevermore", function()
     local function presence(u)
         local lvl = level(u, PRESENCE)
         if lvl <= 0 or not U.alive(u) or Mods.flag(u, "break") then return end
-        local armor = A.value(PRESENCE, "presence_armor_reduction", lvl)
+        local armor = A.value(PRESENCE, "presence_armor_reduction", lvl, u)
         local until_ = Timer.now() + 0.5
         for _, e in ipairs(U.enemiesOf(GetOwningPlayer(u), GetUnitX(u), GetUnitY(u),
-                                       A.value(PRESENCE, "presence_radius", lvl))) do
+                                       A.value(PRESENCE, "presence_radius", lvl, u))) do
             local m = Mods.get(e, "nevermore_presence")
             if m and m.props.armor == armor then
                 m.expires = until_
@@ -320,10 +364,52 @@ define("hero_nevermore", function()
         end)
     end
 
-    local function requiemDamage(lvl)
-        local d = A.value(REQUIEM, "AbilityDamage", lvl)
+    local function requiemDamage(u, lvl)
+        local d = A.value(REQUIEM, "AbilityDamage", lvl, u)
         if d > 0 then return d end
         return REQUIEM_DAMAGE[math.max(1, math.min(#REQUIEM_DAMAGE, lvl))]
+    end
+
+    -- Aghanim's Scepter (Dota 7.41): the lines fly back into Shadow Fiend,
+    -- each hitting a unit once more for requiem_damage_pct_scepter % of the
+    -- damage, and heal him for requiem_heal_pct_scepter % of what they deal.
+    -- Not confirmed from Dota's code: the way back does not fear, and a
+    -- release on death does not come back.
+    local function flyBack(u, set, radius, speed, w0, w1, dmg, heal)
+        local owner = GetOwningPlayer(u)
+        Timer.onFrame(function(dt)
+            local ux, uy = GetUnitX(u), GetUnitY(u)
+            local far = 0
+            for _, ln in ipairs(set) do
+                if not ln.done then far = math.max(far, U.dist(ln.x, ln.y, ux, uy)) end
+            end
+            local cands = U.enemiesOf(owner, ux, uy, far + w1)
+            local left = 0
+            for _, ln in ipairs(set) do
+                if not ln.done then
+                    local d, step = U.dist(ln.x, ln.y, ux, uy), speed * dt
+                    if d <= step or not U.alive(u) then
+                        ln.done = true
+                        DestroyEffect(ln.fx)
+                    else
+                        local a = U.angle(ln.x, ln.y, ux, uy)
+                        ln.x, ln.y = U.polar(ln.x, ln.y, step, a)
+                        BlzSetSpecialEffectPosition(ln.fx, ln.x, ln.y, groundZ(ln.x, ln.y) + 60)
+                        BlzSetSpecialEffectYaw(ln.fx, a)
+                        local r = w0 + (w1 - w0) * math.min(1, d / radius)
+                        for _, e in ipairs(cands) do
+                            if not ln.hit[e] and U.alive(e) and U.dist(ln.x, ln.y, GetUnitX(e), GetUnitY(e)) <= r then
+                                ln.hit[e] = true
+                                local dealt = Damage.deal(u, e, dmg, Damage.MAGICAL)
+                                if dealt > 0 and heal > 0 then Damage.heal(u, dealt * heal) end
+                            end
+                        end
+                        left = left + 1
+                    end
+                end
+            end
+            return left == 0
+        end)
     end
 
     -- Lines fan out evenly from Shadow Fiend; each hits a unit at most once,
@@ -332,15 +418,17 @@ define("hero_nevermore", function()
         if lines <= 0 or lvl <= 0 then return end
         local owner = GetOwningPlayer(u)
         local x0, y0 = GetUnitX(u), GetUnitY(u)
-        local radius = math.max(1, A.value(REQUIEM, "requiem_radius", lvl))
-        local speed = math.max(100, A.value(REQUIEM, "requiem_line_speed", lvl))
-        local w0 = A.value(REQUIEM, "requiem_line_width_start", lvl)
-        local w1 = A.value(REQUIEM, "requiem_line_width_end", lvl)
-        local dmg = requiemDamage(lvl)
-        local ms = A.value(REQUIEM, "requiem_reduction_ms", lvl) / 100
-        local mres = A.value(REQUIEM, "requiem_reduction_mres", lvl) / 100
-        local per = A.value(REQUIEM, "requiem_slow_duration", lvl)
-        local cap = A.value(REQUIEM, "requiem_slow_duration_max", lvl)
+        local radius = math.max(1, A.value(REQUIEM, "requiem_radius", lvl, u))
+        local speed = math.max(100, A.value(REQUIEM, "requiem_line_speed", lvl, u))
+        local w0 = A.value(REQUIEM, "requiem_line_width_start", lvl, u)
+        local w1 = A.value(REQUIEM, "requiem_line_width_end", lvl, u)
+        local dmg = requiemDamage(u, lvl)
+        local ms = A.value(REQUIEM, "requiem_reduction_ms", lvl, u) / 100
+        local mres = A.value(REQUIEM, "requiem_reduction_mres", lvl, u) / 100
+        local per = A.value(REQUIEM, "requiem_slow_duration", lvl, u)
+        local cap = A.value(REQUIEM, "requiem_slow_duration_max", lvl, u)
+        local back = onDeath and 0 or A.value(REQUIEM, "requiem_damage_pct_scepter", lvl, u) / 100
+        local heal = A.value(REQUIEM, "requiem_heal_pct_scepter", lvl, u) / 100
         local face = math.rad(GetUnitFacing(u))
         local set = {}
         for i = 1, lines do
@@ -359,6 +447,7 @@ define("hero_nevermore", function()
             local cands = U.enemiesOf(owner, x0, y0, dist + r)
             for _, ln in ipairs(set) do
                 local hx, hy = U.polar(x0, y0, dist, ln.a)
+                ln.x, ln.y = hx, hy
                 BlzSetSpecialEffectPosition(ln.fx, hx, hy, groundZ(hx, hy) + 60)
                 for _, e in ipairs(cands) do
                     if not ln.hit[e] and U.alive(e) and U.dist(hx, hy, GetUnitX(e), GetUnitY(e)) <= r then
@@ -372,7 +461,12 @@ define("hero_nevermore", function()
                 end
             end
             if dist >= radius then
-                for _, ln in ipairs(set) do DestroyEffect(ln.fx) end
+                if back > 0 and U.alive(u) then
+                    for _, ln in ipairs(set) do ln.hit = {} end
+                    flyBack(u, set, radius, speed, w0, w1, dmg * back, heal)
+                else
+                    for _, ln in ipairs(set) do DestroyEffect(ln.fx) end
+                end
                 return true
             end
             return false
@@ -417,13 +511,13 @@ define("hero_nevermore", function()
         local lvl = level(u, REQUIEM)
         local total = M.souls(u)
         if lvl > 0 and total > 0 then
-            local lines = math.floor(math.min(total, A.value(REQUIEM, "max_soul_release", lvl))
-                                     * A.value(REQUIEM, "soul_death_release", lvl))
+            local lines = math.floor(math.min(total, A.value(REQUIEM, "max_soul_release", lvl, u))
+                                     * A.value(REQUIEM, "soul_death_release", lvl, u))
             release(u, lvl, lines, true)
         end
         endFeast(u, s, true)
         s.lingering, s.linger = {}, 0
-        s.souls = math.floor(s.souls * A.value(NECRO, "necromastery_soul_release", 1))
+        s.souls = math.floor(s.souls * A.value(NECRO, "necromastery_soul_release", 1, u))
         clearCharge(u)
     end
 
@@ -431,8 +525,8 @@ define("hero_nevermore", function()
         if M.units[dying] then onOwnDeath(dying) end
         if killer and killer ~= dying and M.units[killer] and not IsUnitType(dying, UNIT_TYPE_STRUCTURE)
             and not IsUnitIllusion(dying) then
-            local n = IsUnitType(dying, UNIT_TYPE_HERO) and A.value(NECRO, "souls_per_hero_kill", 1)
-                or A.value(NECRO, "souls_per_kill", 1)
+            local n = IsUnitType(dying, UNIT_TYPE_HERO) and A.value(NECRO, "souls_per_hero_kill", 1, killer)
+                or A.value(NECRO, "souls_per_kill", 1, killer)
             if gainSouls(killer, n) then soulTo(GetUnitX(dying), GetUnitY(dying), killer) end
         end
     end)

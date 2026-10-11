@@ -1,14 +1,14 @@
 -- Who plays what. Any of the six user slots can end up a hero player or the
--- commander: a human in the commander slot commands, a lone human may choose
--- to command, otherwise a computer that is in the game does (aiSlot). Every
--- hero slot without a human gets a bot.
+-- Warcraft player: a human in the Warcraft slot plays Warcraft, a lone human
+-- may choose to, otherwise a computer that is in the game does (aiSlot).
+-- Every hero slot without a human gets a bot.
 define("roles", function()
     local Log = use("log")
     local Roles = {
         humans = {},        -- slot -> true
         heroSlots = {},     -- ordered list of slots that field a Dota hero
-        commander = nil,    -- slot owning the commander's base
-        commanderIsAI = false,
+        warcraft = nil,     -- slot owning the Warcraft base
+        warcraftIsAI = false,
     }
 
     local function isHuman(i)
@@ -24,22 +24,22 @@ define("roles", function()
     end
 
     -- The melee AI runs only for a computer that is in the game. A game
-    -- started straight from the map leaves the "Commander AI" slot empty and
-    -- puts its one computer into a user slot (slot 1), so that one commands.
+    -- started straight from the map leaves the "Warcraft AI" slot empty and
+    -- puts its one computer into a user slot (slot 1), so that one plays.
     local function aiSlot()
-        if isPlayingComputer(SLOT_COMMANDER) then return SLOT_COMMANDER end
-        if isPlayingComputer(SLOT_COMMANDER_AI) then return SLOT_COMMANDER_AI end
-        for i = 0, SLOT_COMMANDER do
+        if isPlayingComputer(SLOT_WARCRAFT) then return SLOT_WARCRAFT end
+        if isPlayingComputer(SLOT_WARCRAFT_AI) then return SLOT_WARCRAFT_AI end
+        for i = 0, SLOT_WARCRAFT do
             if isPlayingComputer(i) then return i end
         end
-        Log.warn("roles: no computer is playing, so the AI commander takes the empty slot "
-            .. SLOT_COMMANDER_AI .. " and its melee AI cannot run")
-        return SLOT_COMMANDER_AI
+        Log.warn("roles: no computer is playing, so the Warcraft AI takes the empty slot "
+            .. SLOT_WARCRAFT_AI .. " and its melee AI cannot run")
+        return SLOT_WARCRAFT_AI
     end
 
     function Roles.detect()
         local count, only = 0, nil
-        for i = 0, SLOT_COMMANDER do
+        for i = 0, SLOT_WARCRAFT do
             if isHuman(i) then
                 Roles.humans[i] = true
                 count, only = count + 1, i
@@ -49,23 +49,23 @@ define("roles", function()
         return count
     end
 
-    -- soloWantsCommand: the lone human picked "Commander" in the role dialog
-    function Roles.assign(soloWantsCommand)
-        if Roles.humans[SLOT_COMMANDER] then
-            Roles.commander = SLOT_COMMANDER
-        elseif soloWantsCommand and Roles.soloSlot then
-            Roles.commander = Roles.soloSlot
+    -- soloWantsWarcraft: the lone human picked "Warcraft" in the role dialog
+    function Roles.assign(soloWantsWarcraft)
+        if Roles.humans[SLOT_WARCRAFT] then
+            Roles.warcraft = SLOT_WARCRAFT
+        elseif soloWantsWarcraft and Roles.soloSlot then
+            Roles.warcraft = Roles.soloSlot
         else
-            Roles.commander = aiSlot()
-            Roles.commanderIsAI = true
+            Roles.warcraft = aiSlot()
+            Roles.warcraftIsAI = true
         end
         Roles.heroSlots = {}
-        for i = 0, SLOT_COMMANDER do
-            if i ~= Roles.commander and #Roles.heroSlots < 5 then
+        for i = 0, SLOT_WARCRAFT do
+            if i ~= Roles.warcraft and #Roles.heroSlots < 5 then
                 Roles.heroSlots[#Roles.heroSlots + 1] = i
             end
         end
-        Log.info("roles: commander=" .. Roles.commander .. (Roles.commanderIsAI and " (AI)" or "")
+        Log.info("roles: warcraft=" .. Roles.warcraft .. (Roles.warcraftIsAI and " (AI)" or "")
             .. " heroes=" .. table.concat(Roles.heroSlots, ","))
     end
 
@@ -85,8 +85,8 @@ define("roles", function()
         if slot == SLOT_ANCIENTS or slot == SLOT_BUILDINGS then
             return "dota"
         end
-        if slot == Roles.commander or slot == SLOT_HORDE or slot == SLOT_COMMANDER_AI then
-            return "commander"
+        if slot == Roles.warcraft or slot == SLOT_HORDE or slot == SLOT_WARCRAFT_AI then
+            return "warcraft"
         end
         for i = 1, #Roles.heroSlots do
             if Roles.heroSlots[i] == slot then

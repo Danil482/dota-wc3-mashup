@@ -30,7 +30,7 @@ define("structures", function()
     local melee = {}          -- melee barracks -> true
     local locked = {}         -- building -> true while tier protection holds
     local guards = {}         -- building -> units that must die before it is vulnerable
-    local hitAt = {}          -- building -> last time the commander's side damaged it
+    local hitAt = {}          -- building -> last time the Warcraft side damaged it
     local fallen = {}         -- "tower1" | "tower2" | "rax_melee" -> true once the first one fell
     local glyphFx = {}        -- building -> its Glyph shield effect
     local glyphGen = 0
@@ -86,7 +86,7 @@ define("structures", function()
         return out
     end
 
-    -- The commander's side hit a base building (tier 3 or 4 tower, barracks,
+    -- The Warcraft side hit a base building (tier 3 or 4 tower, barracks,
     -- the Ancient) within the last `seconds`.
     function S.baseUnderAttack(seconds)
         local now = Timer.now()
@@ -146,7 +146,7 @@ define("structures", function()
             end
         end)
         Damage.onDamaged(function(source, target)
-            if kinds[target] and source and use("roles").side(GetPlayerId(GetOwningPlayer(source))) == "commander" then
+            if kinds[target] and source and use("roles").side(GetPlayerId(GetOwningPlayer(source))) == "warcraft" then
                 hitAt[target] = Timer.now()
             end
         end)

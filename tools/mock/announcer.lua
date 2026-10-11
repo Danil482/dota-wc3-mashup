@@ -4,8 +4,8 @@
 -- hears it, start time) and drives the horn, first blood, multi-kills and
 -- streaks, Dota buildings falling, denied and under attack, Roshan, the end
 -- of the game, last hits, denies, level-ups, runes, failed casts and the
--- Town Portal. Checks that lines never overlap and that the commander hears
--- none of it. Failed checks become ERROR lines, which fail the mock run.
+-- Town Portal. Checks that lines never overlap and that the Warcraft player
+-- hears none of it. Failed checks become ERROR lines, which fail the mock run.
 do
     local saved = {}
     local function stub(name, fn)
@@ -102,8 +102,8 @@ do
         end
 
         -- units: the real heroes (spawned by heroes.lua, never replaced here),
-        -- stand-ins owned by their players as event sources, the commander's
-        -- heroes and army
+        -- stand-ins owned by their players as event sources, the Warcraft
+        -- player's heroes and army
         local units = {}
         local function unit(slot, code, x, y, o)
             o = o or {}
@@ -290,8 +290,8 @@ do
         check("hums stop", hums[1] and hums[1].killed and hums[2] and hums[2].killed)
         check("arrival sound at the target", #made(path("sfx", "tp_appear"), t7) == 1)
 
-        -- the commander hears none of the Dota players' lines and UI sounds
-        -- (world sounds such as the portal above are for everyone)
+        -- the Warcraft player hears none of the Dota players' lines and UI
+        -- sounds (world sounds such as the portal above are for everyone)
         advance(0.5)
         listener.slot = 7
         local t8 = __mock.now
@@ -304,7 +304,7 @@ do
                 or string.find(s.path, "Sound\\Dota\\sfx\\", 1, true)
             if dota and s.created >= t8 and s.vol > 0 then heard = s.path .. " at " .. s.vol end
         end
-        check("the commander hears no Dota line", heard == nil, heard)
+        check("the Warcraft player hears no Dota line", heard == nil, heard)
         listener.slot = 0
         advance(3)
 

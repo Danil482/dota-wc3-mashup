@@ -24,11 +24,11 @@ def main():
             "towers": {lane: pts(p) for lane, p in L.DOTA["towers"].items()},
             "barracks": {lane: pts(p) for lane, p in L.DOTA["barracks"].items()},
         },
-        "commander": {
-            "start": pts([L.COMMANDER["start"]])[0],
-            "mines": pts(L.COMMANDER["mines"]),
-            "expansions": pts(L.COMMANDER["expansions"]),
-            "spawns": {lane: pts([p])[0] for lane, p in L.COMMANDER["spawns"].items()},
+        "warcraft": {
+            "start": pts([L.WARCRAFT["start"]])[0],
+            "mines": pts(L.WARCRAFT["mines"]),
+            "expansions": pts(L.WARCRAFT["expansions"]),
+            "spawns": {lane: pts([p])[0] for lane, p in L.WARCRAFT["spawns"].items()},
         },
         "roshan": pts([L.ROSHAN])[0],
         "runes": pts(L.RUNES),

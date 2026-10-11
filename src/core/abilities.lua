@@ -185,7 +185,7 @@ define("abilities", function()
 
     -- Abilities a unit owns that silence should disable: our Dota abilities
     -- plus any native WC3 hero spell (stolen by Spell Steal, copied by Morph,
-    -- or a commander hero's own), found by walking the unit's ability list.
+    -- or a Warcraft hero's own), found by walking the unit's ability list.
     function A.ownedBy(u)
         local list, seen = {}, {}
         for id in pairs(defs) do

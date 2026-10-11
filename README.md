@@ -1,7 +1,7 @@
-# Dota vs Commander
+# Dota vs Warcraft
 
 A Dota 2 × Warcraft III mashup for **Warcraft III Reforged**. Up to five Dota heroes (bots fill
-the empty slots) fight one **commander**, who plays a full Warcraft race: base building,
+the empty slots) fight one **Warcraft player**, who plays a full WC3 race: base building,
 heroes, an army of their own, and uncontrollable creep waves every 30 seconds. The battlefield
 is Dota's: three lanes, the river, neutral camps, runes and Roshan.
 
@@ -32,21 +32,35 @@ of the map on your PC from your Dota 2 install. Nothing from either game is dist
   - Shadow Fiend
 - Dota items and shops.
 - Bots that follow Valve's bot data for lanes, skill builds and item builds.
-- The commander side: any WC3 race, with an AI commander when no human takes the slot.
+- The Warcraft side: any WC3 race, played by the Warcraft AI when no human takes the slot.
 - The Dota map: neutral camps, runes, Roshan with Aegis, backdoor protection, lane creep
   upgrades.
 
-## Building from source
+## Build from a clean clone
 
-- Python 3.12 (`.venv`), plus Node.js for `tools/`.
-- Run `npm install` in `tools/`.
-- Put the StormLib x64 DLL in `tools/vendor/`.
-- `research/` is not included. It needs jassdoc's `common.j` / `Blizzard.j` and the WC3 SLK
-  metadata.
+You need Windows with Git, Python 3.12, Node.js 22.12 or newer, and Warcraft III Reforged
+installed: the build reads Warcraft's object data tables from your own install. In PowerShell:
 
 ```
+git clone https://github.com/Danil482/dota-wc3-mashup.git
+cd dota-wc3-mashup
+py -3.12 -m venv .venv
+.venv\Scripts\python.exe -m pip install -r tools\requirements.txt
+.venv\Scripts\python.exe -I tools\fetch_research.py
 .venv\Scripts\python.exe -I tools\build.py --test --work build\work_dev
 ```
+
+`tools/fetch_research.py` fills the git-ignored inputs of the build:
+
+- `research/jass/`: jassdoc's `common.j` and `Blizzard.j` for the offline mock, from a pinned
+  commit, SHA-256 checked.
+- `research/slk/`: the SLK tables, read from Warcraft III's CASC storage.
+- `tools/vendor/stormlib/`: StormLib 9.40, from the pinned release zip, SHA-256 checked.
+- `tools/node_modules/`: `npm ci` from the lockfile.
+
+It finds Warcraft III by itself; pass `--wc3 <folder>` if it can't. `--dota` also extracts the
+Dota 2 data that the data-refresh tools read. A good build prints `MOCK RESULT: OK`. The autotest's
+FAIL lines on the mock are expected, because the mock has no real units.
 
 `docs/FRAMEWORK.md` describes the Lua framework. Architecture notes live in the Obsidian vault
 under `obsidian/`.

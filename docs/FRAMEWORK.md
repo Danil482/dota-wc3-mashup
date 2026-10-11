@@ -1,4 +1,4 @@
-# Dota vs Commander – map framework reference
+# Dota vs Warcraft – map framework reference
 
 Warcraft III: Reforged 2.0.1 custom map, Lua 5.3. All `src/**/*.lua` files are concatenated into one
 `war3map.lua` by `tools/build_lua.py`; modules register with `define(name, factory)` and resolve each
@@ -24,20 +24,20 @@ other lazily with `use(name)`. Natives are the ones in `research/jass/common.j` 
 - `use("data.sounds")[hero][event]` – voice-line paths extracted from Dota 2 (`cast_<ability>`, `kill`, ...).
 - `use("data.audio")` – Dota's default music pack, announcer and effects (`tools/select_vo.py`):
   `music|announcer|sfx[key] = {path, duration, volume}`; loop tracks add `start`, `stop`, `sync{}`, `restart`.
-- `use("data.mapdata")` – every gameplay position: `bounds`, `lanes{top,mid,bot}` (Dota spawn → commander
-  spawn), `dota{fountain, ancient, shop, towers{top,mid,bot,base}, barracks}`, `commander{start, mines,
+- `use("data.mapdata")` – every gameplay position: `bounds`, `lanes{top,mid,bot}` (Dota spawn → Warcraft
+  spawn), `dota{fountain, ancient, shop, towers{top,mid,bot,base}, barracks}`, `warcraft{start, mines,
   expansions, spawns}`, `roshan`, `runes`, optional `bounty_runes`, `side_shops`, `camps{name = pos}` (a camp's
   type comes from its name: small, medium, large or ancient). Read positions from here only; never hard-code them.
 
 ### Data modules and the launcher (contract)
 `tools/build_lua.py` writes each data module between two marker lines:
 ```
--- @dvc-data-begin data.<name>
+-- @dvw-data-begin data.<name>
 define("data.<name>", function() ... end)
--- @dvc-data-end data.<name>
+-- @dvw-data-end data.<name>
 ```
 The base map's `data.mapdata` is the hand-made layout from `tools/layout.py`. The launcher
-(`launcher/dvc_launcher/terrain`) replaces the `data.mapdata` block of a personalized map with Dota's own
+(`launcher/dvw_launcher/terrain`) replaces the `data.mapdata` block of a personalized map with Dota's own
 layout, read from the player's Dota 2, together with the map's terrain (`war3map.w3e`, `.wpm`, `.doo`,
 `war3mapMap.blp`) and start locations (`war3map.w3i`, `war3mapUnits.doo`). So:
 - keep exactly one marked `data.mapdata` block and its schema (above); new keys must be optional in Lua;
@@ -100,7 +100,7 @@ muted by volume for the others; never call these inside a `GetLocalPlayer()` blo
 
 ### music, announcer, gamesounds – Dota's music, announcer and gameplay sounds
 - `use("music")`: `init()` (after roles), `horn()`, `gameOver(winnerSide)`, `buyback(unit)`, `duck(seconds)`,
-  `state(slot)`. Dota players only; the commander keeps Warcraft's music.
+  `state(slot)`. Dota players only; the Warcraft player keeps the WC3 music.
 - `use("announcer")`: `init([secondsToHorn])` (default `creeps.first`), `say(key, priority, tag)`,
   `gameOver(winnerSide)`, `horn()`; keys are `data.audio.announcer` keys (`fort_rad`, `scan_rad`, `cour_kill_rad`, ...).
 - `use("gamesounds")`: `init()`, `buy(p)`, `sell(p)`, `combine(p)`, `error(p)`, `castFail(hero, "cooldown"|"mana")`,
@@ -109,12 +109,12 @@ muted by volume for the others; never call these inside a `GetLocalPlayer()` blo
 ### bots – `use("bots")`
 `Bots.hint(abilityName, spec)` – tell the generic hero bot how to use an ability (see `src/ai/bots.lua`).
 
-### commander, commander_base – the commander's base
-- `use("commander")`: `setup(raceKey)` (from `game.lua`), `halls()`, `player`, `raceKey`, `hall{x, y, half, unit}`,
-  `starters`/`starterTarget` (starter structures made/wanted). Test builds with the AI commander log its slot,
+### warcraft, warcraft_base – the Warcraft base
+- `use("warcraft")`: `setup(raceKey)` (from `game.lua`), `halls()`, `player`, `raceKey`, `hall{x, y, half, unit}`,
+  `starters`/`starterTarget` (starter structures made/wanted). Test builds with the Warcraft AI log its slot,
   start location and setup once, then `summary()` every 30 s; `activity{orders, builds, trained}` counts what its
   units were told to do.
-- `use("commander_base")`: the starter base, stock WC3 structures around the hall. Tune `STARTER[race]`
+- `use("warcraft_base")`: the starter base, stock WC3 structures around the hall. Tune `STARTER[race]`
   (`{id, count, role}`, role `tower` | `production` | `supply`) and `FOR` (`"ai"` default, `"all"`, `"none"`).
   `plan(raceKey, site)` returns the spots, `build(p, raceKey, site)` creates them.
 

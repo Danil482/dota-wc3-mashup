@@ -12,8 +12,8 @@ from . import convert
 
 W3E_VERSION = 11
 TREE_DOO_BUILD = 132          # build_map.js saves doo with buildVersion 132 (with skins)
-MAPDATA_BEGIN = "-- @dvc-data-begin data.mapdata"
-MAPDATA_END = "-- @dvc-data-end data.mapdata"
+MAPDATA_BEGIN = "-- @dvw-data-begin data.mapdata"
+MAPDATA_END = "-- @dvw-data-end data.mapdata"
 
 
 class W3xError(Exception):

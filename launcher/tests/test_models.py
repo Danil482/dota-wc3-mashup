@@ -1,4 +1,4 @@
-"""Tests of the Dota -> MDX model converter (launcher/dvc_launcher/mdx, models.py).
+"""Tests of the Dota -> MDX model converter (launcher/dvw_launcher/mdx, models.py).
 
 Offline part (no Dota 2 needed): a small skinned glTF is generated, converted
 and checked: coordinates, pivots, skinning groups, root-motion removal,
@@ -31,8 +31,8 @@ sys.path.insert(0, str(ROOT / "launcher"))
 
 from PIL import Image  # noqa: E402
 
-from dvc_launcher import models  # noqa: E402
-from dvc_launcher.mdx import convert, kv3, textures, units, writer  # noqa: E402
+from dvw_launcher import models  # noqa: E402
+from dvw_launcher.mdx import convert, kv3, textures, units, writer  # noqa: E402
 
 failures = []
 K = 1.0 / 0.0254
@@ -184,6 +184,19 @@ def test_synthetic(work):
         r = next(iter(rb.values()))
         check("synthetic: mdx-m3-viewer reads it back byte for byte", r["ok"], "; ".join(r["problems"][:3]))
 
+    # Cast sequences (units.CAST_SEQUENCES) and Stand Channel: heroes only, no cast
+    # sequence that repeats the Spell clip.
+    clips = {"Stand": "idle", "Walk": "run", "Spell": "idle", "Spell One": "idle", "Spell Two": "run",
+             "Stand Channel": "idle"}
+    for kind, want in ((units.HERO, ["Spell", "Spell Two", "Stand Channel"]), (units.CREEP, ["Spell"])):
+        conv = convert.Converter("hero_test", dict(unit, kind=kind), glb, [], clips, attach)
+        cmodel, _info = conv.convert(models.texture_namer("hero_test", {}))
+        got = [s.name for s in cmodel.sequences if s.name == "Spell" or s.name in units.HERO_SEQUENCES]
+        check(f"synthetic: {kind} cast sequences are {want}", got == want, str(got))
+        if kind == units.HERO:
+            s2 = next(s for s in cmodel.sequences if s.name == "Spell Two")
+            check("synthetic: a cast sequence does not loop", not s2.looping)
+
     # The static portrait model of units flagged "portrait" in units.py.
     pfiles = {}
     conv = convert.Converter("hero_test", unit, glb, [], {"Stand": "idle", "Walk": "run"}, attach)
@@ -267,6 +280,43 @@ def test_units():
     check("every unit with a portrait model points upor at it in models.json", not unset, str(unset))
 
 
+def test_casts():
+    """Cast sequences (units.CAST_SEQUENCES) and the aani tools/gen_objects.py
+    asks for (units.cast_anim)."""
+    # Numeric sub-animation tags: WC3 reads them in sequence names (common.j
+    # SUBANIM_TYPE_ONE.., jassdoc SetUnitAnimation) and never adds them to a
+    # hero's requests by itself, unlike alternate, upgrade, defend or swim.
+    numeric = {"one", "two", "three", "four", "five", "first", "second", "third", "fourth", "fifth"}
+    names = [n for n, _a in units.CAST_SEQUENCES]
+    check("casts: every cast sequence is 'Spell <numeric tag>', each tag once",
+          all(n.split()[0] == "Spell" and len(n.split()) == 2 and n.split()[1].lower() in numeric for n in names)
+          and len({n.split()[1] for n in names}) == len(names), str(names))
+    check("casts: each Dota activity has one cast sequence",
+          sum(len(a) for _n, a in units.CAST_SEQUENCES) == len(units.CAST_TAGS))
+    want = {"ACT_DOTA_CAST_ABILITY_4": "spell,four", "ACT_DOTA_RAZE_2": "spell,two",
+            "ACT_DOTA_CAST_ABILITY_6": "spell,first", "ACT_DOTA_OVERRIDE_ABILITY_4": "spell,third",
+            "ACT_DOTA_CHANNEL_ABILITY_4": "spell,channel", "ACT_DOTA_GENERIC_CHANNEL_1": "spell,channel",
+            "ACT_INVALID": "", None: "spell", "ACT_DOTA_CAST_ABILITY_ROT": "spell"}
+    got = {a: units.cast_anim(a) for a in want}
+    check("casts: aani by Dota activity", got == want, str({a: v for a, v in got.items() if v != want[a]}))
+    heroes = json.loads((ROOT / "src" / "data" / "heroes.json").read_text(encoding="utf-8"))
+    acts = [ab.get("AbilityCastAnimation") for h in heroes.values() for ab in h["abilities"]]
+    check("casts: src/data/heroes.json carries AbilityCastAnimation (tools/summarize_heroes.py)", any(acts))
+    # Two activities of one hero must not share a tag (OVERRIDE_ABILITY_n, RAZE_n and CAST_ABILITY_n do).
+    clash = {}
+    for hero, h in heroes.items():
+        by_tag = {}
+        for ab in h["abilities"]:
+            a = ab.get("AbilityCastAnimation")
+            if a in units.CAST_TAGS:
+                by_tag.setdefault(units.CAST_TAGS[a], set()).add(a)
+        clash.update({f"{hero}:{t}": sorted(s) for t, s in by_tag.items() if len(s) > 1})
+    check("casts: no hero has two activities on one cast sequence", not clash, str(clash))
+    unknown = sorted({a for a in acts if a and a != "ACT_INVALID" and a not in units.CAST_TAGS
+                      and not a.startswith(units.CHANNEL_ACTIVITIES)})
+    check("casts: every hero ability's activity has a sequence or is a channel", not unknown, str(unknown))
+
+
 def test_quantize():
     q = convert._quantize
     check("quantize: single bone", q([(5, 1.0)]) == (5,))
@@ -325,6 +375,8 @@ def test_kv3_and_clips():
           chosen["Walk"] == "run2", str(chosen["Walk"]))
     check("clips: Attack - 2 differs from Attack", chosen["Attack - 2"] == "hit2", str(chosen["Attack - 2"]))
     check("clips: Spell by activity", chosen["Spell"] == "cast_q")
+    check("clips: Spell Two from ACT_DOTA_CAST_ABILITY_2, Spell One has no clip",
+          chosen["Spell Two"] == "cast_q" and chosen["Spell One"] is None, str((chosen["Spell Two"], chosen["Spell One"])))
     check("clips: Stand - 2 from ACT_DOTA_IDLE_RARE", chosen["Stand - 2"] == "idle_rare")
     check("clips: fallback noted", any("renamed_run" in n for n in notes), str(notes))
     check("kv3: split_dump", list(kv3.split_dump('[1/2] a/b.vmdl_c\n--- Data for block "ASEQ" ---\n{ x = 1 }\n')) ==
@@ -334,7 +386,7 @@ def test_kv3_and_clips():
 # ------------------------------------------------------------------ Dota integration
 
 def test_dota(dota, work):
-    from dvc_launcher import installs
+    from dvw_launcher import installs
     root = installs.dota_root(dota)
     vpk = installs.dota_vpk(root)
     vrf_exe = ROOT / "launcher" / "vendor" / "vrf" / "Source2Viewer-CLI.exe"
@@ -380,13 +432,14 @@ def main():
     ap.add_argument("--dota")
     ap.add_argument("--work")
     args = ap.parse_args()
-    work = Path(args.work) if args.work else Path(tempfile.mkdtemp(prefix="dvc_models_"))
+    work = Path(args.work) if args.work else Path(tempfile.mkdtemp(prefix="dvw_models_"))
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True)
     test_quantize()
     test_blp()
     test_kv3_and_clips()
     test_units()
+    test_casts()
     test_errors(work)
     test_prune(work)
     test_synthetic(work)

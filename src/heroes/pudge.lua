@@ -9,6 +9,7 @@ define("hero_pudge", function()
     local Events = use("events")
     local U = use("util")
     local Bots = use("bots")
+    local Fx = use("fx")
     local M = {units = {}}
 
     local HOOK, ROT, SHIELD = "pudge_meat_hook", "pudge_rot", "pudge_flesh_heap"
@@ -16,8 +17,8 @@ define("hero_pudge", function()
 
     local FX = {
         hook = "abilities\\weapons\\WyvernSpear\\WyvernSpearMissile.mdl",
-        hookHit = "Objects\\Spawnmodels\\Orc\\OrcSmallDeathExplode\\OrcSmallDeathExplode.mdl",
-        rot = "Abilities\\Spells\\Undead\\PlagueCloud\\PlagueCloudCaster.mdl",
+        hookHit = Fx.model("pudge_hook_impact", "Objects\\Spawnmodels\\Orc\\OrcSmallDeathExplode\\OrcSmallDeathExplode.mdl"),
+        rot = Fx.model("pudge_rot", "Abilities\\Spells\\Undead\\PlagueCloud\\PlagueCloudCaster.mdl"),
         shield = "Abilities\\Spells\\NightElf\\Barkskin\\BarkSkinTarget.mdl",
         heap = "Abilities\\Spells\\Items\\AIsm\\AIsmTarget.mdl",
         devour = "Abilities\\Spells\\Orc\\Devour\\DevourEffectArt.mdl",

@@ -16,6 +16,8 @@ Per ability:
                    talent name, "scepter" or "shard" ("+150", "x1.5", "=1",
                    "-40%", per-level lists such as "1 2 3")
   HasScepterUpgrade / HasShardUpgrade / IsGrantedByScepter / IsGrantedByShard
+  AbilityCastAnimation  the activity of the cast animation, which picks the
+                   ability's sequence (tools/gen_objects.py aani, mdx/units.py)
 """
 import json
 import os
@@ -45,7 +47,7 @@ ABILITY_KEYS = [
     "AbilityUnitTargetType", "SpellImmunityType", "MaxLevel", "AbilityCastPoint",
     "AbilityCooldown", "AbilityManaCost", "AbilityCastRange", "AbilityChannelTime",
     "Innate", "IsGrantedByShard", "IsGrantedByScepter", "LinkedAbility",
-    "HasScepterUpgrade", "HasShardUpgrade",
+    "HasScepterUpgrade", "HasShardUpgrade", "AbilityCastAnimation",
 ]
 
 PCT = 0.01

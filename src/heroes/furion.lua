@@ -13,6 +13,7 @@ define("hero_furion", function()
     local Safe = use("safe")
     local Log = use("log")
     local Bots = use("bots")
+    local Fx = use("fx")
     local F = {}
 
     local SPROUT, TELEPORT, CALL = "furion_sprout", "furion_teleportation", "furion_force_of_nature"
@@ -174,9 +175,9 @@ define("hero_furion", function()
                 return
             end
             if not U.alive(c) then return end
-            fx("Abilities\\Spells\\Human\\MassTeleport\\MassTeleportCaster.mdl", GetUnitX(c), GetUnitY(c))
+            fx(Fx.model("furion_teleport", "Abilities\\Spells\\Human\\MassTeleport\\MassTeleportCaster.mdl"), GetUnitX(c), GetUnitY(c))
             SetUnitPosition(c, p.x, p.y)
-            fx("Abilities\\Spells\\Human\\MassTeleport\\MassTeleportTo.mdl", GetUnitX(c), GetUnitY(c))
+            fx(Fx.model("furion_teleport_end", "Abilities\\Spells\\Human\\MassTeleport\\MassTeleportTo.mdl"), GetUnitX(c), GetUnitY(c))
             local m = Mods.add(c, "furion_teleport_barrier", {duration = ctx.v("buff_duration"), source = c,
                 effect = "Abilities\\Spells\\NightElf\\Barkskin\\BarkSkinTarget.mdl", attach = "chest"})
             if m then m.shield = ctx.v("barrier") end
@@ -383,7 +384,7 @@ define("hero_furion", function()
             local f = info.owner
             if U.alive(t) and U.alive(f) then
                 local slot = GetPlayerId(GetOwningPlayer(f))
-                if slot <= SLOT_COMMANDER and use("roles").isBot(slot)
+                if slot <= SLOT_WARCRAFT and use("roles").isBot(slot)
                     and U.dist(GetUnitX(t), GetUnitY(t), GetUnitX(f), GetUnitY(f)) > 700 then
                     IssuePointOrder(t, "attack", GetUnitX(f), GetUnitY(f))
                 end

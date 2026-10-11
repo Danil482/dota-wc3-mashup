@@ -179,7 +179,7 @@ do
             and ally(N, SLOT_HORDE) == false)
         check("buildings allied with the heroes", ally(SLOT_BUILDINGS, 0) == true and ally(0, SLOT_BUILDINGS) == true
             and ally(SLOT_BUILDINGS, 0, VISION) == true)
-        check("buildings hostile to the commander", ally(SLOT_BUILDINGS, Roles.commander) == false)
+        check("buildings hostile to the Warcraft player", ally(SLOT_BUILDINGS, Roles.warcraft) == false)
         check("buildings leave the test dummies alone", ally(SLOT_BUILDINGS, 9) == true and ally(9, SLOT_BUILDINGS) == true)
 
         ---------------------------------------------------------------- day and night
@@ -193,7 +193,7 @@ do
         local X, Y = 8000, -8000
         local dh = unit(0, ids.heroes.pudge, X, Y, {hero = true, level = 3})
         local mate = unit(1, ids.heroes.tinker, X + 100, Y, {hero = true})
-        local foe = unit(Roles.commander, "Hpal", X + 300, Y, {hero = true, level = 5})
+        local foe = unit(Roles.warcraft, "Hpal", X + 300, Y, {hero = true, level = 5})
         local melee = FourCC(ids.units.dota_melee)
         local creep80 = unit(SLOT_ANCIENTS, melee, X + 50, Y + 50, {hp = 80})
         local creep40 = unit(SLOT_ANCIENTS, melee, X + 60, Y + 60, {hp = 40})
@@ -227,9 +227,19 @@ do
         check("ally hero refused", #rec.stops == 2 and string.find(errText(), Lane.text("dota_hud_error_hero_cant_be_denied"), 1, true) ~= nil,
             errText())
         Events.emit("order", dh, ATTACK, ward)
-        Events.emit("order", foe, ATTACK, dh)       -- the commander keeps Warcraft's rules
+        Events.emit("order", foe, ATTACK, dh)       -- the Warcraft player keeps Warcraft's rules
         advance(0.01)
         check("ward and enemy orders untouched", #rec.stops == 2, #rec.stops)
+        -- the swing guard: however the attack was ordered, it stops as it starts
+        Events.emit("attacked", dh, creep80)
+        check("a swing at a creep at 80% stops", #rec.stops == 3 and rec.stops[3] == dh, #rec.stops)
+        Events.emit("attacked", dh, creep40)
+        check("a swing at a creep at 40% goes on", #rec.stops == 3, #rec.stops)
+        Events.emit("attacked", dh, mate)
+        check("a swing at an allied hero stops", #rec.stops == 4, #rec.stops)
+        Events.emit("attacked", dh, t1)
+        check("a swing at an own tower at full health stops", #rec.stops == 5, #rec.stops)
+        advance(0.01)
 
         -- a deny: "!" for everyone, no gold, half the XP to the enemy heroes near it
         local g0 = gold(0)
@@ -253,7 +263,7 @@ do
         local popup = tagWith("+" .. bounty)
         check("gold popup for the killer", popup ~= nil and popup.vis == true)
         foe.dead = false
-        local creep2 = unit(Roles.commander, "hfoo", X + 400, Y, {hp = 10})
+        local creep2 = unit(Roles.warcraft, "hfoo", X + 400, Y, {hp = 10})
         rec.tags = {}
         creep2.dead = true
         Events.emit("death", creep2, mate)
@@ -261,7 +271,7 @@ do
         for _, t in ipairs(rec.tags) do if string.sub(t.text or "", 1, 1) == "+" then popup = t end end
         check("another player's popup hidden here", popup ~= nil and popup.vis == false)
         local g10 = GetPlayerState(Player(SLOT_BUILDINGS), PLAYER_STATE_RESOURCE_GOLD)
-        local creep3 = unit(Roles.commander, "hfoo", X + 400, Y, {hp = 10})
+        local creep3 = unit(Roles.warcraft, "hfoo", X + 400, Y, {hp = 10})
         creep3.dead = true
         Events.emit("death", creep3, t1)
         check("towers earn no gold", GetPlayerState(Player(SLOT_BUILDINGS), PLAYER_STATE_RESOURCE_GOLD) == g10)
@@ -289,8 +299,8 @@ do
                 if r.u == h2 then back2 = true end
             end
             check("creeps go back to the lane", back1 and back2 and not C.aggroed(h1))
-            -- the commander's hero hits a Dota hero under a tower (its aggro
-            -- cooldown from the order in the deny checks has run out)
+            -- the Warcraft player's hero hits a Dota hero under a tower (its
+            -- aggro cooldown from the order in the deny checks has run out)
             advance(Lane.AGGRO.cooldown)
             SetUnitPosition(dh, GetUnitX(t1) + 200, GetUnitY(t1))
             SetUnitPosition(foe, GetUnitX(t1) + 400, GetUnitY(t1))
@@ -325,7 +335,7 @@ do
         -- multishot: a tier 2 tower's attack hits 5 more enemies, a tier 1 none
         local victims = {}
         for i = 1, 7 do
-            victims[i] = unit(Roles.commander, "hfoo", GetUnitX(t2) + 100 + 20 * i, GetUnitY(t2), {hp = 500, maxHp = 500})
+            victims[i] = unit(Roles.warcraft, "hfoo", GetUnitX(t2) + 100 + 20 * i, GetUnitY(t2), {hp = 500, maxHp = 500})
         end
         rec.hits = {}
         ev.damage, ev.attack = 100, true

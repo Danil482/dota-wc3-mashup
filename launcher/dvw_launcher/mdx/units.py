@@ -16,6 +16,46 @@ HERO = "hero"
 CREEP = "creep"
 STRUCTURE = "structure"
 
+# Cast animations of heroes: each Dota cast activity an ability names
+# (AbilityCastAnimation, src/data/heroes.json) gets a sequence of its own,
+# "Spell" plus a sub-animation tag the game knows (common.j SUBANIM_TYPE_*).
+# tools/gen_objects.py gives the ability Art - Animation Names (aani) from
+# cast_anim() below. The game plays the sequence whose name shares the most
+# tags with the request, then the one with the fewest others (jassdoc,
+# SetUnitAnimation), so a model without the tagged sequence plays "Spell": a
+# WC3 stand-in, a Dota model without that clip, or one whose clip is the
+# "Spell" clip and is left out. Stock WC3 relies on this too: Cluster Rockets
+# asks for "spell,one" and the Goblin Tinker model has "Spell One".."Spell
+# Three" and no "Spell". OVERRIDE_ABILITY_n and RAZE_n stand in for a missing
+# CAST_ABILITY_n (Pudge's Meat Hook clip is OVERRIDE_ABILITY_1, Shadowraze is
+# RAZE_1..3); no hero has abilities with both. Tags left: Fourth, Fifth.
+CAST_SEQUENCES = [
+    ("Spell One", ["ACT_DOTA_CAST_ABILITY_1", "ACT_DOTA_OVERRIDE_ABILITY_1", "ACT_DOTA_RAZE_1"]),
+    ("Spell Two", ["ACT_DOTA_CAST_ABILITY_2", "ACT_DOTA_OVERRIDE_ABILITY_2", "ACT_DOTA_RAZE_2"]),
+    ("Spell Three", ["ACT_DOTA_CAST_ABILITY_3", "ACT_DOTA_OVERRIDE_ABILITY_3", "ACT_DOTA_RAZE_3"]),
+    ("Spell Four", ["ACT_DOTA_CAST_ABILITY_4"]),
+    ("Spell Five", ["ACT_DOTA_CAST_ABILITY_5"]),
+    ("Spell First", ["ACT_DOTA_CAST_ABILITY_6"]),
+    ("Spell Second", ["ACT_DOTA_CAST_ABILITY_7"]),
+    ("Spell Third", ["ACT_DOTA_OVERRIDE_ABILITY_4"]),
+]
+CAST_NAMES = {name for name, _acts in CAST_SEQUENCES}
+CAST_TAGS = {act: name.split()[1].lower() for name, acts in CAST_SEQUENCES for act in acts}
+CHANNEL_ACTIVITIES = ("ACT_DOTA_CHANNEL_ABILITY_", "ACT_DOTA_GENERIC_CHANNEL_")
+
+
+def cast_anim(activity):
+    """Art - Animation Names (aani) of an ability whose Dota cast activity is
+    `activity` (None when Dota's data names none)."""
+    if activity == "ACT_INVALID":
+        return ""                          # Dota plays nothing
+    if activity in CAST_TAGS:
+        return "spell," + CAST_TAGS[activity]
+    if activity and activity.startswith(CHANNEL_ACTIVITIES):
+        return "spell,channel"
+    return "spell"
+
+
 # (WC3 sequence, Dota activities in preference order, name patterns, looping, rarity)
 # Activities ending in "*" match any suffix. "Attack - 2" must differ from "Attack".
 SEQUENCES = [
@@ -30,11 +70,17 @@ SEQUENCES = [
                "ACT_DOTA_CAST_ABILITY_6", "ACT_DOTA_CAST_ABILITY_*"], [r"^cast", r"cast"], False, 0.0),
     ("Spell Channel", ["ACT_DOTA_CHANNEL_ABILITY_*", "ACT_DOTA_GENERIC_CHANNEL_1", "ACT_DOTA_TELEPORT"],
      [r"channel", r"teleport"], True, 0.0),
+] + [(name, acts, [], False, 0.0) for name, acts in CAST_SEQUENCES] + [
+    # Dota's teleport channel, for the TP scroll (aani "stand,channel" in
+    # tools/gen_objects.py item_active_fields; WC3's Archmage channels Blizzard so)
+    ("Stand Channel", ["ACT_DOTA_TELEPORT"], [], True, 0.0),
     ("Death", ["ACT_DOTA_DIE"], [r"^death", r"^die", r"death|die"], False, 0.0),
     ("Birth", ["ACT_DOTA_SPAWN"], [r"^spawn", r"spawn"], False, 0.0),
     ("Stand Victory", ["ACT_DOTA_VICTORY"], [r"victory"], True, 0.0),
 ]
-OPTIONAL = {"Stand - 2", "Attack - 2"}
+# Converted only for heroes, and only when a clip is found.
+HERO_SEQUENCES = CAST_NAMES | {"Stand Channel"}
+OPTIONAL = {"Stand - 2", "Attack - 2"} | HERO_SEQUENCES
 SEQUENCE_NAMES = [s[0] for s in SEQUENCES]
 
 # What a missing sequence becomes when neither the table, the activities nor
@@ -84,17 +130,20 @@ UNITS = {
          "models/heroes/tinker/tinker_shoulders.vmdl", "models/heroes/tinker/tinker_helmet.vmdl",
          "models/heroes/tinker/tinker_body_head.vmdl", "models/heroes/tinker/tinker_cape.vmdl"],
         0.8,
+        # Spell Channel: Rearm, Tinker's only "spell,channel" (Dota plays rearm1..3 by level)
         {"Stand": "idle_anim", "Stand Ready": "idle_anim", "Walk": "run_anim", "Attack": "attack_anim",
-         "Spell": "laser_anim", "Spell Channel": "generic_channel", "Death": "death", "Birth": "spawn_anim",
+         "Spell": "laser_anim", "Spell Channel": "rearm1_anim", "Death": "death", "Birth": "spawn_anim",
          "Stand Victory": "victory"}),
     "hero_rubick": _hero(
         "models/heroes/rubick/rubick.vmdl",
         ["models/heroes/rubick/rubick_staff.vmdl", "models/heroes/rubick/cape.vmdl",
          "models/heroes/rubick/shoulder.vmdl", "models/heroes/rubick/rubick_head.vmdl"],
         0.7,
+        # Spell: the cast of a stolen spell (ACT_DOTA_CAST_ABILITY_5, Dota's first
+        # stolen slot), which plain "spell" asks for; his own spells have theirs.
         {"Stand": "rubick_idle", "Stand - 2": "rubick_idle_alt", "Stand Ready": "rubick_idle",
          "Walk": "rubick_run", "Attack": "rubick_attack_anim", "Attack - 2": "rubick_attackb",
-         "Spell": "rubick_cast_telekinesis_anim", "Spell Channel": "rubick_channel", "Death": "rubick_die",
+         "Spell": "rubick_generic_casta", "Spell Channel": "rubick_channel", "Death": "rubick_die",
          "Birth": "rubick_spawn", "Stand Victory": "rubick_victory_anim"}),
     "hero_morphling": _hero(
         "models/heroes/morphling/morphling.vmdl", [], 0.88,

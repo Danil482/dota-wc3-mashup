@@ -10,7 +10,7 @@
 -- Failed checks are ERROR log lines, which fail the mock run.
 do
     local STOP = 851972
-    local FILE = "DotaVsCommander\\controls_probe.txt"
+    local FILE = "DotaVsWarcraft\\controls_probe.txt"
 
     local function advance(seconds)
         local target = __mock.now + seconds
@@ -133,7 +133,9 @@ do
         for name, fn in pairs(saved) do _G[name] = fn end
 
         local lines = P.lines or {}
-        check("one line per hero Channel and the acquisition", #lines == 1 + heroLines + 1, #lines)
+        check("one line per hero Channel, the attachments (D) and the acquisition", #lines == 1 + heroLines + 2, #lines)
+        check("D: attachment and projectile art readings", (lines[#lines - 1] or ""):sub(1, 3) == "D: ",
+            lines[#lines - 1])
         local heroOk = 0
         for i = 2, 1 + heroLines do
             local line = lines[i] or ""
@@ -161,7 +163,7 @@ do
         local file = __mock.files[FILE] or ""
         check("table saved to its own file", string.find(file, "B: ", 1, true)
             and string.find(file, "worker type", 1, true), #file)
-        local log = __mock.files["DotaVsCommander\\log.txt"] or ""
+        local log = __mock.files["DotaVsWarcraft\\log.txt"] or ""
         check("table in the log", string.find(log, "controls probe: order by string and by id", 1, true), #log)
         check("log display restored", Log.debug == loud)
         Log.info("controls_probe exercise: " .. checks .. " checks, " .. failures .. " failed")

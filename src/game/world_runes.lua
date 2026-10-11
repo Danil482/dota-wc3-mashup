@@ -7,7 +7,7 @@
 -- each the midpoint of two neighbouring camps on a jungle path (layout.py
 -- JUNGLE_PATHS), so it is open ground near the camps:
 --   Dota jungle  d_medium2+d_ancient, d_medium1+d_large
---   Commander    c_medium2+c_ancient, c_medium1+c_large
+--   Warcraft     c_medium2+c_ancient, c_medium1+c_large
 --   outer        o_top1+o_top2, o_bot1+o_bot2 (one per side jungle)
 -- A new spawn removes the unclaimed rune it replaces. Rune numbers are the
 -- patch's own tooltips (Amplify Damage +80% base damage and +15% spell amp,

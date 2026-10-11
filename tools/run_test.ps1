@@ -15,8 +15,8 @@ param(
 )
 $ErrorActionPreference = "Stop"
 $docs = [Environment]::GetFolderPath('MyDocuments')
-$mapsDir = Join-Path $docs "Warcraft III\Maps\DotaVsCommander"
-$logFile = Join-Path $docs "Warcraft III\CustomMapData\DotaVsCommander\log.txt"
+$mapsDir = Join-Path $docs "Warcraft III\Maps\DotaVsWarcraft"
+$logFile = Join-Path $docs "Warcraft III\CustomMapData\DotaVsWarcraft\log.txt"
 New-Item -ItemType Directory -Force $mapsDir | Out-Null
 $target = Join-Path $mapsDir (Split-Path $Map -Leaf)
 Copy-Item $Map $target -Force
@@ -147,5 +147,6 @@ Write-Host "---- in-game log ($($log.Count) lines) ----"
 $log | ForEach-Object { Write-Host $_ }
 if (-not $Keep -and -not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
 if (-not $done) { Write-Host "RESULT: NO TEST DONE within $Timeout s"; exit 2 }
-if ($log -match "FAIL |ERROR") { Write-Host "RESULT: FAILED"; exit 1 }
+# Case-sensitive, on the log's level tags only: trace lines such as "sound error for ..." are no failures.
+if ($log -cmatch "\] (FAIL |ERROR )") { Write-Host "RESULT: FAILED"; exit 1 }
 Write-Host "RESULT: OK"

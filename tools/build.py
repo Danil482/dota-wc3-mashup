@@ -28,8 +28,10 @@ def arg(name):
 
 
 def main():
+    if not all(os.path.isfile(os.path.join(ROOT, "research", p)) for p in ("jass/common.j", "slk/unitmetadata.slk")):
+        sys.exit("research/ is incomplete: run .venv\\Scripts\\python.exe -I tools\\fetch_research.py first")
     test = "--test" in sys.argv
-    name = "DotaVsCommander_test.w3x" if test else "DotaVsCommander.w3x"
+    name = "DotaVsWarcraft_test.w3x" if test else "DotaVsWarcraft.w3x"
     work = arg("--work")
     out_dir = os.path.abspath(work) if work else os.path.join(ROOT, "build", "test" if test else "release")
     os.makedirs(out_dir, exist_ok=True)

@@ -152,6 +152,12 @@ define("hud_kit", function()
     Kit.blockers = {}
     function Kit.blocker(parent)
         local b = BlzCreateFrameByType("GLUEBUTTON", "", parent, "ScoreScreenTabButtonTemplate", 0)
+        -- The template's mouse-over highlight, an additive glow, flared over
+        -- whole panels under the cursor (2026-10-11): fade the template's own
+        -- children, before any of ours exist.
+        for i = 0, BlzFrameGetChildrenCount(b) - 1 do
+            BlzFrameSetAlpha(BlzFrameGetChild(b, i), 0)
+        end
         Kit.blockers[#Kit.blockers + 1] = b
         return b
     end

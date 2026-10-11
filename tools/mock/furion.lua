@@ -45,7 +45,7 @@ if not __mockB then
             local id = GetPlayerId(p)
             if id <= 4 or id == 6 then return "dota" end
             if id == PLAYER_NEUTRAL_AGGRESSIVE then return "neutral" end
-            return "commander"
+            return "warcraft"
         end
         stub("IsUnitEnemy", function(u, p)
             if not ours(u) then return orig("IsUnitEnemy")(u, p) end

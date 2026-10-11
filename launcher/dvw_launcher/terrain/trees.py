@@ -1,8 +1,8 @@
 """Dota's trees on the personalized map.
 
 Every tree stays a Warcraft III tree destructable: pathing, vision, the
-commander's harvesting and the tree abilities (Tango, Quelling Blade, Sprout,
-Force of Nature, Blast Off) all rely on that. Only the models change:
+Warcraft player's harvesting and the tree abilities (Tango, Quelling Blade,
+Sprout, Force of Nature, Blast Off) all rely on that. Only the models change:
 war3map.w3b (object data) points three standard tree types at Dota's own tree
 models, converted from the player's game/dota/pak01_dir.vpk to MDX 800, the
 format both graphics modes draw.
@@ -417,7 +417,7 @@ def texture_bytes(color_png, info, mask_png=None):
         bands.append(Image.composite(hi, lo, mask))
     image = Image.merge("RGBA", bands + [image.getchannel("A")])
     # textures.convert reads a file: the tinted image goes through a scratch PNG beside the export.
-    tmp = Path(color_png).with_name(Path(color_png).stem + "_dvc_tinted.png")
+    tmp = Path(color_png).with_name(Path(color_png).stem + "_dvw_tinted.png")
     try:
         image.save(tmp)
         return textures.convert(tmp, mode, limit=TEXTURE_LIMIT, encoding="palette")

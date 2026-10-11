@@ -4,10 +4,10 @@
 -- towers and barracks falling, denied or under attack, enemy towers falling,
 -- Roshan's death and the end of the game. The Dota team plays Radiant: "your"
 -- lines are about its buildings, Roshan "has fallen to the Radiant" when the
--- heroes kill him and "to the Dire" when the commander's side does. As in
+-- heroes kill him and "to the Dire" when the Warcraft side does. As in
 -- Dota, lines never overlap: they queue by priority, stale ones are dropped,
 -- and the music steps back while one plays. Only Dota players hear them; the
--- commander keeps Warcraft's sounds.
+-- Warcraft player keeps Warcraft's sounds.
 --
 -- Hooks: announcer.init([secondsToHorn]) in game.lua begin() right after
 -- creeps.start (the horn defaults to the first lane wave, creeps.first);
@@ -36,7 +36,7 @@ define("announcer", function()
     local STREAK = {[3] = "kill_spree", [4] = "kill_dominate", [5] = "kill_mega", [6] = "kill_unstop",
                     [7] = "kill_wicked", [8] = "kill_monster", [9] = "kill_godlike"}    -- 10+: kill_holy
     local MULTI = {[2] = "kill_double", [3] = "kill_triple", [4] = "kill_ultra"}        -- 5+: kill_rampage
-    -- Warcraft's attacking towers of the four races (the commander's base)
+    -- Warcraft's attacking towers of the four races (the Warcraft base)
     local ENEMY_TOWERS = {"hgtw", "hctw", "hatw", "owtw", "uzg1", "uzg2", "etrp"}
 
     local queue = {}
@@ -141,7 +141,7 @@ define("announcer", function()
 
     -- The hero a kill counts for: a Dota player's hero for anything that
     -- player owns (summons, illusions), else a real hero, else none (towers,
-    -- creeps and the commander's army still end streaks and draw first blood).
+    -- creeps and the Warcraft army still end streaks and draw first blood).
     local function credit(killer)
         local hero = heroOfSlot(GetPlayerId(GetOwningPlayer(killer)))
         if hero then return hero end
@@ -207,18 +207,18 @@ define("announcer", function()
             end
         elseif kind == "rax" then
             A.say("rax_fall_yr_" .. lane, 1)
-        elseif kind == nil and enemyTower[GetUnitTypeId(dying)] and sideOf(dying) == "commander"
+        elseif kind == nil and enemyTower[GetUnitTypeId(dying)] and sideOf(dying) == "warcraft"
             and killer and sideOf(killer) == "dota" and now() - lastEnemyTower >= A.ENEMY_TOWER_GAP then
             lastEnemyTower = now()
             A.say("tower_enemy_fallen", 1)
         end
     end
 
-    -- "Your top tower is under attack.": the commander's own units or heroes
+    -- "Your top tower is under attack.": the Warcraft player's units or heroes
     -- start hitting one of our buildings (his creep waves only for the Ancient).
     local function buildingHit(source, target)
         local kind, lane = building(target)
-        if not kind or sideOf(source) ~= "commander" then return end
+        if not kind or sideOf(source) ~= "warcraft" then return end
         if kind ~= "ancient" and GetPlayerId(GetOwningPlayer(source)) == SLOT_HORDE then return end
         local t = now()
         local quiet = t - (hits[target] or -1000) >= A.ALERT_QUIET
@@ -242,7 +242,7 @@ define("announcer", function()
         local by = killer and sideOf(killer) or "none"
         if by == "dota" then
             A.say("roshan_fallen_rad", 2)
-        elseif by == "commander" then
+        elseif by == "warcraft" then
             A.say("roshan_fallen_dire", 2)
         end
         Sound.sfx("roshan_death", nil, GetUnitX(dying), GetUnitY(dying), 1, {near = 1500, far = 9000})
@@ -267,15 +267,15 @@ define("announcer", function()
         if not defined("victory") or not use("victory").over then return end
         local S = defined("structures") and use("structures") or nil
         local ancient = S and S.ancient
-        A.gameOver((ancient and not use("util").alive(ancient)) and "commander" or "dota")
+        A.gameOver((ancient and not use("util").alive(ancient)) and "warcraft" or "dota")
         return true
     end
 
     -- Test builds: -ann <key> plays a line, -horn sounds the horn now,
-    -- -gg dota|commander plays the end of the game.
+    -- -gg dota|warcraft plays the end of the game.
     local function testCommands()
         local trig = CreateTrigger()
-        for i = 0, SLOT_COMMANDER do
+        for i = 0, SLOT_WARCRAFT do
             TriggerRegisterPlayerChatEvent(trig, Player(i), "-ann ", false)
             TriggerRegisterPlayerChatEvent(trig, Player(i), "-horn", true)
             TriggerRegisterPlayerChatEvent(trig, Player(i), "-gg ", false)
@@ -287,7 +287,7 @@ define("announcer", function()
                 local winner = string.match(msg, "^%-gg%s+(%a+)")
                 if key then A.say(key, 3) end
                 if msg == "-horn" then A.horn() end
-                if winner then A.gameOver(winner == "dota" and "dota" or "commander") end
+                if winner then A.gameOver(winner == "dota" and "dota" or "warcraft") end
             end)
         end)
     end

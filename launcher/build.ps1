@@ -1,11 +1,11 @@
 <#
-Builds dist\DotaVsCommander\:
-    DotaVsCommander.exe        PyInstaller one-file build of launcher\dvc_launcher
+Builds dist\DotaVsWarcraft\:
+    DotaVsWarcraft.exe         PyInstaller one-file build of launcher\dvw_launcher
     StormLib.dll               StormLib 9.40, x64 (MPQ writer)
     vrf\                       Source 2 Viewer CLI 20.0 (asset exporter)
     THIRD_PARTY_NOTICES.txt
     README.txt
-    DotaVsCommander.w3x        only with -BaseMap
+    DotaVsWarcraft.w3x         only with -BaseMap
 
 Third-party binaries are downloaded from their official release URLs into
 launcher\vendor\ (git-ignored) and checked against pinned SHA256 values before
@@ -24,7 +24,7 @@ $Launcher = $PSScriptRoot
 $Root = (Resolve-Path (Join-Path $Launcher "..")).Path
 if (-not $Python) { $Python = Join-Path $Root ".venv\Scripts\python.exe" }
 $Vendor = Join-Path $Launcher "vendor"
-$Dist = Join-Path $Root "dist\DotaVsCommander"
+$Dist = Join-Path $Root "dist\DotaVsWarcraft"
 $Work = Join-Path $Root "build\pyinstaller"
 
 # SHA256 pins. VRF: the GitHub release asset digest. StormLib: the GitHub
@@ -83,14 +83,15 @@ function Get-Package($p) {
 if (-not (Test-Path $Python)) { throw "Python not found: $Python (create the venv first)" }
 Invoke-Native "pip install" { & $Python -m pip install --disable-pip-version-check -q -r (Join-Path $Launcher "requirements.txt") }
 foreach ($f in @((Join-Path $Launcher "vo_manifest.json"), (Join-Path $Root "src\data\heroes.json"),
-                  (Join-Path $Root "src\data\items.json"), (Join-Path $Root "specs\models.json"))) {
+                  (Join-Path $Root "src\data\items.json"), (Join-Path $Root "specs\models.json"),
+                  (Join-Path $Root "specs\effects.json"))) {
     if (-not (Test-Path $f)) { throw "Missing $f (run tools\select_vo.py first; specs\models.json lists the converted unit models)" }
 }
-# Optional HUD images (contract at the top of dvc_launcher\assets.py): checked here, bundled when present.
+# Optional HUD images (contract at the top of dvw_launcher\assets.py): checked here, bundled when present.
 $hudSpec = Join-Path $Root "specs\hud_assets.json"
 $optionalData = @()
 if (Test-Path $hudSpec) {
-    Invoke-Native "hud_assets.json check" { & $Python -I -c "import sys; sys.path.insert(0, sys.argv[2]); from dvc_launcher import assets; print(len(assets.load_hud_specs(sys.argv[1])), 'HUD images')" $hudSpec $Launcher }
+    Invoke-Native "hud_assets.json check" { & $Python -I -c "import sys; sys.path.insert(0, sys.argv[2]); from dvw_launcher import assets; print(len(assets.load_hud_specs(sys.argv[1])), 'HUD images')" $hudSpec $Launcher }
     $optionalData += @("--add-data", "$hudSpec;data")
 }
 
@@ -104,17 +105,18 @@ if (Test-Path $Dist) { Remove-Item $Dist -Recurse -Force }
 New-Item -ItemType Directory -Force $Work | Out-Null
 Invoke-Native "PyInstaller" {
     & $Python -m PyInstaller --noconfirm --clean --onefile --windowed --noupx `
-        --name DotaVsCommander `
+        --name DotaVsWarcraft `
         --distpath $Dist --workpath $Work --specpath $Work `
         --paths $Launcher `
         --add-data "$(Join-Path $Root 'src\data\heroes.json');data" `
         --add-data "$(Join-Path $Root 'src\data\items.json');data" `
         --add-data "$(Join-Path $Launcher 'vo_manifest.json');data" `
         --add-data "$(Join-Path $Root 'specs\models.json');data" `
+        --add-data "$(Join-Path $Root 'specs\effects.json');data" `
         @optionalData `
         --exclude-module tkinter --exclude-module unittest --exclude-module pydoc `
         --exclude-module doctest --exclude-module numpy `
-        (Join-Path $Launcher "DotaVsCommander.py")
+        (Join-Path $Launcher "DotaVsWarcraft.py")
 }
 
 New-Item -ItemType Directory -Force (Join-Path $Dist "vrf") | Out-Null
@@ -122,7 +124,7 @@ Copy-Item (Join-Path $vrfDir "*") (Join-Path $Dist "vrf") -Recurse
 Copy-Item $stormDll $Dist
 Copy-Item (Join-Path $Launcher "README.txt") $Dist
 Invoke-Native "make_notices.py" { & $Python (Join-Path $Launcher "make_notices.py") (Join-Path $Dist "THIRD_PARTY_NOTICES.txt") }
-if ($BaseMap) { Copy-Item $BaseMap (Join-Path $Dist "DotaVsCommander.w3x") }
+if ($BaseMap) { Copy-Item $BaseMap (Join-Path $Dist "DotaVsWarcraft.w3x") }
 
 $files = Get-ChildItem $Dist -Recurse -File
 $total = ($files | Measure-Object Length -Sum).Sum

@@ -1,5 +1,5 @@
 """Tests of the launcher's music, announcer and effect sounds
-(launcher/dvc_launcher/assets.py "audio", vrf.find_output) and of the
+(launcher/dvw_launcher/assets.py "audio", vrf.find_output) and of the
 repo's selection (launcher/vo_manifest.json "audio", src/data/audio.json).
 
 Offline and synthetic: a fake VRF output folder holds a stereo 16-bit WAV, a
@@ -26,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "launcher"))
 
-from dvc_launcher import assets, vrf  # noqa: E402
+from dvw_launcher import assets, vrf  # noqa: E402
 
 failures = []
 
@@ -58,7 +58,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--work")
     args = ap.parse_args()
-    work = Path(args.work) if args.work else Path(tempfile.mkdtemp(prefix="dvc_audio_"))
+    work = Path(args.work) if args.work else Path(tempfile.mkdtemp(prefix="dvw_audio_"))
     shutil.rmtree(work, ignore_errors=True)
     raw = work / "raw"
 

@@ -128,7 +128,13 @@ define("lane", function()
         local n = orderNo[u]
         -- an order given inside its own order event would be overridden
         Timer.after(0, function()
-            if orderNo[u] == n and U.alive(u) then IssueImmediateOrderById(u, STOP) end
+            local stop = orderNo[u] == n and U.alive(u)
+            if stop then IssueImmediateOrderById(u, STOP) end
+            if BUILD_TEST_MODE then
+                Log.info(string.format("lane: attack order on ally %s refused (%s), stop %s", GetUnitName(target), err,
+                    stop and "issued" or "skipped: a newer order"))
+                Log.flush()
+            end
         end)
         Lane.error(p, err)
     end
@@ -161,7 +167,7 @@ define("lane", function()
     -- unverified): a hero that attacks an enemy hero, or is ordered to, draws
     -- the enemy lane creeps within 500 of it for 2.3 s, at most once every 3 s;
     -- an enemy that attacks a hero inside a tower's range draws that tower.
-    -- On the commander's side his heroes and his own army draw Dota creeps
+    -- On the Warcraft side his heroes and his own army draw Dota creeps
     -- and towers; his creep waves draw nothing.
 
     Lane.AGGRO = {radius = 500, duration = 2.3, cooldown = 3}
@@ -172,7 +178,7 @@ define("lane", function()
         local side = Roles.side(slot)
         if IsUnitType(u, UNIT_TYPE_STRUCTURE) then return false end
         if side == "dota" then return IsUnitType(u, UNIT_TYPE_HERO) and slot ~= SLOT_ANCIENTS end
-        return side == "commander" and slot ~= SLOT_HORDE
+        return side == "warcraft" and slot ~= SLOT_HORDE
     end
 
     -- `attacker` attacks (or is ordered to attack) the hero `victim`.
@@ -214,6 +220,28 @@ define("lane", function()
         end
     end
 
+    -- The swing itself: an attack on an ally that may not be denied stops as
+    -- it starts, however it was ordered. In game (2026-10-11) allies at full
+    -- health were denied, teammates killed and own towers hit, while the
+    -- order check above passed the mock.
+    local function onAttacked(attacker, target)
+        if sideOf(attacker) ~= sideOf(target) then
+            Lane.aggro(attacker, target)
+            return
+        end
+        local p = GetOwningPlayer(attacker)
+        if attacker == target or not Roles.isHeroSlot(GetPlayerId(p)) then return end
+        local err = Lane.denyError(target)
+        if BUILD_TEST_MODE then
+            Log.info(string.format("lane: %s swings at ally %s: %s", GetUnitName(attacker), GetUnitName(target),
+                err and ("stopped, " .. err) or "deny allowed"))
+            Log.flush()
+        end
+        if not err then return end
+        IssueImmediateOrderById(attacker, STOP)
+        Lane.error(p, err)
+    end
+
     -- ------------------------------------------------------------ Scan
     -- Dota's tooltip (DOTA_Tooltip_ability_radar_Description): a 900 area for
     -- 8 s, telling whether enemy heroes are in it. Two team charges, each
@@ -246,10 +274,10 @@ define("lane", function()
         return math.max(0, Lane.scanRestoreAt - Timer.now()), Lane.SCAN.restore
     end
 
-    -- Commander-side heroes inside a scanned area.
+    -- Warcraft-side heroes inside a scanned area.
     function Lane.scanHits(x, y)
         return U.enum(x, y, Lane.SCAN.radius, function(u)
-            return IsUnitType(u, UNIT_TYPE_HERO) and sideOf(u) == "commander"
+            return IsUnitType(u, UNIT_TYPE_HERO) and sideOf(u) == "warcraft"
         end)
     end
 
@@ -307,7 +335,7 @@ define("lane", function()
             if U.alive(u) and not BlzIsUnitInvulnerable(u) and hit and now - hit <= Lane.BOT_GLYPH.hit
                 and GetWidgetLife(u) < BlzGetUnitMaxHP(u) * Lane.BOT_GLYPH.hp then
                 local foes = U.enum(GetUnitX(u), GetUnitY(u), Lane.BOT_GLYPH.radius, function(e)
-                    return sideOf(e) == "commander" and not IsUnitType(e, UNIT_TYPE_STRUCTURE)
+                    return sideOf(e) == "warcraft" and not IsUnitType(e, UNIT_TYPE_STRUCTURE)
                 end)
                 if #foes >= Lane.BOT_GLYPH.foes then
                     S.glyph(Player(bot))
@@ -331,7 +359,7 @@ define("lane", function()
         startDay()
         Events.on("order", onOrder)
         Events.on("attacked", function(attacker, target)
-            if attacker and target then Lane.aggro(attacker, target) end
+            if attacker and target then onAttacked(attacker, target) end
         end)
         Events.on("death", onDeath)
         Timer.every(1, botGlyph)

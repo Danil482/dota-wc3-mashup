@@ -1,7 +1,7 @@
-DOTA VS COMMANDER - launcher
-============================
+DOTA VS WARCRAFT - launcher
+===========================
 
-Up to five Dota 2 heroes against one Warcraft III commander, as a custom map for
+Up to five Dota 2 heroes against one Warcraft III player, as a custom map for
 Warcraft III: Reforged 2.0.1.
 
 The map ships without any Dota 2 content. When you start the mod, this launcher
@@ -39,23 +39,24 @@ WHAT THE LAUNCHER DOES
 5. Lays the map out like Dota's own, read from game\dota\maps\dota.vpk:
    ground heights as Warcraft III cliffs and ramps, the river, the trees,
    and the towers, barracks, camps, runes, Roshan and lanes at Dota's spots
-   (the commander takes the Dire base). About 20 seconds the first time,
-   then cached. If this fails, the map keeps its built-in Dota-like layout.
+   (the Warcraft player takes the Dire base). About 20 seconds the first
+   time, then cached. If this fails, the map keeps its built-in Dota-like
+   layout.
 6. Writes the personal map with StormLib:
-     Documents\Warcraft III\Maps\DotaVsCommander\DotaVsCommander.w3x
+     Documents\Warcraft III\Maps\DotaVsWarcraft\DotaVsWarcraft.w3x
 7. Copies your Dota 2 keys and game settings (ability, item, TP, shop and
    select-hero keys, quick cast, double-tap self cast, zoom lock, auto
    attack), read without changes from Steam\userdata\<account>\570, to
-     Documents\Warcraft III\CustomMapData\DotaVsCommander\dota_settings.txt
+     Documents\Warcraft III\CustomMapData\DotaVsWarcraft\dota_settings.txt
    The map applies them when you play a Dota hero. Without the file it uses
    Dota's default keys.
 8. Starts Warcraft III with that map.
 
 It never writes into the Warcraft III or Dota 2 folders. Files it creates:
-  %LOCALAPPDATA%\DotaVsCommander\cache\<Dota build>\   exported files
-  %LOCALAPPDATA%\DotaVsCommander\logs\launcher.log    log of every run
-  Documents\Warcraft III\Maps\DotaVsCommander\        the personal map
-  Documents\Warcraft III\CustomMapData\DotaVsCommander\dota_settings.txt
+  %LOCALAPPDATA%\DotaVsWarcraft\cache\<Dota build>\    exported files
+  %LOCALAPPDATA%\DotaVsWarcraft\logs\launcher.log     log of every run
+  Documents\Warcraft III\Maps\DotaVsWarcraft\         the personal map
+  Documents\Warcraft III\CustomMapData\DotaVsWarcraft\dota_settings.txt
                                                       your Dota keys and settings
 
 
@@ -72,12 +73,12 @@ RUNNING IT BY HAND
 ------------------
 Melty starts the launcher for you. To run it yourself:
 
-  DotaVsCommander.exe --game "<Warcraft III folder>" --dota "<Dota 2 folder>"
+  DotaVsWarcraft.exe --game "<Warcraft III folder>" --dota "<Dota 2 folder>"
 
   --game          the Warcraft III folder (contains _retail_\x86_64\Warcraft III.exe)
   --dota          the Dota 2 folder, e.g.
                   C:\Program Files (x86)\Steam\steamapps\common\dota 2 beta
-  --map <file>    base map (default: DotaVsCommander.w3x next to the exe)
+  --map <file>    base map (default: DotaVsWarcraft.w3x next to the exe)
   --out <file>    where to write the personal map (default: see above)
   --prepare-only  build the map, do not start the game
   --no-wait       exit right after starting the game (default: wait for it)
@@ -93,7 +94,7 @@ then), 6 base map missing or damaged,
 7 map could not be written (close Warcraft III if it is running),
 8 Warcraft III not found or did not start, 1 unexpected error.
 
-To force a fresh export, delete %LOCALAPPDATA%\DotaVsCommander\cache.
+To force a fresh export, delete %LOCALAPPDATA%\DotaVsWarcraft\cache.
 
 
 HUD IMAGES (for map developers)
@@ -131,7 +132,7 @@ build.ps1 checks it and bundles it into the launcher. It is a JSON list of:
   kind     optional, "hud".
   note     optional free text.
 The result is a BLP1 with a 256-colour palette, 8-bit alpha and mipmaps.
-The full contract is at the top of dvc_launcher\assets.py.
+The full contract is at the top of dvw_launcher\assets.py.
 
 
 CREDITS

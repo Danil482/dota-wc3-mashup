@@ -1,7 +1,7 @@
-"""DotaVsCommander.exe: build the personalized map from the player's Dota 2
+"""DotaVsWarcraft.exe: build the personalized map from the player's Dota 2
 install, then start Warcraft III.
 
-DotaVsCommander.exe --game <WC3 folder> --dota <Dota 2 folder>
+DotaVsWarcraft.exe --game <WC3 folder> --dota <Dota 2 folder>
                     [--map <base .w3x>] [--out <map path>] [--prepare-only]
 """
 import argparse
@@ -17,12 +17,12 @@ import traceback
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from . import (PLAN_VERSION, __version__, assets, dota_settings, installs, models, stormlib, terrain, vpkdir, vrf,
-               winapi)
+from . import (PLAN_VERSION, __version__, assets, dota_settings, effects, installs, models, stormlib, terrain, vpkdir,
+               vrf, winapi)
 
-APP = "DotaVsCommander"
-TITLE = "Dota vs Commander"
-MAP_NAME = "DotaVsCommander.w3x"
+APP = "DotaVsWarcraft"
+TITLE = "Dota vs Warcraft"
+MAP_NAME = "DotaVsWarcraft.w3x"
 
 EXIT_OK = 0
 EXIT_INTERNAL = 1
@@ -34,7 +34,7 @@ EXIT_MAP_MISSING = 6
 EXIT_WRITE_FAILED = 7
 EXIT_WC3_FAILED = 8
 
-log = logging.getLogger("dvc")
+log = logging.getLogger("dvw")
 
 
 class LauncherError(Exception):
@@ -53,14 +53,14 @@ class _Parser(argparse.ArgumentParser):
 
 
 def parse_args(argv):
-    p = _Parser(prog="DotaVsCommander.exe", add_help=False,
-                description="Builds the Dota vs Commander map from your own Dota 2 install and starts "
+    p = _Parser(prog="DotaVsWarcraft.exe", add_help=False,
+                description="Builds the Dota vs Warcraft map from your own Dota 2 install and starts "
                             "Warcraft III.")
     p.add_argument("--game", help="Warcraft III folder (contains _retail_\\x86_64\\Warcraft III.exe)")
     p.add_argument("--dota", help="Dota 2 folder (contains game\\dota\\pak01_dir.vpk)")
     p.add_argument("--map", help=f"base map (default: {MAP_NAME} next to the exe)")
     p.add_argument("--out", help="personalized map to write (default: Documents\\Warcraft III\\Maps\\"
-                                 f"DotaVsCommander\\{MAP_NAME})")
+                                 f"DotaVsWarcraft\\{MAP_NAME})")
     p.add_argument("--prepare-only", action="store_true", help="build the map but do not start the game")
     p.add_argument("--no-wait", action="store_true", help="exit right after starting the game")
     p.add_argument("--quiet", action="store_true", help="no message boxes (errors go to the log only)")
@@ -100,7 +100,8 @@ def data_file(name):
             "items.json": repo / "src" / "data" / "items.json",
             "vo_manifest.json": repo / "launcher" / "vo_manifest.json",
             "hud_assets.json": repo / "specs" / "hud_assets.json",
-            "models.json": repo / "specs" / "models.json"}[name]
+            "models.json": repo / "specs" / "models.json",
+            "effects.json": repo / "specs" / "effects.json"}[name]
 
 
 def default_vrf():
@@ -116,14 +117,14 @@ def default_stormlib():
 
 
 def user_dir():
-    # DVC_USER_DIR is for development only: parallel source runs get their own
+    # DVW_USER_DIR is for development only: parallel source runs get their own
     # cache, logs and work folders instead of sharing %LOCALAPPDATA%.
-    override = os.environ.get("DVC_USER_DIR")
+    override = os.environ.get("DVW_USER_DIR")
     return Path(override) if override else winapi.local_app_data_dir() / APP
 
 
 def default_out():
-    return winapi.documents_dir() / "Warcraft III" / "Maps" / "DotaVsCommander" / MAP_NAME
+    return winapi.documents_dir() / "Warcraft III" / "Maps" / "DotaVsWarcraft" / MAP_NAME
 
 
 def setup_logging():
@@ -286,7 +287,21 @@ def prepare_assets(dota, vpk, vrf_exe):
         raise LauncherError(EXIT_INTERNAL, f"Asset name clash: {clash[:3]}")
     files.update(model_files)
     log.info(f"models: {len(keys)} units, {len(model_files)} files in {time.perf_counter() - t:.1f} s")
+    files.update(prepare_effects(vpk, vrf_exe, build_dir))
     return files
+
+
+def prepare_effects(vpk, vrf_exe, build_dir):
+    """Dota attack projectiles and spell effects (effects.py). Every missile
+    the object data names is written, converted or a plain glow."""
+    t = time.perf_counter()
+    try:
+        spec = effects.load_spec(data_file("effects.json"))
+        out = effects.prepare(vpk, vrf_exe, build_dir, spec, log.info)
+    except (OSError, ValueError, effects.EffectError) as e:
+        raise LauncherError(EXIT_INTERNAL, f"Could not prepare the Dota effects:\n{e}\n\nReinstall the mod.") from e
+    log.info(f"effects: {len(out)} files in {time.perf_counter() - t:.1f} s")
+    return out
 
 
 def prepare_terrain(dota, base_map, vrf_exe, stormlib_dll):
@@ -397,6 +412,11 @@ def run(args):
 
     files = prepare_assets(dota, vpk, vrf_exe)
     files.update(prepare_terrain(dota, base_map, vrf_exe, stormlib_dll))
+    try:    # data.effects after the terrain step, which patches war3map.lua too
+        files.update(effects.lua_files(base_map, stormlib_dll, files, effects.load_spec(data_file("effects.json")),
+                                       log.info))
+    except (OSError, ValueError) as e:
+        log.warning(f"effects: WC3 spell effects stay: {e}")
     write_map(base_map, out_path, files, stormlib_dll, user_dir() / "work" / f"map-{os.getpid()}")
     export_settings(dota, vpk)
     log.info(f"prepared in {time.perf_counter() - t0:.1f} s")
@@ -429,7 +449,7 @@ def main(argv=None):
             return EXIT_OK
         return run(args)
     except UsageError as e:
-        return fail(EXIT_USAGE, f"Wrong command line: {e}\n\nUsage: DotaVsCommander.exe --game <Warcraft III "
+        return fail(EXIT_USAGE, f"Wrong command line: {e}\n\nUsage: DotaVsWarcraft.exe --game <Warcraft III "
                                 f"folder> --dota <Dota 2 folder> [--map <base map>] [--out <map path>] "
                                 f"[--prepare-only]")
     except LauncherError as e:

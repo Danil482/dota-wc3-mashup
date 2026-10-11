@@ -677,6 +677,12 @@ class Converter:
         exported = set(self.hero.animation_names())
         for name, looping, rarity, fallback in plan:
             clip_name = self.clip_names.get(name)
+            if name in units.HERO_SEQUENCES and self.kind != units.HERO:
+                continue
+            if name in units.CAST_NAMES and clip_name == self.clip_names.get("Spell"):
+                # A request for "Spell <tag>" plays "Spell" when the model has no
+                # such sequence: the same clip twice would only add size.
+                continue
             if clip_name and clip_name not in exported:
                 self.notes.append(f"{name}: clip {clip_name} is not in the export")
                 clip_name = None

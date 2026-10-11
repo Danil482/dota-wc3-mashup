@@ -3,8 +3,9 @@
 -- mock WC3 API, then at 6 s of game time (before the draft) makes test heroes
 -- the bot players' main heroes at the home shop (never a human's: the music
 -- director binds a human's hero once) and buys, combines, stacks and
--- sells items, runs every active handler once, fires the attack procs and the
--- periodic loops, and lets a bot shop. The storage rules (backpack, stash,
+-- sells items, runs every active handler once, holds Dota's cooldowns on
+-- every item use path, fires the attack procs and the periodic loops, and
+-- lets a bot shop. The storage rules (backpack, stash,
 -- TP slot, courier) are tools/mock/inventory.lua's. Failed checks and Lua
 -- errors become ERROR log lines, which fail the mock run. Test units stand at
 -- the home shop and are removed afterwards; the main heroes are restored.
@@ -161,7 +162,7 @@ do
         local function gold(p) return GetPlayerState(p or p0, PLAYER_STATE_RESOURCE_GOLD) end
         local hero = newHero(1, hx, hy, true)
         local ally = newHero(2, hx + 100, hy)
-        local foeHero = newHero(SLOT_COMMANDER_AI, hx + 200, hy + 100)
+        local foeHero = newHero(SLOT_WARCRAFT_AI, hx + 200, hy + 100)
         local foe = CreateUnit(Player(SLOT_HORDE), creepType, hx + 200, hy, 0)
         local fodder = CreateUnit(Player(SLOT_HORDE), creepType, hx + 250, hy - 50, 0)
         testUnits[#testUnits + 1] = foe
@@ -330,6 +331,72 @@ do
             end
         end
         wipe(p0)
+
+        -- Dota's cooldowns hold on every use path: a HUD click or item key, a
+        -- waiting item's target click, the TP slot, and the cast start (bots
+        -- and the rest); open again once they end (1 s here). Quick cast is
+        -- tools/mock/inventory.lua's (it needs the local player's hero); the
+        -- mouse model is tools/mock/dota_settings.lua's.
+        local Use, T = use("dota_items"), __mockSettings
+        local blink = hand(hero, "item_blink")
+        shop(hero, "item_tpscroll")
+        local tpScroll = Inv.get(p0, "tp", 0)
+        local bslot = 0
+        for i = 0, 5 do
+            if UnitItemInSlot(hero, i) == blink then bslot = i end
+        end
+        local blinkAbil = FourCC(ids.item_abilities.item_blink)
+        local points = {}
+        local usePoint = UnitUseItemPoint
+        UnitUseItemPoint = function(u, it, x, y)
+            points[#points + 1] = it
+            return usePoint(u, it, x, y)
+        end
+        local function orders() return __mock.calls.IssuePointOrder or 0 end
+        -- every path while ready, a Blink left waiting, the cooldowns start
+        check("a ready Blink waits for its target", Use.use(p0, bslot) and Use.pending[p0] ~= nil)
+        if T then
+            T.mouse(p0, "down", hx + 300, hy, MOUSE_BUTTON_TYPE_LEFT)
+            check("its target click uses it", #points == 1 and points[1] == blink)
+            Use.use(p0, bslot)
+        end
+        local o = orders()
+        Inv.teleport(p0, hx - 2000, hy)
+        check("a ready TP slot orders the teleport", orders() == o + 1)
+        check("a ready cast starts", Actives.run("onChannel", hero, blinkAbil, nil, hx + 300, hy) ~= false)
+        local saved = {data.item_blink.cooldown, data.item_tpscroll.cooldown}
+        data.item_blink.cooldown, data.item_tpscroll.cooldown = 1, 1
+        Items.used(hero, blink, "item_blink")
+        Items.used(hero, tpScroll, "item_tpscroll")
+        data.item_blink.cooldown, data.item_tpscroll.cooldown = saved[1], saved[2]
+        -- while they recharge
+        if T then
+            T.mouse(p0, "down", hx + 300, hy, MOUSE_BUTTON_TYPE_LEFT)
+            check("a waiting item's target click is refused while it recharges", #points == 1 and Use.pending[p0] == nil)
+        end
+        Use.pending[p0] = nil
+        check("a HUD click or item key is refused while it recharges", not Use.use(p0, bslot) and Use.pending[p0] == nil)
+        o = orders()
+        Inv.teleport(p0, hx - 2000, hy)
+        check("the TP slot is refused while it recharges", orders() == o and not Use.useTp(p0) and Use.pending[p0] == nil)
+        check("the cast start is refused while it recharges",
+            Actives.run("onChannel", hero, blinkAbil, nil, hx + 300, hy) == false)
+        -- and once they ended
+        Timer.after(1.1, function()
+            use("safe").call(function()
+                check("Blink again after its cooldown", Use.use(p0, bslot) and Use.pending[p0] ~= nil)
+                if T then
+                    T.mouse(p0, "down", hx + 300, hy, MOUSE_BUTTON_TYPE_LEFT)
+                    check("its target click again", #points == 2)
+                end
+                Use.pending[p0] = nil
+                UnitUseItemPoint = usePoint
+                local n = orders()
+                Inv.teleport(p0, hx - 2000, hy)
+                check("the TP slot again", orders() == n + 1)
+                check("the cast start again", Actives.run("onChannel", hero, blinkAbil, nil, hx + 300, hy) ~= false)
+            end)
+        end)
 
         -- the Town Portal: bought into the TP slot, cast by the hero's own
         -- TP ability, spent after the channel

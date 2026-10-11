@@ -1,4 +1,4 @@
--- Dota 2 style HUD for the Dota-team players. The commander and observers
+-- Dota 2 style HUD for the Dota-team players. The Warcraft player and observers
 -- keep the normal Warcraft III interface.
 --
 --   bottom-left    minimap (WC3 minimap moved into a Dota frame)
@@ -10,13 +10,15 @@
 --                  stash row above it while the stash holds items or the
 --                  hero is at the home shop
 --   top            five Dota heroes with HP/mana and respawn timers, game
---                  clock with day/night, the commander on the right
+--                  clock with day/night, the Warcraft player on the right
 --
 -- The ability row is built from the WC3 command buttons: cells that hold the
 -- focused hero's abilities line up in one row (Dota's empty slots, such as
 -- Rubick's stolen-spell slots, show the spare D/F cells); move/stop/hold/
 -- attack/patrol and WC3's own learn button are parked off-screen (their
--- hotkeys keep working). Any other selection (shop, creeps, summons) shows
+-- hotkeys keep working). Warcraft shows no command card for a unit the
+-- player does not control, so our own icons fill the row for it (Dota shows
+-- any selected unit's abilities). The player's other units and shops show
 -- the full 4 x 3 command card in the same place.
 --
 -- Multiplayer: all frames and triggers are created for every player in
@@ -72,9 +74,10 @@ define("dota_hud", function()
         -- top bar
         CLOCK_W = 0.066, CLOCK_H = 0.030,
         HERO_W = 0.026, HERO_H = 0.026, HERO_GAP = 0.002,  -- square hero icons (shrink if needed)
-        CMD_W = 0.16,           -- commander block right of the clock
+        CMD_W = 0.16,           -- Warcraft block right of the clock
         -- Warcraft III frames
         TOOLTIP_DY = 0.012,     -- ability tooltip: bottom edge this far above the panel
+        TIP_W = 0.260, TIP_H = 0.110,  -- our icons' tooltip (a unit the player does not control)
         -- the stretched ConsoleUIBackdrop also took every click from our buttons
         -- in the strip (SHOP, "+" learn) in game, so it stays collapsed
         BLOCK_BOTTOM_CLICKS = false,
@@ -101,7 +104,7 @@ define("dota_hud", function()
     local view = nil                                 -- local: "dota" or nil (WC3 UI)
     local failures = 0                               -- local: update errors so far
     local respawnAt = {}                             -- hero -> game time of revival (synced)
-    local halls = 0                                  -- commander town halls (synced)
+    local halls = 0                                  -- Warcraft town halls (synced)
     local keyByType = {}                             -- unit type -> hero key
     local rows = {}                                  -- hero key -> ability row
     local selGroup = nil
@@ -208,6 +211,171 @@ define("dota_hud", function()
         return cur < e.max and GetHeroLevel(hero) >= required(e, cur)
     end
     Hud.canLearn = canLearn
+
+    -- Every ability object by its build-data cell (ids.ability_cells,
+    -- y * 4 + x), Rubick's D-cell copies of stolen spells included, newest
+    -- object first: a form that takes another ability's button (Detonate
+    -- over Reactive Tazer, M.A.D.'s Shard forms, MegaMeepo Fling, Telekinesis
+    -- Land, a stolen spell) is created after the ability it covers
+    -- (tools/gen_objects.py), so the newest one a unit has is the one shown.
+    local D_CELL = 5                                 -- gen_objects D_CELL (1, 1)
+    local byCell = nil
+    local function cellIndex()
+        if byCell then return byCell end
+        byCell = {}
+        local ids = use("data.ids")
+        local nameOf = {}
+        for name, code in pairs(ids.abilities or {}) do nameOf[code] = name end
+        local function add(cell, code, name)
+            local list = byCell[cell]
+            if not list then
+                list = {}
+                byCell[cell] = list
+            end
+            list[#list + 1] = {name = name, id = FourCC(code), code = code}
+        end
+        for name, cell in pairs(ids.ability_cells or {}) do
+            if ids.abilities[name] then add(cell, ids.abilities[name], name) end
+        end
+        -- a copy carries its Dota spell's name; a Warcraft spell's has none
+        for orig, copy in pairs(ids.rubick_copies or {}) do add(D_CELL, copy, nameOf[orig]) end
+        for _, list in pairs(byCell) do table.sort(list, function(a, b) return a.code > b.code end) end
+        return byCell
+    end
+
+    -- The ability unit u shows in `cell`: {name, id}, or nil. By the build
+    -- data, so synced code may ask (Warcraft's button positions can be local:
+    -- Rubick moves a stolen spell's button for its owner only).
+    local function abilityIn(u, cell)
+        for _, e in ipairs(cellIndex()[cell] or {}) do
+            if GetUnitAbilityLevel(u, e.id) > 0 then return e end
+        end
+        return nil
+    end
+    Hud.abilityIn = abilityIn
+
+    -- Build-data cells of a row's slots: each ability's own, the spare cells
+    -- in turn for Dota's empty slots.
+    local rowCells = {}                              -- row -> {cell per slot}
+    local function cellsOf(row)
+        local out = rowCells[row]
+        if out then return out end
+        out = {}
+        local cells, spare = use("data.ids").ability_cells or {}, 0
+        for k, e in ipairs(row) do
+            if e.empty then
+                spare = spare + 1
+                out[k] = L.SPARE_CELLS[spare]
+            else
+                out[k] = cells[e.name]
+            end
+        end
+        rowCells[row] = out
+        return out
+    end
+
+    -- The ability a row slot shows on unit u: the one holding its cell, else
+    -- the slot's own (an unlearned ability shows dimmed).
+    local function shownId(u, e, cell)
+        local held = cell and abilityIn(u, cell)
+        if held then return held.id end
+        return e and e.id
+    end
+
+    -- Abilities of a unit that is no Dota hero, as our icons show them:
+    -- {{id, max}, ...} in command card order, bottom row first. Read in
+    -- synced code only (selection and skill events): the first lookup of an
+    -- ability takes a handle id. Left out: items, buffs, Warcraft's commands
+    -- (attack, move, learn, inventories, shops, transport, gathering, repair,
+    -- building) and our helpers (mods.lua's spell immunity and invisibility,
+    -- Ghost, the crow-form flight trick).
+    local NOT_SHOWN = {}
+    for code in string.gmatch("Aatk Amov AHer AInv Aihn Aion Aien Aiun Apak Aloc Avul Awan Aalr Apit Aneu Ane2 Aall "
+            .. "Asid Asud ARal Abun Aloa Adro Ahar Ahrl Arep Ahrp Aren Arst AHbu AObu AUbu AEbu ANbu AGbu "
+            .. "ACmi Apiv Aeth Arav Amrf", "%S+") do
+        NOT_SHOWN[FourCC(code)] = true
+    end
+    local CHAR_A, CHAR_S = string.byte("A"), string.byte("S")   -- abilities; buffs and effects start otherwise
+
+    local function code4(id)
+        return string.char((id >> 24) & 255, (id >> 16) & 255, (id >> 8) & 255, id & 255)
+    end
+
+    -- the list, and in test builds the codes left out
+    local function readAbilities(u)
+        local list, out, i = {}, {}, 0
+        while true do
+            local ab = BlzGetUnitAbilityByIndex(u, i)
+            if not ab then break end
+            local id = BlzGetAbilityId(ab)
+            local first = id >> 24
+            local x, y = BlzGetAbilityPosX(id), BlzGetAbilityPosY(id)
+            if (first == CHAR_A or first == CHAR_S) and not NOT_SHOWN[id]
+                    and not BlzGetAbilityBooleanField(ab, ABILITY_BF_ITEM_ABILITY) and BlzGetAbilityIcon(id) ~= ""
+                    and x >= 0 and x <= 3 and y >= 0 and y <= 2 then
+                list[#list + 1] = {id = id, max = BlzGetAbilityIntegerField(ab, ABILITY_IF_LEVELS), rank = (2 - y) * 4 + x}
+            elseif BUILD_TEST_MODE then
+                out[#out + 1] = code4(id)
+            end
+            i = i + 1
+        end
+        table.sort(list, function(a, b)
+            if a.rank ~= b.rank then return a.rank < b.rank end
+            return a.id < b.id
+        end)
+        for k = #list, ROW_MAX + 1, -1 do list[k] = nil end
+        return list, out
+    end
+
+    local unitAbilities, listed, listLimit = {}, 0, 300   -- unit -> readAbilities(unit) (synced)
+    local NONE = {}
+    local function listAbilities(u)
+        if not u or GetUnitTypeId(u) == 0 or heroKeyOf(u) then return end
+        if unitAbilities[u] == nil then
+            listed = listed + 1
+            if listed > listLimit then
+                -- forget removed units
+                local keep, n = {}, 0
+                for v, list in pairs(unitAbilities) do
+                    if GetUnitTypeId(v) ~= 0 then keep[v], n = list, n + 1 end
+                end
+                unitAbilities, listed, listLimit = keep, n + 1, math.max(300, 2 * n)
+            end
+        end
+        local before = unitAbilities[u]
+        local list, out = readAbilities(u)
+        unitAbilities[u] = list
+        if BUILD_TEST_MODE then
+            -- what the icons show, once per unit and change: the filter as seen in game
+            local codes = {}
+            for _, e in ipairs(list) do codes[#codes + 1] = code4(e.id) end
+            list.codes = table.concat(codes, " ")
+            if not before or before.codes ~= list.codes then
+                Log.info(string.format("hud icons for %s: %s (left out: %s)", GetUnitName(u),
+                    list.codes ~= "" and list.codes or "none", #out > 0 and table.concat(out, " ") or "none"))
+            end
+        end
+    end
+
+    -- Shops keep Warcraft's command card with their items.
+    local APIT = FourCC("Apit")
+    local shopTypes = nil
+    local function isShop(u)
+        if not shopTypes then
+            shopTypes = {}
+            for name, code in pairs(use("data.ids").units or {}) do
+                if string.sub(name, 1, 4) == "shop" then shopTypes[FourCC(code)] = true end
+            end
+        end
+        return shopTypes[GetUnitTypeId(u)] == true or GetUnitAbilityLevel(u, APIT) > 0
+    end
+
+    -- An ability's icon; test builds have no Dota art and show a WC3 stand-in.
+    local function iconOf(id)
+        local path = BlzGetAbilityIcon(id) or ""
+        if path == "" or (not Kit.dota and string.find(path, "BTNDota_", 1, true)) then return Kit.btn("BTNSkillz") end
+        return path
+    end
 
     ---------------------------------------------------------------- Warcraft III frames
 
@@ -494,6 +662,24 @@ define("dota_hud", function()
             F.statIcons[i] = Kit.backdrop(F.fgBottom, icons[i])
             F.statTexts[i] = Kit.text(F.fgBottom, 0.72, TEXT_JUSTIFY_LEFT)
         end
+        -- our ability icons for a unit the player does not control (Warcraft
+        -- shows no command card for it): under the mana texts and pips made
+        -- below; hovering shows F.iconTip, clicks do nothing
+        F.icons = {}
+        for k = 1, ROW_MAX do
+            local s = {}
+            s.b, s.img = Kit.button(F.fgBottom, C.dark)
+            s.cd = Kit.sweep(s.b)
+            Kit.label(s.b, 0.6)                 -- its click layer keeps the hover over the sweep's seconds
+            s.hover = Kit.frame(F.fgBottom)
+            BlzFrameSetTooltip(Kit.hit(s.b), s.hover)
+            Kit.show(s.b, false)
+            F.icons[k] = s
+        end
+        F.iconTip = Kit.frame(F.fgRoot)
+        F.iconTipBg = Kit.backdrop(F.iconTip, Kit.tex("tooltip_bg", C.dark), Kit.dota and 245 or 230)
+        F.iconTipText = Kit.text(F.iconTip, 0.72, TEXT_JUSTIFY_LEFT, TEXT_JUSTIFY_TOP)
+        Kit.show(F.iconTip, false)
         F.learn, F.learnImg, F.learnText, F.pips, F.mana, F.cd = {}, {}, {}, {}, {}, {}
         for k = 1, ROW_MAX do
             F.learn[k], F.learnImg[k] = Kit.button(F.fgBottom, Kit.tex("levelup_button", C.gold))
@@ -554,10 +740,12 @@ define("dota_hud", function()
         F.top = {}
         for i = 1, 5 do
             local t = {}
-            t.icon = Kit.backdrop(F.fgTop, Kit.btn("BTNHeroPaladin"))
-            t.label = Kit.text(F.fgTop, 0.6)
-            t.dead = Kit.backdrop(F.fgTop, C.dark, 170)
-            t.timer = Kit.text(F.fgTop, 0.95)
+            -- a click selects the hero (registerEvents); the texts sit under
+            -- the button's click layer (Kit.label)
+            t.b, t.icon = Kit.button(F.fgTop, Kit.btn("BTNHeroPaladin"))
+            t.label = Kit.label(t.b, 0.6)
+            t.dead = Kit.backdrop(t.b, C.dark, 170)
+            t.timer = Kit.label(t.b, 0.95)
             t.hpBg = Kit.backdrop(F.bgTop, C.dark, 230)
             t.hp = Kit.bar(F.simTop, Kit.tex("hp_fill", C.green))
             t.mp = Kit.bar(F.simTop, Kit.tex("mana_fill", C.blue))
@@ -623,6 +811,11 @@ define("dota_hud", function()
         Kit.place(F.goldIcon, cx0 + 0.001, 0.025, cx0 + 0.013, 0.039)
         Kit.placeText(F.gold, cx0 + 0.014, 0.024, cx1, 0.040)
         Kit.place(F.shopBtn, cx0, 0.003, cx1, 0.022)
+        -- our icons' tooltip, where Warcraft's own ability tooltip shows
+        local tx0, tx1, ty0 = G.abilCX - L.TIP_W / 2, G.abilCX + L.TIP_W / 2, P + L.TOOLTIP_DY
+        Kit.place(F.iconTip, tx0, ty0, tx1, ty0 + L.TIP_H)
+        Kit.place(F.iconTipBg, tx0, ty0, tx1, ty0 + L.TIP_H)
+        Kit.placeText(F.iconTipText, tx0 + 0.008, ty0 + 0.006, tx1 - 0.008, ty0 + L.TIP_H - 0.006)
     end
 
     -- HP/mana bars span the ability area (row mode) or its left part (grid).
@@ -645,31 +838,37 @@ define("dota_hud", function()
     end
 
     -- Command card: one Dota row for a hero, the 4 x 3 grid for anything else.
+    -- A unit the player does not control (S.foreign) gets our icons in the
+    -- row instead of Warcraft's buttons: a Dota hero's row, or ("icons") any
+    -- other unit's abilities (S.list).
     local function applyCommands(mode, key)
         S.mode, S.key = mode, key
         local used = {}
-        if mode == "row" then
-            local row = visibleRow(key, S.unit)
+        if mode == "row" or mode == "icons" then
+            local row = mode == "row" and visibleRow(key, S.unit) or S.list or NONE
             local rects = rowRects(#row)
             S.n, S.rects = #row, rects
+            S.iconRow = S.foreign and row or nil
             -- the cell of each slot: an ability's own cell (local: Rubick moves
             -- stolen spells for their owner), then the spare cells for Dota's
             -- empty slots
             local cellOf = {}
-            for k, e in ipairs(row) do
-                if not e.empty then
-                    local idx = BlzGetAbilityPosY(e.id) * 4 + BlzGetAbilityPosX(e.id)
-                    if idx >= 0 and idx <= 11 and not used[idx] then
-                        used[idx], cellOf[k] = true, idx
+            if not S.foreign then
+                for k, e in ipairs(row) do
+                    if not e.empty then
+                        local idx = BlzGetAbilityPosY(e.id) * 4 + BlzGetAbilityPosX(e.id)
+                        if idx >= 0 and idx <= 11 and not used[idx] then
+                            used[idx], cellOf[k] = true, idx
+                        end
                     end
                 end
-            end
-            for k, e in ipairs(row) do
-                if e.empty then
-                    for _, idx in ipairs(L.SPARE_CELLS) do
-                        if not used[idx] then
-                            used[idx], cellOf[k] = true, idx
-                            break
+                for k, e in ipairs(row) do
+                    if e.empty then
+                        for _, idx in ipairs(L.SPARE_CELLS) do
+                            if not used[idx] then
+                                used[idx], cellOf[k] = true, idx
+                                break
+                            end
                         end
                     end
                 end
@@ -679,6 +878,7 @@ define("dota_hud", function()
                 local r = rects[k]
                 local idx = cellOf[k]
                 if idx and D.cmd[idx] then Kit.place(D.cmd[idx], r[1], r[2], r[3], r[4]) end
+                if S.foreign then placeSlot(F.icons[k], r[1], r[2], r[3], r[4]) end
                 if F.wells then
                     Kit.place(F.wells[k], r[1] - 0.003, r[2] - 0.003, r[3] + 0.003, r[4] + 0.003)
                     Kit.show(F.wells[k], true)
@@ -711,7 +911,10 @@ define("dota_hud", function()
                 end
             end
         end
-        placeBars(mode ~= "row")
+        if not S.foreign then
+            for k = 1, ROW_MAX do Kit.show(F.icons[k].b, false) end
+        end
+        placeBars(mode == "grid")
     end
 
     local function placeTop()
@@ -734,6 +937,7 @@ define("dota_hud", function()
             local x = x0 + (i - 1) * (w + L.HERO_GAP)
             local y1 = top - 0.002
             local y0 = y1 - h
+            Kit.place(t.b, x, y0, x + w, y1)
             Kit.place(t.icon, x, y0, x + w, y1)
             Kit.place(t.dead, x, y0, x + w, y1)
             Kit.placeText(t.timer, x, y0, x + w, y1)
@@ -742,7 +946,7 @@ define("dota_hud", function()
             Kit.place(t.hp, x + 0.0005, y0 - 0.0038, x + w - 0.0005, y0 - 0.001)
             Kit.place(t.mp, x + 0.0005, y0 - 0.0066, x + w - 0.0005, y0 - 0.0043)
         end
-        -- commander block right of the clock
+        -- Warcraft block right of the clock
         local c0 = cr + 0.004
         Kit.place(F.cmdBg, c0 - 0.003, top - 0.031, c0 + L.CMD_W, top)
         Kit.place(F.cmdIcon, c0, top - 0.026, c0 + 0.024, top - 0.002)
@@ -896,6 +1100,10 @@ define("dota_hud", function()
         return u ~= nil and GetUnitTypeId(u) ~= 0 and not IsUnitType(u, UNIT_TYPE_DEAD)
     end
 
+    -- Whole seconds until game time `at`; the epsilon keeps float error
+    -- (a 120 s wait read as 120.0000001) from showing one second more.
+    local function secondsTo(at, now) return math.max(0, math.ceil(at - now - 1e-3)) end
+
     local function primaryOf(key)
         local info = key and use("data.heroes")[key]
         local p = info and info.stats and info.stats.AttributePrimary or ""
@@ -984,6 +1192,7 @@ define("dota_hud", function()
         local main = H.bySlot[GetPlayerId(lp)]
         local own = GetOwningPlayer(u) == lp and main ~= nil and heroKeyOf(main) == key
         local points = own and GetHeroSkillPoints(main) or 0
+        local cells = cellsOf(row)
         for k = 1, ROW_MAX do
             local e = row[k]
             -- learn buttons by full-row index (Aghanim's entries never learn)
@@ -997,11 +1206,14 @@ define("dota_hud", function()
                     Kit.setTex(F.pips[k][j], j <= level and Kit.tex("pip_on", Kit.C.gold) or Kit.tex("pip_off", Kit.C.dark))
                 end
             end
-            local cost = (id and level > 0) and BlzGetUnitAbilityManaCost(u, id, level - 1) or 0
+            -- cost and cooldown of what the button shows (a form or a stolen spell)
+            local shown = e and shownId(u, e, cells[k])
+            local sl = shown and GetUnitAbilityLevel(u, shown) or 0
+            local cost = sl > 0 and BlzGetUnitAbilityManaCost(u, shown, sl - 1) or 0
             Kit.show(F.mana[k].box, cost > 0)
             if cost > 0 then Kit.setText(F.mana[k], Kit.color(BLUE, tostring(cost))) end
             -- seconds left, over WC3's own cooldown sweep
-            local cd = (id and level > 0) and BlzGetUnitAbilityCooldownRemaining(u, id) or 0
+            local cd = sl > 0 and BlzGetUnitAbilityCooldownRemaining(u, shown) or 0
             Kit.show(F.cd[k].box, cd > 0.05)
             if cd > 0.05 then Kit.setText(F.cd[k], Kit.color("ffffff", tostring(math.ceil(cd)))) end
         end
@@ -1014,6 +1226,60 @@ define("dota_hud", function()
             Kit.show(F.cd[k].box, false)
             for j = 1, PIPS do Kit.show(F.pips[k][j], false) end
         end
+    end
+
+    local function tooltipOf(id, level)
+        local li = math.max(0, level - 1)
+        return Kit.color(GOLD, BlzGetAbilityTooltip(id, li)) .. "|n" .. BlzGetAbilityExtendedTooltip(id, li)
+    end
+
+    -- Our icons for a unit the player does not control, as Dota shows any
+    -- selected unit: the icon (dimmed while unlearned), level pips, mana
+    -- cost, cooldown sweep with seconds and the tooltip on hover; no hotkeys,
+    -- no learn buttons, clicks do nothing. A Dota hero's slot shows what
+    -- holds its cell (a form, a stolen spell).
+    local function updateIcons(u)
+        local row = S.iconRow or NONE
+        local cells = S.mode == "row" and cellsOf(row) or nil
+        local seen, tip = {}, nil
+        for k = 1, ROW_MAX do
+            local s, e = F.icons[k], row[k]
+            local id = e and (cells and shownId(u, e, cells[k]) or e.id)
+            if id and seen[id] then id = nil end     -- two slots on one cell: MegaMeepo and its Fling
+            local level = id and GetUnitAbilityLevel(u, id) or 0
+            Kit.show(s.b, id ~= nil)
+            if id then
+                seen[id] = true
+                Kit.setTex(s.img, iconOf(id))
+                Kit.setAlpha(s.img, level > 0 and 255 or 110)
+                local left = level > 0 and BlzGetUnitAbilityCooldownRemaining(u, id) or 0
+                Kit.setSweep(s.cd, left, left > 0 and math.max(left, BlzGetUnitAbilityCooldown(u, id, level - 1)) or 0)
+                if BlzFrameIsVisible(s.hover) then tip = tooltipOf(id, level) end
+            else
+                Kit.setSweep(s.cd, 0, 0)
+            end
+            local base = e and e.id and GetUnitAbilityLevel(u, e.id) or 0
+            local max = e and e.max or 0
+            for j = 1, PIPS do
+                local on = j <= max and max > 1
+                Kit.show(F.pips[k][j], on)
+                if on then
+                    Kit.setTex(F.pips[k][j], j <= base and Kit.tex("pip_on", Kit.C.gold) or Kit.tex("pip_off", Kit.C.dark))
+                end
+            end
+            local cost = level > 0 and BlzGetUnitAbilityManaCost(u, id, level - 1) or 0
+            Kit.show(F.mana[k].box, cost > 0)
+            if cost > 0 then Kit.setText(F.mana[k], Kit.color(BLUE, tostring(cost))) end
+            Kit.show(F.cd[k].box, false)                -- the sweep counts the seconds
+            Kit.show(F.learn[k], false)
+        end
+        Kit.show(F.iconTip, tip ~= nil)
+        if tip then Kit.setText(F.iconTipText, tip) end
+    end
+
+    local function hideIcons()
+        for k = 1, ROW_MAX do Kit.show(F.icons[k].b, false) end
+        Kit.show(F.iconTip, false)
     end
 
     -- Cooldown of an item for the sweep: the Lua-timed one (items.lua), or
@@ -1098,7 +1364,7 @@ define("dota_hud", function()
         Kit.show(F.courBtn, cr ~= nil)
         Kit.show(F.deliverBtn, cr ~= nil)
         if cr then
-            local wait = cr.dead and cr.respawnAt and math.max(0, math.ceil(cr.respawnAt - Timer.now())) or nil
+            local wait = cr.dead and cr.respawnAt and secondsTo(cr.respawnAt, Timer.now()) or nil
             Kit.setText(F.courText, wait and Kit.color("ff7070", tostring(wait)) or "")
             Kit.setAlpha(F.courImg, cr.dead and 110 or 255)
         end
@@ -1169,17 +1435,23 @@ define("dota_hud", function()
             Log.flush()
         end
         local key = heroKeyOf(u)
-        local mode = key and "row" or "grid"
+        local has = u ~= nil and GetUnitTypeId(u) ~= 0
+        -- Warcraft shows no command card for a unit the player does not
+        -- control; shops keep theirs, with the items
+        local foreign = has and GetOwningPlayer(u) ~= lp and not isShop(u)
+        local mode = key and "row" or (foreign and "icons" or "grid")
+        local list = mode == "icons" and (unitAbilities[u] or NONE) or nil
         S.ticks = S.ticks + 1
         local unitChanged = u ~= S.unit
         S.unit = u
-        if mode ~= S.mode or key ~= S.key or S.dirty or S.ticks % 30 == 0
-            or (mode == "row" and (unitChanged or #visibleRow(key, u) ~= S.n)) then
+        if mode ~= S.mode or key ~= S.key or foreign ~= S.foreign or S.dirty or S.ticks % 30 == 0
+            or (mode == "row" and (unitChanged or #visibleRow(key, u) ~= S.n))
+            or (mode == "icons" and (unitChanged or list ~= S.list)) then
+            S.foreign, S.list = foreign, list
             applyCommands(mode, key)
             placeInventory()
             S.dirty = false
         end
-        local has = u ~= nil and GetUnitTypeId(u) ~= 0
         for _, f in ipairs({F.hp, F.hpBg, F.hpText.box, F.hpRegen.box, F.name.box, F.level.box, F.levelBg}) do
             Kit.show(f, has)
         end
@@ -1193,7 +1465,7 @@ define("dota_hud", function()
             if isDead then
                 local main = heroes().bySlot[GetPlayerId(GetOwningPlayer(u))]
                 local at = respawnAt[u] or (main and respawnAt[main])
-                Kit.setText(F.deadText, at and Kit.color("ff7070", tostring(math.max(0, math.ceil(at - now)))) or "")
+                Kit.setText(F.deadText, at and Kit.color("ff7070", tostring(secondsTo(at, now))) or "")
             end
         else
             for i = 1, 6 do
@@ -1209,7 +1481,12 @@ define("dota_hud", function()
             Kit.show(F.mpText.box, false)
             Kit.show(F.mpRegen.box, false)
         end
-        if mode == "row" and has then updateRow(u, key, lp) else hideRowExtras() end
+        if foreign then
+            updateIcons(u)
+        else
+            hideIcons()
+            if mode == "row" and has then updateRow(u, key, lp) else hideRowExtras() end
+        end
         Kit.setText(F.gold, Kit.color(GOLD, tostring(GetPlayerState(lp, PLAYER_STATE_RESOURCE_GOLD))))
         updateItems(has and u or nil, lp)
         updateSelection(lp, u)
@@ -1250,19 +1527,19 @@ define("dota_hud", function()
             Kit.show(t.timer.box, down)
             if down then
                 local at = respawnAt[u]
-                Kit.setText(t.timer, at and Kit.color("ffffff", tostring(math.max(0, math.ceil(at - now)))) or "")
+                Kit.setText(t.timer, at and Kit.color("ffffff", tostring(secondsTo(at, now))) or "")
             end
         end
         Kit.setText(F.clock, Kit.clock(use("world").clock()))   -- Dota's 0:00 is world.init()
         local tod = GetFloatGameState(GAME_STATE_TIME_OF_DAY)
         local day = tod >= 6 and tod < 18
         Kit.setTex(F.dayIcon, day and Kit.tex("icon_sun", Kit.btn("BTNOrbOfFire")) or Kit.tex("icon_moon", Kit.btn("BTNMoonStone")))
-        -- commander
-        local race = use("commander").raceKey
+        -- Warcraft player
+        local race = use("warcraft").raceKey
         Kit.setTex(F.cmdIcon, Kit.btn(RACE_ICON[race] or "BTNTownHall"))
-        local name = "Commander"
-        if Roles.commander ~= nil then
-            name = Roles.commanderIsAI and "Commander (AI)" or GetPlayerName(Player(Roles.commander))
+        local name = "Warcraft"
+        if Roles.warcraft ~= nil then
+            name = Roles.warcraftIsAI and "Warcraft (AI)" or GetPlayerName(Player(Roles.warcraft))
         end
         Kit.setText(F.cmdName, Kit.color(RED, name))
         Kit.setText(F.cmdInfo, Kit.color(GRAY, (RACE_NAME[race] or "") .. "  halls " .. halls))
@@ -1287,7 +1564,7 @@ define("dota_hud", function()
 
     ---------------------------------------------------------------- views
 
-    -- "dota" for hero players; nil (Warcraft III UI) for the commander,
+    -- "dota" for hero players; nil (Warcraft III UI) for the Warcraft player,
     -- observers and everyone else.
     function Hud.viewOf(p)
         if IsPlayerObserver(p) then return nil end
@@ -1375,6 +1652,23 @@ define("dota_hud", function()
         for i = 0, 2 do slotEvents(F.bag[i], "bag", i, "backpack slot " .. i) end
         slotEvents(F.tp, "tp", 0, "tp slot")
         for i = 0, 5 do slotEvents(F.stash[i], "stash", i, "stash slot " .. i) end
+        -- the HUD's empty space under the mouse: a drag released there puts
+        -- the item back (a press over the bottom HUD reports the ground under it)
+        for _, b in ipairs({{F.fgBottom, "bottom"}, {F.fgTop, "top"}, {F.blockStats, "stats"}, {F.blockXp, "xp"},
+                            {F.blockStash, "stash"}}) do
+            local hover = CreateTrigger()
+            BlzTriggerRegisterFrameEvent(hover, b[1], FRAMEEVENT_MOUSE_ENTER)
+            BlzTriggerRegisterFrameEvent(hover, b[1], FRAMEEVENT_MOUSE_LEAVE)
+            TriggerAddAction(hover, function()
+                Safe.call(function()
+                    if GetHandleId(BlzGetTriggerFrameEvent()) == GetHandleId(FRAMEEVENT_MOUSE_ENTER) then
+                        Use.enter(GetTriggerPlayer(), "hud", b[2])
+                    else
+                        Use.leave(GetTriggerPlayer(), "hud", b[2])
+                    end
+                end)
+            end)
+        end
         -- courier: a click selects it (a double click also centres the
         -- camera on it), Deliver Items sends it to the hero
         local courClicks = {}
@@ -1403,6 +1697,27 @@ define("dota_hud", function()
         button(F.deliverBtn, "deliver", function(p)
             if defined("courier") then use("courier").deliver(p) end
         end)
+        -- top bar, as in Dota: a click on a hero selects it (an enemy only
+        -- while the player sees it), a double click also centres the camera
+        -- on it; selection and camera are local
+        local topClicks = {}
+        for i = 1, 5 do
+            button(F.top[i].b, "top hero " .. i, function(p)
+                local slot = (Roles.heroSlots or {})[i]
+                local u = slot and heroes().bySlot[slot]
+                local now = Timer.now()
+                local last = topClicks[p]
+                local double = last ~= nil and last.i == i and now - last.at <= 0.4
+                topClicks[p] = {i = i, at = now}
+                if p ~= GetLocalPlayer() or not u or GetUnitTypeId(u) == 0 then return end
+                if not IsUnitAlly(u, p) and not IsUnitVisible(u, p) then return end
+                ClearSelection()
+                SelectUnit(u, true)
+                if double then PanCameraToTimed(GetUnitX(u), GetUnitY(u), 0) end
+            end)
+        end
+        -- our icons act on nothing: a click only gives the keyboard back
+        for k = 1, ROW_MAX do button(F.icons[k].b, "icon " .. k, function() end) end
         local grabHit = Kit.hit(F.grab)
         Kit.probe(F.grab, "grab all")
         local grabTrig = CreateTrigger()
@@ -1483,10 +1798,24 @@ define("dota_hud", function()
         end)
         Events.on("hero_respawned", function(u) respawnAt[u] = nil end)
         Events.on("hero_level", function() S.dirty = true end)
-        Events.on("hero_skill", function() S.dirty = true end)
-        -- commander town halls, counted for every player (creates a group)
+        Events.on("hero_skill", function(u)
+            S.dirty = true
+            if unitAbilities[u] then listAbilities(u) end
+        end)
+        -- a unit a Dota player selects: its abilities for our icons, read for
+        -- every client in this synced event
+        local selTrig = CreateTrigger()
+        for slot = 0, bj_MAX_PLAYERS - 1 do
+            if Hud.viewOf(Player(slot)) == "dota" then
+                TriggerRegisterPlayerUnitEvent(selTrig, Player(slot), EVENT_PLAYER_UNIT_SELECTED, nil)
+            end
+        end
+        TriggerAddAction(selTrig, function()
+            Safe.call(function() listAbilities(GetTriggerUnit()) end)
+        end)
+        -- Warcraft town halls, counted for every player (creates a group)
         Timer.every(1, function()
-            local Cmd = use("commander")
+            local Cmd = use("warcraft")
             if Cmd.player then halls = Cmd.halls() end
         end)
         if BUILD_TEST_MODE then

@@ -24,7 +24,7 @@
 -- toggles, right-click deny and the acquisition guard (a second stop on the
 -- next tick unless a newer order came); Dota's failed-cast check of an
 -- ability key on every client, by the build data's cell and the synced
--- selection; Dota's defaults without a file; nothing for the commander or
+-- selection; Dota's defaults without a file; nothing for the Warcraft player or
 -- bots; and no handles in local code.
 -- Failed checks are ERROR log lines, which fail the mock run.
 if __mockHud and not __mockSettings then
@@ -34,13 +34,13 @@ if __mockHud and not __mockSettings then
                mouseRegs = {}, unitRegs = {}, fx = {}, destroyed = {}}
     __mockSettings = T
 
-    -- What launcher\dvc_launcher\dota_settings.py writes for a player with quick
+    -- What launcher\dvw_launcher\dota_settings.py writes for a player with quick
     -- cast on Q E R and the swapped D/F, W moved to 2, items on Z X C V, Alt+B
     -- and Space, TP on B, shop on F5 and hero selection on 1, the courier on
     -- F2 F3 F7 F8 and Grab All on F9 (tools/mock/inventory.lua); auto attack
     -- Standard with summons on Never, no auto attack while Stop is held,
     -- right-click allies to deny, quick cast on key press.
-    T.files = {["DotaVsCommander\\dota_settings.txt"] = "function PreloadFiles takes nothing returns nothing\r\n\r\n"
+    T.files = {["DotaVsWarcraft\\dota_settings.txt"] = "function PreloadFiles takes nothing returns nothing\r\n\r\n"
         .. "\tcall PreloadStart()\r\n"
         .. '\tcall BlzSetAbilityTooltip(1095656547, "v=1;a1=81q;a2=50;a3=69q;a4=70q;a5=68q;a6=82q;i1=90q;i2=88q;'
         .. 'i3=67q;i4=86q;i5=66-4;i6=32q;tp=66;sh=116;hs=49;cs=113;cv=114;cb=118;ch=119;gs=120;'
@@ -343,7 +343,7 @@ if __mockHud and not __mockSettings then
         advance(0.2)
 
         -- the file: read after loading, stash restored, settings sent once
-        check("settings file read", #T.preloads == 1 and T.preloads[1].name == "DotaVsCommander\\dota_settings.txt",
+        check("settings file read", #T.preloads == 1 and T.preloads[1].name == "DotaVsWarcraft\\dota_settings.txt",
             #T.preloads)
         check("file read only after loading", T.preloads[1] == nil or T.preloads[1].ready)
         check("tooltip stash restored", BlzGetAbilityTooltip(FourCC("ANdc"), 0) == "")
@@ -351,7 +351,7 @@ if __mockHud and not __mockSettings then
         check("own settings parsed", mine and mine.zl and mine.dt and mine.to == 2 and mine.cd == 1134, mine and mine.to)
         local sent = 0
         for _, m in ipairs(T.sync) do
-            if m.prefix == "dvcset" then
+            if m.prefix == "dvwset" then
                 sent = sent + 1
                 check("settings fit one sync message", #m.data <= 255, #m.data)
             end
@@ -618,6 +618,120 @@ if __mockHud and not __mockSettings then
             Log.warn("dota_settings exercise: Pudge not in this build, ability casts not checked")
         end
 
+        -- a native point ability: Anti-Mage's Blink (AEbl) is no Channel, so the
+        -- build data has no target kind for it and Dota's POINT flag decides
+        -- (every Blink quick cast was refused in game, 2026-10-11)
+        local blinkAb = abilityId("antimage_blink")
+        if ids.heroes.antimage and blinkAb then
+            local am = CreateUnit(p0, FourCC(ids.heroes.antimage), GetUnitX(hero), GetUnitY(hero), 0)
+            H.keyOf[am], H.bySlot[0] = "antimage", am
+            am.abilities[blinkAb] = 1
+            T.abil[blinkAb] = {}
+            check("build data: Blink has an order but no Channel target kind", ids.orders.antimage_blink == "blink"
+                and (ids.ability_targets or {}).antimage_blink == nil, tostring((ids.ability_targets or {}).antimage_blink))
+            M.selection = {am}
+            local orders = #T.orders
+            local cx, cy = math.floor(GetUnitX(am)) + 500, math.floor(GetUnitY(am)) + 300
+            -- the synced point quick cast, as a key press sends it (the mock's
+            -- own bindings keep the ability 2 key off quick cast)
+            BlzSendSyncData("dvwcast", string.format("qp|%d|0|%d|%d", blinkAb, cx, cy))
+            advance(0.2)
+            local got = since(T.orders, orders, "u", am)
+            local o = got[1] or {}
+            check("quick cast of the native Blink at the cursor", #got == 1 and o.oid == OrderId("blink") and o.str
+                and o.x == cx and o.y == cy, #got)
+            advance(3)
+            H.keyOf[am], H.bySlot[0] = nil, hero
+            RemoveUnit(am)
+            M.selection = {hero}
+        else
+            Log.warn("dota_settings exercise: Anti-Mage not in this build, native quick cast not checked")
+        end
+
+        -- a key finds what the hero shows in its cell: a form that took the
+        -- button (Techies' Detonate Tazer on W; the Shard's M.A.D. plant, then
+        -- Detonate M.A.D., on D) or a stolen spell on D, cast by its own build
+        -- data (D quick cast never fired for them in game, 2026-10-11)
+        local tazer, tazerDet = abilityId("techies_reactive_tazer"), abilityId("techies_tazer_detonate")
+        local mad, plant, madDet = abilityId("techies_mutually_assured_destruction"), abilityId("techies_mad_plant"),
+            abilityId("techies_mad_detonate")
+        if ids.heroes.techies and tazer and tazerDet and mad and plant and madDet then
+            local tech = CreateUnit(p0, FourCC(ids.heroes.techies), GetUnitX(hero), GetUnitY(hero), 0)
+            H.keyOf[tech], H.bySlot[0] = "techies", tech
+            for _, id in ipairs({tazer, tazerDet, mad, plant}) do tech.abilities[id] = 1 end
+            M.selection = {tech}
+            advance(0.2)
+            local GS = use("gamesounds")
+            local realCheck, asked = GS.checkCast, {}
+            GS.checkCast = function(h, id) asked[#asked + 1] = id return true end
+            T.press(p0, 50)
+            GS.checkCast = realCheck
+            check("the W key (on 2) acts for Detonate Tazer, not the hidden Tazer", asked[1] == tazerDet, asked[1])
+            local onD = S.abilityAt(tech, 5)
+            check("D holds the Shard's M.A.D. plant", onD ~= nil and onD.id == plant, onD and onD.name)
+            local orders = #T.orders
+            local cx, cy = math.floor(GetUnitX(tech)) + 400, math.floor(GetUnitY(tech)) - 200
+            BlzSendSyncData("dvwcast", string.format("qp|%d|0|%d|%d", plant, cx, cy))
+            advance(0.2)
+            local got = since(T.orders, orders, "u", tech)
+            local o = got[1] or {}
+            check("quick cast of the M.A.D. plant at the cursor", #got == 1 and ids.orders.techies_mad_plant ~= nil
+                and o.oid == OrderId(ids.orders.techies_mad_plant) and o.x == cx and o.y == cy, #got)
+            tech.abilities[madDet] = 1
+            onD = S.abilityAt(tech, 5)
+            check("D holds Detonate M.A.D. while a charge is planted", onD ~= nil and onD.id == madDet, onD and onD.name)
+            advance(3)
+            H.keyOf[tech], H.bySlot[0] = nil, hero
+            RemoveUnit(tech)
+            M.selection = {hero}
+        else
+            Log.warn("dota_settings exercise: Techies' forms not in this build, their keys not checked")
+        end
+        local stolenUnit = abilityId("rubick_stolen_unit")
+        local blinkCopy = ids.abilities.antimage_blink and (ids.rubick_copies or {})[ids.abilities.antimage_blink]
+        local boltCopy = (ids.rubick_copies or {}).AHtb
+        if ids.heroes.rubick and stolenUnit and blinkCopy and boltCopy then
+            local rub = CreateUnit(p0, FourCC(ids.heroes.rubick), GetUnitX(hero), GetUnitY(hero), 0)
+            H.keyOf[rub], H.bySlot[0] = "rubick", rub
+            M.selection = {rub}
+            advance(0.2)
+            rub.abilities[stolenUnit] = 1
+            local onD = S.abilityAt(rub, 5)
+            check("D holds a stolen Dota spell's unit slot", onD ~= nil and onD.id == stolenUnit, onD and onD.name)
+            local orders = #T.orders
+            BlzSendSyncData("dvwcast", string.format("qa|%d|%d|%d|%d", stolenUnit, GetHandleId(enemy),
+                math.floor(GetUnitX(enemy)), math.floor(GetUnitY(enemy))))
+            advance(0.2)
+            local got = since(T.orders, orders, "u", rub)
+            local o = got[1] or {}
+            check("quick cast of the stolen slot at the hovered unit", #got == 1 and o.target == enemy
+                and o.oid == OrderId(ids.orders.rubick_stolen_unit), #got)
+            advance(3)
+            rub.abilities[stolenUnit] = nil
+            rub.abilities[FourCC(blinkCopy)] = 1
+            onD = S.abilityAt(rub, 5)
+            check("D holds the D-cell copy of a stolen Blink", onD ~= nil and onD.id == FourCC(blinkCopy)
+                and onD.name == "antimage_blink", onD and onD.name)
+            local cx, cy = math.floor(GetUnitX(rub)) - 300, math.floor(GetUnitY(rub)) + 250
+            BlzSendSyncData("dvwcast", string.format("qp|%d|0|%d|%d", FourCC(blinkCopy), cx, cy))
+            advance(0.2)
+            got = since(T.orders, orders, "u", rub)
+            o = got[2] or {}
+            check("quick cast of the stolen Blink at the cursor", #got == 2 and o.oid == OrderId("blink")
+                and o.x == cx and o.y == cy, #got)
+            advance(3)
+            rub.abilities[FourCC(blinkCopy)] = nil
+            rub.abilities[FourCC(boltCopy)] = 1
+            onD = S.abilityAt(rub, 5)
+            check("D holds the copy of a stolen Warcraft spell (Warcraft's targeting)", onD ~= nil
+                and onD.id == FourCC(boltCopy) and onD.name == nil, onD and onD.name)
+            H.keyOf[rub], H.bySlot[0] = nil, hero
+            RemoveUnit(rub)
+            M.selection = {hero}
+        else
+            Log.warn("dota_settings exercise: Rubick or Anti-Mage not in this build, stolen spell keys not checked")
+        end
+
         -- items: quick cast hands the hovered unit to the waiting item; double tap on yourself
         emptyInventory()
         local staff = UnitAddItemById(hero, FourCC(ids.items.item_force_staff))
@@ -869,7 +983,7 @@ if __mockHud and not __mockSettings then
         RemoveUnit(ally)
         RemoveUnit(enemy)
 
-        -- other players: Dota's defaults without a file, Never, commander and bots
+        -- other players: Dota's defaults without a file, Never, Warcraft and bots
         local saved1, saved2 = Roles.humans[1], Roles.humans[2]
         Roles.humans[1], Roles.humans[2] = true, true
         local before = #M.keys
@@ -912,8 +1026,8 @@ if __mockHud and not __mockSettings then
             check("never: idle again after a move", other.peon == true)
         end
         Roles.humans[1], Roles.humans[2] = saved1, saved2
-        S.apply(SLOT_COMMANDER_AI, "")
-        check("no keys for the commander", S.applied(SLOT_COMMANDER_AI) == nil)
+        S.apply(SLOT_WARCRAFT_AI, "")
+        check("no keys for the Warcraft player", S.applied(SLOT_WARCRAFT_AI) == nil)
         S.apply(3, "")
         check("no keys for a bot", S.applied(3) == nil and not Items.custom[Player(3)])
 

@@ -16,11 +16,12 @@ define("hero_antimage", function()
     local BREAK, BLINK, COUNTER = "antimage_mana_break", "antimage_blink", "antimage_counterspell"
     local PERSECUTOR, VOID = "antimage_persectur", "antimage_mana_void"
 
+    local Fx = use("fx")
     local FX = {
         burn = "Abilities\\Spells\\Human\\Feedback\\SpellBreakerAttack.mdl",
-        shell = "Abilities\\Spells\\Undead\\AntiMagicShell\\AntiMagicShell.mdl",
+        shell = Fx.model("antimage_counterspell", "Abilities\\Spells\\Undead\\AntiMagicShell\\AntiMagicShell.mdl"),
         reflect = "Abilities\\Spells\\Items\\SpellShieldAmulet\\SpellShieldCaster.mdl",
-        void = "Abilities\\Spells\\Human\\ManaFlare\\ManaFlareBoltImpact.mdl",
+        void = Fx.model("antimage_mana_void", "Abilities\\Spells\\Human\\ManaFlare\\ManaFlareBoltImpact.mdl"),
         voidHit = "Abilities\\Spells\\Human\\Feedback\\ArcaneTowerAttack.mdl",
         stun = "Abilities\\Spells\\Human\\Thunderclap\\ThunderclapTarget.mdl",
     }
@@ -62,7 +63,7 @@ define("hero_antimage", function()
             if Mods.has(u, "antimage_counterspell_resist") then Mods.remove(u, "antimage_counterspell_resist") end
             return
         end
-        local v = A.value(COUNTER, "magic_resistance", lvl) / 100
+        local v = A.value(COUNTER, "magic_resistance", lvl, u) / 100
         local m = Mods.get(u, "antimage_counterspell_resist")
         if not m or m.props.magic_resist ~= v then
             Mods.add(u, "antimage_counterspell_resist", {source = u, persist = true, dispel = "none",
@@ -115,13 +116,13 @@ define("hero_antimage", function()
         end
         if lp > 0 then
             local pct = GetUnitState(target, UNIT_STATE_MANA) / maxMana * 100
-            local threshold = math.max(1, A.value(PERSECUTOR, "mana_threshold", 1))
+            local threshold = math.max(1, A.value(PERSECUTOR, "mana_threshold", 1, source))
             if pct <= threshold then
                 local extra = math.max(0, GetHeroLevel(source) - 1)
                 local low = A.value(PERSECUTOR, "move_slow_min", 1, source) + SLOW_MIN_PER_LEVEL * extra
                 local high = A.value(PERSECUTOR, "move_slow_max", 1, source) + SLOW_MAX_PER_LEVEL * extra
                 local slow = low + (high - low) * (1 - pct / threshold)
-                Mods.add(target, "antimage_persecutor", {duration = A.value(PERSECUTOR, "slow_duration", 1),
+                Mods.add(target, "antimage_persecutor", {duration = A.value(PERSECUTOR, "slow_duration", 1, source),
                                                           source = source, props = {move_pct = -slow / 100}, debuff = true})
             end
         end
@@ -172,7 +173,7 @@ define("hero_antimage", function()
     -- Counterspell ------------------------------------------------------------------
     -- The active adds a native Spell Shield (cooldown 0) for its duration, which
     -- blocks every negative targeted spell; a dummy recasts the spell at its caster.
-    -- SIMPLIFIED: only WC3-native spells are reflected (the commander side has
+    -- SIMPLIFIED: only WC3-native spells are reflected (the Warcraft side has
     -- no Lua spells); reflected channels last at most the dummy's 6 s life.
     local function reflect(am, caster, abil)
         if not DUMMY_ID or not U.alive(caster) then return end
