@@ -103,6 +103,74 @@ define("items", function()
         SetItemCharges(item, n)
     end
 
+    -- ------------------------------------------------------------ cooldowns
+    -- As in Dota, a cooldown belongs to the item and travels with it. WC3's
+    -- remaining-cooldown read can return 0 for Channel-based abilities, so each
+    -- use is timed here too; once the read returned a positive value after a
+    -- use, it is trusted for that item while a main inventory holds it (it
+    -- then also follows Refresher, Rearm and cooldown reductions).
+
+    -- Seconds left and the full length of the item's cooldown; pass the unit
+    -- whose main inventory holds the item to include WC3's own value.
+    function Items.cdLeft(it, holder)
+        local s = it and istate[it]
+        if not s or not s.cdEnd then return 0, 0 end
+        local left = s.cdEnd - Timer.now()
+        if holder and s.native then
+            local id = abilId[nameOf[GetItemTypeId(it)]]
+            if id then left = BlzGetUnitAbilityCooldownRemaining(holder, id) end
+        end
+        if left <= 0.01 then return 0, s.cdDur end
+        return left, math.max(s.cdDur, left)
+    end
+
+    -- Puts the item on cooldown for at least `seconds` (Blink's damage lock,
+    -- the backpack swap); `holder` carries it in a main inventory, if any.
+    -- Such a lock is also enforced in Lua (Items.locked), in case WC3 does not
+    -- take a started cooldown on an item ability.
+    function Items.startCooldown(it, seconds, holder)
+        local s = Items.istate(it)
+        local now = Timer.now()
+        s.lockEnd = math.max(s.lockEnd or 0, now + seconds)
+        if Items.cdLeft(it, holder) >= seconds then return end
+        s.cdEnd, s.cdDur, s.native = now + seconds, seconds, false
+        local id = abilId[nameOf[GetItemTypeId(it)]]
+        if holder and id then BlzStartUnitAbilityCooldown(holder, id, seconds) end
+    end
+
+    -- Seconds left of a lock set by Items.startCooldown.
+    function Items.locked(it)
+        local s = it and istate[it]
+        return s and s.lockEnd and math.max(0, s.lockEnd - Timer.now()) or 0
+    end
+
+    -- An item active was used (item_actives.lua, at the effect).
+    function Items.used(u, it, name)
+        local id, e = abilId[name], DATA[name]
+        local dur = (e and e.cooldown) or 0
+        if not it or not id or dur <= 0 then return end
+        local s = Items.istate(it)
+        s.cdEnd, s.cdDur, s.native = Timer.now() + dur, dur, false
+        Timer.after(0, function()
+            if GetItemTypeId(it) ~= 0 and BlzGetUnitAbilityCooldownRemaining(u, id) > 0 then s.native = true end
+        end)
+    end
+
+    -- Before an item leaves a main inventory: WC3's value becomes the timed one.
+    function Items.settleCooldown(it, holder)
+        local s = istate[it]
+        if not s or not s.cdEnd then return end
+        local left = Items.cdLeft(it, holder)
+        s.cdEnd, s.native = Timer.now() + left, false
+    end
+
+    -- After an item entered a main inventory: WC3 gets the time left.
+    function Items.restoreCooldown(it, holder)
+        local left = Items.cdLeft(it)
+        local id = abilId[nameOf[GetItemTypeId(it)]]
+        if left > 0.05 and id then BlzStartUnitAbilityCooldown(holder, id, left) end
+    end
+
     -- ------------------------------------------------------------ inventory
 
     -- Dota items the unit carries: list of {item, name, slot}.
@@ -190,12 +258,22 @@ define("items", function()
     end
 
     local function take(u, it)
-        busy[u] = true
+        local was = u and busy[u]
+        if u then busy[u] = true end
         istate[it] = nil
         RemoveItem(it)
-        busy[u] = nil
+        if u then busy[u] = was end
     end
     Items.remove = take
+
+    -- Runs fn with the unit's item events ignored (moves made by Lua itself).
+    function Items.quiet(u, fn)
+        local was = busy[u]
+        busy[u] = true
+        local ok, err = pcall(fn)
+        busy[u] = was
+        if not ok then error(err, 0) end
+    end
 
     local TREADS = {str = "Strength", agi = "Agility", int = "Intelligence"}
 

@@ -73,6 +73,7 @@ define("dota_shop", function()
         if e and e.result then return Kit.btn("BTNSnazzyScroll") end
         return Kit.btn(CAT_ICON[e and e.shop or ""] or "BTNChestOfGold")
     end
+    Shop.iconOf = iconOf
 
     ---------------------------------------------------------------- stock (synced state)
 
@@ -362,11 +363,14 @@ define("dota_shop", function()
         local C = Kit.C
         local x1, y0 = L.RIGHT, L.BOTTOM
         local x0, y1 = x1 - L.W, y0 + L.H
-        F.root = Kit.frame(parents.fg)
+        -- The panel itself blocks clicks on its empty space (Kit.blocker). An
+        -- unrelated full-panel catcher took every hover and click from the
+        -- item buttons and tabs in game (UI probe log, 2026-10-10); as the
+        -- parent of every button here, the blocker leaves them the mouse.
+        F.root = Kit.blocker(parents.fg)
+        Kit.place(F.root, x0, y0, x1, y1)
         BlzFrameSetVisible(F.root, false)
-        -- No click catcher behind the panel: in game an invisible full-panel
-        -- BUTTON took every hover and click from the item buttons and tabs
-        -- (UI probe log, 2026-10-10), so clicks on empty panel space reach the world.
+        Kit.probe(F.root, "shop blocker", true)
         F.bg = Kit.backdrop(F.root, Kit.tex("shop_bg", C.dark), Kit.dota and 245 or 235)
         Kit.place(F.bg, x0, y0, x1, y1)
 

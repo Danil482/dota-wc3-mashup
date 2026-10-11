@@ -17,9 +17,18 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "src", "data")
 
 ICON = "ReplaceableTextures\\CommandButtons\\BTNDota_{}.blp"
-ORDERS = ["acidbomb", "ancestralspirit", "animatedead", "antimagicshell", "blackarrow",
-          "breathoffire", "carrionswarm", "chainlightning", "clusterrockets", "controlmagic",
-          "cripple", "curse"]
+# Order strings for Channels without a spec "order", by Channel target type
+# (Ncl2: 0 none, 1 unit, 2 point, 3 unit or point): each is a WC3 hero spell's
+# order with the same kind of target (items never take hero orders). The game
+# refused every trigger point order of a point Channel that had Acid Bomb's
+# order, a unit spell's (2026-10-11); src/ui/controls_probe.lua checks it.
+ORDERS = {
+    0: ["stomp", "fanofknives", "mirrorimage", "avatar", "metamorphosis", "windwalk", "chemicalrage"],
+    1: ["thunderbolt", "holybolt", "chainlightning", "hex", "frostnova", "manaburn", "shadowstrike", "sleep",
+        "antimagicshell"],
+    2: ["blizzard", "rainoffire", "deathanddecay", "earthquake", "inferno", "silence", "volcano", "farsight"],
+    3: ["carrionswarm", "shockwave", "impale"],
+}
 # Dota's keys by command card cell, so a hotkey never repeats on one card
 # (M S H A P O belong to the WC3 commands).
 CELL_KEYS = {(0, 2): "Q", (1, 2): "W", (2, 2): "E", (3, 2): "R", (1, 1): "D", (2, 1): "F", (0, 1): "G", (3, 1): "T"}
@@ -144,7 +153,17 @@ def tooltip(ab, spec, level, levels):
     return f"{title} - [|cffffcc00Level {level}|r]", "|n".join(lines)
 
 
-def ability_object(abils, ids, hero, ab, spec, slot_index, ult, order_index=None):
+def pool_order(target, used):
+    """The first ORDERS order for this target type not in `used` (taken by the
+    hero or named by a spec); it joins `used`."""
+    for order in ORDERS[target]:
+        if order not in used:
+            used.add(order)
+            return order
+    raise SystemExit(f"no free Channel order for target type {target}: add one to ORDERS")
+
+
+def ability_object(abils, ids, hero, ab, spec, slot_index, ult, orders_used=None):
     """Create the WC3 ability for one Dota ability. Returns its raw code."""
     flags = flags_of(ab)
     levels = levels_of(ab)
@@ -170,6 +189,8 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, order_index=None
         cells = [(0, 2), (1, 2), (2, 2), (1, 1), (2, 1)]
         bx, by = cells[min(slot_index, len(cells) - 1)]
         rx, ry = (slot_index, 0) if slot_index < 3 else (slot_index - 3, 1)
+    # synced Lua (dota_settings) finds an ability by this, not by button positions, which can be local
+    ids.out.setdefault("ability_cells", {})[ab["name"]] = by * 4 + bx
     title = spec.get("title") or ab.get("title") or ab["name"]
     icon = ICON.format(ab["name"])
     f = {
@@ -202,6 +223,7 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, order_index=None
                     break
         areas.append(radius or 0)
     f.update({"atp1": tips, "aub1": ubers})
+    order = spec.get("order")
 
     if kind == "passive":
         base = "AEev"            # Evasion at 0 % as an icon-only passive
@@ -232,6 +254,7 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, order_index=None
         else:
             target = 0
         target = spec.get("target", target)
+        order = order or pool_order(target, set() if orders_used is None else orders_used)
         options = 1                          # visible
         if target in (2, 3) and any(areas):
             options |= 2                     # area targeting circle
@@ -241,7 +264,7 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, order_index=None
             "Ncl1": follow, "Ncl2": [target] * levels, "Ncl3": [options] * levels,
             # channels never lock the command card: stop/move must interrupt them as in Dota
             "Ncl4": [0] * levels, "Ncl5": [1 if spec.get("lockAbilities") else 0] * levels,
-            "Ncl6": [spec.get("order", ORDERS[(slot_index if order_index is None else order_index) % len(ORDERS)])] * levels,
+            "Ncl6": [order] * levels,
             "acdn": cds, "amcs": manas, "aran": ranges, "aare": areas,
             # no hero/nonhero or ancient flags: both kinds stay targetable
             "atar": [spec.get("targets", "air,ground,enemy,neutral")] * levels,
@@ -255,7 +278,10 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, order_index=None
         if innate and kind == "active":
             f["arlv"], f["alsk"] = 1, 0
     if base == "ANcl":
-        ids.out["orders"][ab["name"]] = spec.get("order", ORDERS[(slot_index if order_index is None else order_index) % len(ORDERS)])
+        if order:
+            ids.out["orders"][ab["name"]] = order
+        # Lua quick cast (dota_settings) orders by this, not by run-time field reads (refused in game, 2026-10-11)
+        ids.out.setdefault("ability_targets", {})[ab["name"]] = (f.get("Ncl2") or [0])[0]
     elif spec.get("order"):
         ids.out["orders"][ab["name"]] = spec["order"]
     abils.add(base, code, f)
@@ -287,6 +313,11 @@ def commander_spell_copies(abils, ids):
 
 
 def heroes(units, abils, buffs, ids, herodata, specs):
+    # Orders the specs name, on any hero: Morphling's copies of another hero's
+    # abilities sit next to his own, so pool orders avoid all of them.
+    named = {str(a["order"]).lower() for sp in specs["heroes"].values()
+             for a in list((sp.get("abilities") or {}).values()) + list((sp.get("abilities_extra") or {}).values())
+             if a.get("order")}
     for hero, info in herodata.items():
         spec = specs["heroes"][hero]
         s = info["stats"]
@@ -294,7 +325,7 @@ def heroes(units, abils, buffs, ids, herodata, specs):
         ids.out["heroes"][hero] = code
         learnable, innates = [], []
         slot_index = 0
-        order_index = 0          # every Channel ability on a hero needs its own order
+        orders_used = set(named)     # every Channel ability on a hero needs its own order
         plan = []
         for ab in sorted(info["abilities"], key=lambda a: a["slot"]):
             aspec = spec.get("abilities", {}).get(ab["name"], {})
@@ -314,8 +345,7 @@ def heroes(units, abils, buffs, ids, herodata, specs):
             if (is_innate(ab) or aspec.get("innateActive")) and "_cell" not in aspec and "cell" not in aspec:
                 aspec = dict(aspec, _cell=free_cells.pop(0) if free_cells else (0, 1))
             ult = "ULTIMATE" in (ab.get("AbilityType") or "")
-            acode, innate = ability_object(abils, ids, hero, ab, aspec, slot_index, ult, order_index)
-            order_index += 1
+            acode, innate = ability_object(abils, ids, hero, ab, aspec, slot_index, ult, orders_used)
             if innate or aspec.get("innateActive"):
                 innates.append(acode)
             else:
@@ -609,7 +639,7 @@ def item_orders(abils, ids):
     so far (hero spells, extras) already answers to it, then a free spare.
     Channel abilities are read by their Ncl6 field, others by their base."""
     native = native_orders()
-    used = {o.lower() for o in ORDERS} | {str(o).lower() for o in ids.out["orders"].values()}
+    used = {o for pool in ORDERS.values() for o in pool} | {str(o).lower() for o in ids.out["orders"].values()}
     # Rubick's Spell Steal and Morph can put any WC3 hero spell on a Dota hero,
     # so items must also avoid the orders of every WC3 hero ability.
     heroes_abils = {r.get("alias") for r in w3obj.parse_slk(os.path.join(w3obj.SLK_DIR, "abilitydata.slk"))
@@ -903,6 +933,31 @@ def world(units, abils, ids, w3t):
     print(f"world: {len(out['units'])} units, {len(out['items'])} items, {len(out['abilities'])} abilities")
 
 
+# Test builds: src/ui/controls_probe.lua gives footmen these Channels at the
+# start and logs which trigger orders the engine accepts, for every Channel
+# target type and the order of a native spell of each target kind (the
+# Dismember, Meat Hook and Poof orders of the in-game test among them). Inert
+# in other builds; made last, so no other raw code or item order changes.
+PROBE_ORDERS = [("animatedead", "instant"), ("acidbomb", "unit"), ("blink", "point"),
+                ("carrionswarm", "unit or point")]
+
+
+def order_probe(abils, ids):
+    cases = [(target, order, native, 1) for target in range(4) for order, native in PROBE_ORDERS]
+    cases += [(2, order, native, 3) for order, native in PROBE_ORDERS[1:3]]   # with Meat Hook's targeting circle
+    out = ids.out["order_probe"] = []
+    for target, order, native, options in cases:
+        code = ids.new("A")
+        abils.add("ANcl", code, {
+            "anam": f"Order Probe {target} {order}", "aher": 0, "alev": 1,
+            "Ncl1": [0.0], "Ncl2": [target], "Ncl3": [options], "Ncl4": [0.0], "Ncl5": [0], "Ncl6": [order],
+            "acdn": [0.0], "amcs": [0], "aran": [99999.0], "aare": [100.0 if options & 2 else 0.0],
+            "atar": ["air,ground,enemy,neutral,friend,player,self,vuln,invu"],
+            "aani": "", "acat": "", "atat": "", "aeat": "", "asat": "",
+        })
+        out.append({"code": code, "target": target, "order": order, "native": native, "options": options})
+
+
 MISC = """[Misc]
 StrAttackBonus=1
 StrHitPointBonus=22
@@ -955,6 +1010,7 @@ def main(out_dir=None, standins=False):
     commander_spell_copies(abils, ids)
     item_objects = items(units, abils, ids)
     world(units, abils, ids, item_objects)
+    order_probe(abils, ids)
     files = {
         "war3map.w3u": units.save(),
         "war3map.w3t": item_objects.save(),

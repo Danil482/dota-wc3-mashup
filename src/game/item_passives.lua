@@ -231,8 +231,8 @@ define("item_passives", function()
     function P.lockBlink(u)
         local lock = v("item_blink", "blink_damage_cooldown")
         blinkLock[u] = Timer.now() + lock
-        local id = I().abilityId("item_blink")
-        if id and BlzGetUnitAbilityCooldownRemaining(u, id) < lock then BlzStartUnitAbilityCooldown(u, id, lock) end
+        local it = I().find(u, "item_blink")
+        if it then I().startCooldown(it, lock, u) end
     end
 
     function P.blinkLocked(u)

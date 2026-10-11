@@ -8,7 +8,7 @@ shipped base map.
   maps/dota/entities/world_layer_*_base.vents_c  trees of the two base layers
   maps/dota.gnv                                  gridnav: 64-unit cells, bit 0 = walkable
   maps/dota/world_physics.vmdl_c                 collision mesh: ground heights and water
-  maps/dota/worldnodes/*agg_merge_mod_*.vmdl_c   ground meshes per material: tile textures
+  maps/dota/worldnodes/*agg_merge_mod_*.vmdl_c   ground meshes per material: tile textures (layer_bins)
 
 describe() turns them into one JSON-able dict, the "description". Dota and the
 Warcraft III map share one frame at 1:1 scale: a point keeps its x, y and z
@@ -231,8 +231,7 @@ def entity_points(entities):
     camps.sort(key=lambda c: (c["side"], c["type"], c["pos"]))
     def points(cls):
         return sorted(_xy(e) for e in by_class.get(cls, []))
-    tree_entities = [e for e in by_class.get("ent_dota_tree", [])]
-    trees = sorted({(int(round(o[0])), int(round(o[1]))) for o in (_xy(e) for e in tree_entities)})
+    trees, tree_kinds = tree_points(by_class.get("ent_dota_tree", []))
     bounds = by_class.get("world_bounds", [{}])[0]
     def vec(s):
         try:
@@ -251,8 +250,32 @@ def entity_points(entities):
         "wisdom_shrines": points("npc_dota_xp_fountain"),
         "player_starts": {"good": points("info_player_start_goodguys"), "bad": points("info_player_start_badguys")},
         "world_bounds": {"min": vec(bounds.get("min")), "max": vec(bounds.get("max"))},
-        "trees": [list(t) for t in trees],
+        "trees": trees,
+        "tree_kinds": tree_kinds,
     }
+
+
+def tree_points(entities):
+    """Dota's trees: ([[x, y, kind, yaw in degrees, scale]] sorted by
+    position, one per spot, and the kinds [[model, skin]] they index, sorted).
+    The skin picks the model's material group (leaf colours, blossoms)."""
+    def num(v, default):
+        return float(v) if isinstance(v, (int, float)) else default
+    rows = {}
+    for e in entities:
+        x, y, _z = _xy(e)
+        spot = (int(round(x)), int(round(y)))
+        angles = e.get("angles") if isinstance(e.get("angles"), list) else [0.0, 0.0, 0.0]
+        scales = e.get("scales") if isinstance(e.get("scales"), list) else [1.0]
+        skin = e.get("skin", "0")
+        skin = str(int(skin)) if isinstance(skin, float) else str(skin or "0")
+        row = (str(e.get("model", "")), skin, round(num(angles[1] if len(angles) > 1 else 0.0, 0.0) % 360.0, 1),
+               round(num(scales[0] if scales else 1.0, 1.0), 3))
+        rows[spot] = min(rows.get(spot, row), row)        # duplicates at one spot: a fixed pick
+    kinds = sorted({(m, s) for m, s, _a, _sc in rows.values()})
+    index = {k: n for n, k in enumerate(kinds)}
+    trees = [[x, y, index[(m, s)], a, sc] for (x, y), (m, s, a, sc) in sorted(rows.items())]
+    return trees, [list(k) for k in kinds]
 
 
 # ------------------------------------------------------------------ gridnav
@@ -368,55 +391,61 @@ def raster_top(parts, up_only):
     return top
 
 
-def material_of(mesh_path):
-    """Material class of a ground mesh from its name."""
-    name = Path(mesh_path).stem
-    m = re.search(r"agg_merge_mod_([a-z_]+?)_\d+_\d+$", name)
-    key = m.group(1) if m else name
-    side = "dire" if key.startswith("dire") else "radiant"
-    if "riverbed" in key:
-        kind = "river"
-    elif "cracked" in key:
-        kind = "cracked"
-    elif "base" in key:
-        kind = "base"
-    elif "path" in key:
-        kind = "path"
-    else:
-        kind = "ground"
-    if key.startswith("radiant_dire"):
-        side = "mixed"
-    return f"{side}_{kind}"
-
-
-def material_bins(mesh_paths, step=4):
-    """Per 128-unit tile: the material whose mesh has the most vertices there.
-    Every step-th vertex is sampled; the meshes are dense, so that is plenty."""
-    names = sorted({material_of(p) for p in mesh_paths})
-    counts = {n: array.array("i", [0]) * (MAT_SIZE * MAT_SIZE) for n in names}
+def layer_bins(mesh_paths, step=4):
+    """Per 128-unit tile: the Dota ground layer that shows most there, as
+    "<material>:<layer>" names and one index per tile (255: no ground mesh).
+    Dota's multiblend materials paint four texture layers; a vertex's
+    _TEXCOORD_1 holds the blend weights of layers 1-3, laid one over the
+    other on layer 0 (layer 3 on top), so the share of layer n is w_n times
+    (1 - w_m) for every layer m above it. Every step-th vertex is sampled; the
+    meshes are dense, so that is plenty."""
+    sums = {}
     for p in sorted(mesh_paths, key=str):
+        material = material_key(p)
         doc, data, bin_start = read_glb(p)
-        c = counts[material_of(p)]
+        acc = sums.setdefault(material, [array.array("d", bytes(8 * MAT_SIZE * MAT_SIZE)) for _ in range(4)])
+        a0, a1, a2, a3 = acc
         for mesh in doc.get("meshes", []):
             for prim in mesh["primitives"]:
-                pos = _accessor(doc, data, bin_start, prim["attributes"]["POSITION"])
-                xs = pos[0::3 * step]
-                zs = pos[2::3 * step]
-                for x, z in zip(xs, zs):
+                attrs = prim["attributes"]
+                if "_TEXCOORD_1" not in attrs:
+                    continue
+                pos = _accessor(doc, data, bin_start, attrs["POSITION"])
+                wts = _accessor(doc, data, bin_start, attrs["_TEXCOORD_1"])
+                if len(wts) // 4 != len(pos) // 3:
+                    continue
+                for v in range(0, len(pos) // 3, step):
                     # VRF's model glTF: x stays x, Dota y is glTF z, metres
-                    i = int((x * GLTF_UNITS - ORIGIN) // MAT_CELL)
-                    j = int((z * GLTF_UNITS - ORIGIN) // MAT_CELL)
-                    if 0 <= i < MAT_SIZE and 0 <= j < MAT_SIZE:
-                        c[j * MAT_SIZE + i] += 1
+                    i = int((pos[3 * v] * GLTF_UNITS - ORIGIN) // MAT_CELL)
+                    j = int((pos[3 * v + 2] * GLTF_UNITS - ORIGIN) // MAT_CELL)
+                    if not (0 <= i < MAT_SIZE and 0 <= j < MAT_SIZE):
+                        continue
+                    w1, w2, w3 = wts[4 * v + 1], wts[4 * v + 2], wts[4 * v + 3]
+                    k = j * MAT_SIZE + i
+                    a3[k] += w3
+                    rest = 1.0 - w3
+                    a2[k] += w2 * rest
+                    rest *= 1.0 - w2
+                    a1[k] += w1 * rest
+                    a0[k] += (1.0 - w1) * rest
+    names = [f"{m}:{n}" for m in sorted(sums) for n in range(4)]
+    columns = [sums[m][n] for m in sorted(sums) for n in range(4)]
     out = bytearray(MAT_SIZE * MAT_SIZE)
     for k in range(MAT_SIZE * MAT_SIZE):
-        best, pick = 0, 255
-        for n_i, n in enumerate(names):
-            v = counts[n][k]
-            if v > best:
-                best, pick = v, n_i
+        best, pick = 0.0, 255
+        for n, col in enumerate(columns):
+            if col[k] > best:
+                best, pick = col[k], n
         out[k] = pick
+    if len(names) > 255:
+        raise SourceError(f"{len(names)} ground layers, at most 255 fit")
     return names, bytes(out)
+
+
+def material_key(mesh_path):
+    """'radiant_path' from .../n0_lr0_agg_merge_mod_radiant_path_000_0.glb."""
+    m = re.search(r"agg_merge_mod_([a-z_]+?)_\d+_\d+$", Path(mesh_path).stem)
+    return m.group(1) if m else Path(mesh_path).stem
 
 
 # ------------------------------------------------------------------ slopes
@@ -524,9 +553,9 @@ def describe(paths, log):
     del glb
     if sum(1 for v in height if v is not None) < SIZE * SIZE // 4:
         raise SourceError("the physics mesh covers too little of the map")
-    mat_names, mat = material_bins(paths["meshes"]) if paths["meshes"] else ([], bytes([255]) * MAT_SIZE ** 2)
+    mat_names, mat = layer_bins(paths["meshes"]) if paths["meshes"] else ([], bytes([255]) * MAT_SIZE ** 2)
     ramps = find_ramps(height, walk)
-    log(f"terrain: {len(ramps)} ramps, {len(mat_names)} ground materials, "
+    log(f"terrain: {len(ramps)} ramps, {len(mat_names) // 4} ground materials, "
         f"{sum(walk)} walkable cells of {SIZE * SIZE}")
     xs = [ORIGIN + (k % SIZE + 0.5) * CELL for k in range(SIZE * SIZE) if walk[k]]
     ys = [ORIGIN + (k // SIZE + 0.5) * CELL for k in range(SIZE * SIZE) if walk[k]]

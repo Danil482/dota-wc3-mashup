@@ -22,6 +22,27 @@ def output_path(vpk_path):
     raise ValueError(f"unsupported resource type: {vpk_path}")
 
 
+def output_candidates(vpk_path):
+    """Every file name VRF may write for a resource. A sound keeps its own
+    container: MP3 (music, voices) or WAV (most effects)."""
+    if vpk_path.endswith(".vsnd_c"):
+        stem = vpk_path[:-len(".vsnd_c")]
+        return (stem + ".mp3", stem + ".wav")
+    return (output_path(vpk_path),)
+
+
+def find_output(folder, vpk_path):
+    """The non-empty exported file of `vpk_path` under `folder`, or None."""
+    for rel in output_candidates(vpk_path):
+        p = Path(folder) / rel
+        try:
+            if p.stat().st_size > 0:
+                return p
+        except OSError:
+            pass
+    return None
+
+
 def batches(paths):
     batch, length = [], 0
     for p in paths:

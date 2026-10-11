@@ -21,6 +21,8 @@ define("game", function()
         use("victory").init()
         use("heroes").init()
         use("voice").init()
+        use("safe").call(function() use("gamesounds").init() end)   -- Dota's coins, denies, level-ups, rune and Aegis sounds
+        use("safe").call(function() use("music").init() end)        -- Dota music for Dota players; the commander keeps Warcraft's
         use("hero_bot").init()
         use("cheats").init()
         use("dummy").init()
@@ -28,9 +30,11 @@ define("game", function()
             Log.info("all heroes picked")
         end)
         use("creeps").start(Cmd.raceKey)
+        use("safe").call(function() use("announcer").init() end)    -- right after creeps.start: the horn sounds with the first wave
         use("world").init()                 -- world clock 0:00; first lane wave at 0:30
         use("safe").call(function() use("dota_hud").init() end)   -- Dota HUD and shop for hero players
         use("safe").call(function() use("dota_settings").init() end)   -- Dota players' own keys and settings
+        use("safe").call(function() use("controls_probe").run() end)   -- test builds: which trigger orders the engine takes (controls_probe.txt)
         if BUILD_TEST_MODE then
             use("autotest").run()
         end

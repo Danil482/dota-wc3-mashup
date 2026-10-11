@@ -14,7 +14,10 @@ the cache. The personalized map is written with StormLib and checked: the
 archive opens, file versions, the minimap, every structure, camp, rune and
 lane point on walkable ground and reachable from the fountain, the commander
 reaching the Ancient, only known ramp models, and the map script running on
-the mock WC3 API with the new layout. Pictures: <work>/dota.png, <work>/wc3.png.
+the mock WC3 API with the new layout. Blocked ground: the raised cliffs and
+rocks leave the pathing byte for byte as without them, at least 97% of the
+blocked cells look blocked, the commander base is flat with its town hall,
+mine and expansions in place. Pictures: <work>/dota.png, <work>/wc3.png.
 
 Usage: python -I launcher/tests/test_terrain.py [--dota "<Dota 2 root>"] [--base <map.w3x>] [--work <folder>]
 Never starts Warcraft III, Dota 2 or Steam.
@@ -39,7 +42,8 @@ sys.path.insert(0, str(ROOT / "tools"))
 from PIL import Image  # noqa: E402
 
 from dvc_launcher import stormlib, terrain  # noqa: E402
-from dvc_launcher.terrain import convert, w3x  # noqa: E402
+from dvc_launcher.blp import decode as blp_decode  # noqa: E402
+from dvc_launcher.terrain import convert, ground, trees, w3x  # noqa: E402
 
 DLL = next((p for p in (ROOT / "launcher" / "vendor" / "stormlib" / "x64" / "StormLib.dll",
                         ROOT / "dist" / "DotaVsCommander" / "StormLib.dll") if p.is_file()), None)
@@ -213,6 +217,59 @@ def test_lua_patch():
         check("a script without markers is refused", True)
 
 
+def test_tree_plan():
+    """Dota tree kinds -> WC3 tree types: dire_* to BTtw, default skins to
+    LTlt (always 10 variations, for Sprout), other skins to FTtw; a kind past
+    the 10 slots of its type borrows a variation of the same skin."""
+    kinds = [["models/props_tree/tree_pine_01.vmdl", "0"], ["models/props_tree/dire_tree004.vmdl", "0"],
+             ["models/props_tree/tree_oak_01.vmdl", "12"]]
+    kinds += [[f"models/props_tree/tree_oak_{n:02d}.vmdl", "3"] for n in range(11)]
+    rows = [[0, 0, k, 0.0, 1.0] for k in range(len(kinds)) for _ in range(20 - k)]
+    plan = trees.plan_trees({"entities": {"tree_kinds": kinds, "trees": rows}})
+    types = plan["types"]
+    rare = plan["kinds"][len(kinds) - 1]
+    check("tree plan: Dire trees to BTtw, default skins to LTlt (10 variations), other skins to FTtw",
+          len(types["LTlt"]) == trees.SLOTS and types["BTtw"] == [kinds[1]] and len(types["FTtw"]) == trees.SLOTS
+          and plan["kinds"][0] == ["LTlt", 0] and plan["kinds"][1] == ["BTtw", 0] and rare[0] == "FTtw"
+          and types["FTtw"][rare[1]][1] == "3", str(plan["kinds"]))
+
+
+def test_object_merge():
+    """war3map.w3b and w3d merged into a base map's: our fields replace the
+    same fields, other fields and custom objects stay."""
+    plan = {"types": {"LTlt": [["m", "0"]] * 10, "BTtw": [["d", "0"]] * 4}, "kinds": []}
+    base_b = trees.write_object_file(2, [("LTlt", "\0\0\0\0", [(0, [("bnam", 3, "Tree"), ("bvar", 0, 3)])])],
+                                     [("ATtr", "B000", [(0, [("bnam", 3, "Custom")])])])
+    _v, originals, customs = trees.read_object_file(trees.object_file(plan, base_b))
+    mods = {b: {m[0]: m[2] for _f, ms in g for m in ms} for b, _n, g in originals}
+    ok_b = mods["LTlt"]["bnam"] == "Tree" and mods["LTlt"]["bvar"] == 10 and mods["BTtw"]["bvar"] == 4         and mods["LTlt"]["bfil"] == trees.MAP_DIR + "LTlt" and customs[0][1] == "B000"
+    base_d = trees.write_level_file(2, [("LPcr", "\0\0\0\0", [(0, [("dnam", 3, 0, 0, "Corn")])])], [])
+    _v, originals, _c = trees.read_level_file(trees.doodad_file(plan, base_d))
+    mods = {b: {m[0]: m[4] for _f, ms in g for m in ms} for b, _n, g in originals}
+    ok_d = mods["LPcr"]["dnam"] == "Corn" and mods["LPcr"]["dfil"] == trees.MAP_DIR + "LTlt"         and mods["LPcr"]["dvar"] == 10 and mods["LPcw"]["dfil"] == trees.MAP_DIR + "BTtw"
+    check("war3map.w3b and w3d merge into the base map's object data", ok_b and ok_d)
+
+
+def test_tile_shapes():
+    """The 16 transition shapes of a tile meet seamlessly: where two cells
+    share a tile edge with the same corners, their alpha along it matches."""
+    masks = ground.transition_masks()
+    size = ground.CELL
+    seam = inside = 0
+    for c in range(1, 15):
+        for x in range(size - 1):
+            for y in range(size):
+                inside = max(inside, abs(masks[c].getpixel((x, y)) - masks[c].getpixel((x + 1, y))))
+        for d in range(1, 15):
+            # c's right edge (corners TR, BR) beside d's left edge (TL, BL)
+            if ((c >> 2) & 1, c & 1) == ((d >> 3) & 1, (d >> 1) & 1):
+                for y in range(size):
+                    seam = max(seam, abs(masks[c].getpixel((size - 1, y)) - masks[d].getpixel((0, y))))
+    full = all(masks[c].getextrema() == (255, 255) for c in (0, 15))
+    check("tile transition shapes meet at tile edges as smoothly as inside a cell; cells 0 and 15 whole",
+          full and seam <= inside, f"largest alpha step across a seam {seam}, inside a cell {inside}")
+
+
 def read_base(base):
     s = stormlib.StormLib(DLL)
     h = s.open_archive(base)
@@ -255,6 +312,37 @@ def parse_w3e(data):
     return w, h, ox, oy, layers, ramps, pos + 7 * w * h
 
 
+def doo_entries(doo):
+    """[(id, variation)] of the war3map.doo entries (v8, subversion 11)."""
+    count = struct.unpack_from("<I", doo, 12)[0]
+    out, pos = [], 16
+    for _ in range(count):
+        out.append((doo[pos:pos + 4].decode("ascii"), struct.unpack_from("<i", doo, pos + 4)[0]))
+        pos += 4 + 4 + 12 + 4 + 12 + 4 + 2 + 4
+        sets = struct.unpack_from("<i", doo, pos)[0]
+        pos += 4
+        for _s in range(sets):
+            pos += 4 + 8 * struct.unpack_from("<i", doo, pos)[0]
+        pos += 4
+    return out
+
+
+def doo_kinds(doo):
+    """{id: count} of the war3map.doo entries (v8, subversion 11, no item sets)."""
+    count = struct.unpack_from("<I", doo, 12)[0]
+    out, pos = {}, 16
+    for _ in range(count):
+        kind = doo[pos:pos + 4].decode("ascii")
+        out[kind] = out.get(kind, 0) + 1
+        pos += 4 + 4 + 12 + 4 + 12 + 4 + 2 + 4
+        sets = struct.unpack_from("<i", doo, pos)[0]
+        pos += 4
+        for _s in range(sets):
+            pos += 4 + 8 * struct.unpack_from("<i", doo, pos)[0]
+        pos += 4
+    return out
+
+
 def flood(wpm, size, start):
     open_ = (0x40, 0x08)
     i, j = int((start[0] + 10240) // 32), int((start[1] + 10240) // 32)
@@ -285,6 +373,161 @@ def near(seen, size, p, radius=192):
     r = radius // 32
     return any(seen[b * size + a] for a in range(i0 - r, i0 + r + 1) for b in range(j0 - r, j0 + r + 1)
                if 0 <= a < size and 0 <= b < size)
+
+
+def test_ground_textures(files):
+    """Every tile the terrain uses has Dota's texture in all three forms: a
+    512 x 256 BLP1 and DDS for classic graphics, a DDS diffuse for HD, both
+    with the transition shapes in the alpha of the left half."""
+    used = terrain.used_tiles(files["war3map.w3e"])
+    bad = []
+    for tile in used:
+        try:
+            image = blp_decode(files[ground.classic_path(tile)])
+            alpha = image.getchannel("A")
+            left, right = alpha.crop((0, 0, 256, 256)), alpha.crop((256, 0, 512, 256))
+            ok = image.size == (512, 256) and left.getextrema()[0] < 32 and right.getextrema() == (255, 255)
+            for dds in (files[ground.classic_dds_path(tile)], files[ground.hd_path(tile)]):
+                height, width, _pitch, _depth, mips = struct.unpack_from("<IIIII", dds, 12)
+                ok = ok and dds[:4] == b"DDS " and dds[84:88] == b"DXT5" and (width, height) == (512, 256)                     and mips == 10 and len(dds) == 174928
+            if not ok:
+                bad.append(tile)
+        except (KeyError, ValueError, struct.error) as e:
+            bad.append(f"{tile} ({e})")
+    check("Dota ground textures for every tile the terrain uses (classic BLP and DDS, HD DDS)",
+          used and not bad, f"{len(used)} tiles" + (f", bad {bad}" if bad else ""))
+
+
+def test_tree_models(written, doo, work):
+    """Dota's tree models: war3map.w3b points each replaced tree type at
+    war3mapImported/DotaTrees/<type> with as many variations as there are
+    model files, every tree of war3map.doo uses one of them, and each model
+    reads back cleanly (tools/check_mdx.js)."""
+    w3b = written.get("war3map.w3b")
+    if not w3b:
+        check("war3map.w3b with the tree types", False, "missing")
+        return
+    _version, originals, customs = trees.read_object_file(w3b)
+    counts = {}
+    ok = not customs
+    for base, _new, groups in originals:
+        mods = {m[0]: m[2] for _flag, ms in groups for m in ms}
+        files = [n for n in written if n.startswith(trees.MAP_DIR + base) and n.endswith(".mdx")]
+        counts[base] = mods.get("bvar", 0)
+        ok = ok and mods.get("bfil") == trees.MAP_DIR + base and mods.get("bvar") == len(files) and             all(trees.model_path(base, v) in written for v in range(len(files))) and mods.get("bfxr") == -1.0
+    check("war3map.w3b points LTlt, FTtw and BTtw at Dota's tree models", ok and counts.get("LTlt") == trees.SLOTS,
+          str(counts))
+    bad = [(k, v) for k, v in doo_entries(doo) if k in trees.TYPES and not 0 <= v < counts.get(k, 0)]
+    check("every tree in war3map.doo is a replaced type with an existing variation", not bad, str(bad[:5]))
+    w3d = written.get("war3map.w3d")
+    decor = {}
+    ok = bool(w3d)
+    if w3d:
+        _version, originals, customs = trees.read_level_file(w3d)
+        for base, _new, groups in originals:
+            mods = {m[0]: m[4] for _flag, ms in groups for m in ms}
+            tid = next((t for d, t in trees.DECOR.values() if d == base), None)
+            decor[base] = mods.get("dvar")
+            ok = ok and tid is not None and mods.get("dfil") == trees.MAP_DIR + tid and mods.get("dvar") == counts.get(tid)
+        ok = ok and not customs
+    entries = [(k, v) for k, v in doo_entries(doo) if k in decor]
+    check("war3map.w3d points the decorative tree doodads at the tree models, every one placed has a variation",
+          ok and entries and all(0 <= v < decor[k] for k, v in entries), f"{len(entries)} decorative trees, {decor}")
+    folder = work / "tree_models"
+    shutil.rmtree(folder, ignore_errors=True)
+    folder.mkdir(parents=True)
+    models = []
+    for name, data in written.items():
+        if name.startswith(trees.MAP_DIR):
+            (folder / name.split("\\")[-1]).write_bytes(data)
+            if name.endswith(".mdx"):
+                models.append(str(folder / name.split("\\")[-1]))
+    if shutil.which("node") is None:
+        print("[SKIP] tree models through check_mdx.js: needs node")
+        return
+    p = subprocess.run(["node", str(ROOT / "tools" / "check_mdx.js")] + sorted(models), capture_output=True,
+                       text=True, cwd=str(ROOT / "tools"))
+    try:
+        report = json.loads(p.stdout)
+    except ValueError:
+        report = {}
+    failed = sorted(Path(f).name for f, r in report.items() if not r.get("ok"))
+    check("tree models pass tools/check_mdx.js", report and len(report) == len(models) and not failed,
+          f"{len(report)} models" + (f", failed {failed[:5]}" if failed else "") + (p.stderr[:200] if p.returncode else ""))
+
+
+def looks_blocked(t, r):
+    """(blocked cells in the playable area, those that look blocked): under a
+    cliff tile, on raised ground, under a tree's pathing or a rock."""
+    cells, tiles = convert.CELLS, convert.TILES
+    cover = bytearray(cells * cells)
+    for x, y, *_rest in t.trees:
+        i0, j0 = int((x - 64 + 10240) // 32), int((y - 64 + 10240) // 32)
+        for b in range(max(0, j0), min(cells, j0 + 4)):
+            for a in range(max(0, i0), min(cells, i0 + 4)):
+                cover[b * cells + a] = 1
+    for x, y, _z, _v, s, _a in t.rocks:
+        rad = convert.ROCK_RADIUS * s
+        for b in range(int((y - rad + 10240) // 32), int((y + rad + 10240) // 32) + 1):
+            for a in range(int((x - rad + 10240) // 32), int((x + rad + 10240) // 32) + 1):
+                if 0 <= a < cells and 0 <= b < cells and \
+                        (32 * a + 16 - 10240 - x) ** 2 + (32 * b + 16 - 10240 - y) ** 2 <= rad * rad:
+                    cover[b * cells + a] = 1
+    total = seen = 0
+    for pj in range(cells):
+        for pi in range(cells):
+            k = pj * cells + pi
+            if r.walk[k] or t.pathing[k] != convert.BLOCKED or max(abs(32 * pi + 16 - 10240),
+                                                                   abs(32 * pj + 16 - 10240)) > convert.PLAY:
+                continue
+            total += 1
+            ti, tj = pi // 4, pj // 4
+            top = all(t.raised[convert.ci(ti + a, tj + b)] for a in (0, 1) for b in (0, 1))
+            seen += 1 if t.blocked[tj * tiles + ti] or top or cover[k] else 0
+    return total, seen
+
+
+def test_blocked_ground(folder, wpm_cells, w3e):
+    """Raised blocked ground and rocks, on the cached description: the
+    pathing is exactly the one without them, blocked ground looks blocked,
+    the commander base stays flat and complete."""
+    desc = json.loads((folder / "description.json").read_text(encoding="utf-8"))
+    r = convert.Rasters(desc)
+    t = convert.convert(desc)
+    check("converter output = the map's pathing", bytes(t.pathing) == bytes(wpm_cells))
+    saved = convert.raise_blocked, convert.place_rocks
+    convert.raise_blocked = lambda *a, **k: 0
+    convert.place_rocks = lambda *a, **k: 0
+    try:
+        flat = convert.convert(desc)
+    finally:
+        convert.raise_blocked, convert.place_rocks = saved
+    check("raised ground and rocks leave the pathing exactly as without them",
+          bytes(flat.pathing) == bytes(t.pathing) and sum(t.raised) > 0 and not flat.rocks,
+          f"{sum(t.raised)} raised corners, {len(t.rocks)} rocks")
+    share = convert.walkable_share(t, r)
+    check("at least 93.5% of Dota's walkable ground is walkable", share >= 0.935, f"{share:.2%}")
+    total, seen = looks_blocked(t, r)
+    before = looks_blocked(flat, r)[1]
+    check("blocked ground looks blocked (cliff, raised ground, tree or rock) on 97% of its cells",
+          seen >= 0.97 * total, f"{seen} of {total} ({seen / max(1, total):.1%}); without raising {before}")
+    w, h, _ox, _oy, layers, _ramps, end = parse_w3e(w3e)
+    heights = [struct.unpack_from("<h", w3e, end - 7 * w * h + 7 * k)[0] for k in range(w * h)]
+    base = [k for k in range(w * h) if t.base[k] and not t.frozen[k]]       # frozen: its entrance ramps
+    check("the commander base is flat: one cliff level, no height offsets",
+          base and len({layers[k] for k in base}) == 1 and all(heights[k] == 8192 for k in base),
+          f"{len(base)} corners, {sum(t.base) - len(base)} on its entrance ramps")
+    md = t.mapdata
+    start, fort = md["commander"]["start"], desc["entities"]["forts"]["bad"]
+    mine = md["commander"]["mines"][0]
+    t2 = [tw["pos"] for lane in ("top", "bot") for tw in desc["entities"]["towers"]["bad"].get(lane, [])
+          if tw["tier"] == 2]
+    exp = md["commander"]["expansions"]
+    near = all(min(((p["x"] - q[0]) ** 2 + (p["y"] - q[1]) ** 2) ** 0.5 for q in t2) <= 1800 for p in exp)
+    check("town hall at the Dire Ancient, gold mine 700 away, expansions by the Dire tier-2 towers",
+          abs(start["x"] - fort[0]) <= 32 and abs(start["y"] - fort[1]) <= 32
+          and 600 <= ((mine["x"] - start["x"]) ** 2 + (mine["y"] - start["y"]) ** 2) ** 0.5 <= 800
+          and len(exp) == 2 and near, f"start {start}, mine {mine}, expansions {exp}")
 
 
 def mock_run(script, work):
@@ -328,7 +571,15 @@ def test_dota(dota, base, work):
     check("terrain files identical across cold runs and from the cache",
           runs[0][0] == runs[1][0] == runs[2][0],
           ", ".join(f"{len(r[0])} files in {r[1]:.1f} s" for r in runs))
-    check("terrain replaces exactly the layout files", sorted(files) == sorted(terrain.MAP_FILES), sorted(files))
+    extra = sorted(set(files) - set(terrain.MAP_FILES))
+    ground_files = {p for t in ground.TILE_FILES for p in (ground.classic_path(t), ground.classic_dds_path(t),
+                                                            ground.hd_path(t))}
+    check("terrain replaces the layout files and adds only tree models, war3map.w3b and w3d, tile textures",
+          set(terrain.MAP_FILES) <= set(files) and "war3map.w3b" in extra
+          and all(n in ("war3map.w3b", "war3map.w3d") or n.startswith(trees.MAP_DIR) or n in ground_files
+                  for n in extra),
+          f"{len(extra)} added")
+    test_ground_textures(files)
     data, copied = stormlib.build_archive(DLL, base, files, work / "pack", lambda s: None)
     out = work / "personal.w3x"
     out.write_bytes(data)
@@ -343,8 +594,11 @@ def test_dota(dota, base, work):
           and end == len(w3e))
     size = struct.unpack_from("<iii", wpm, 4)
     check("wpm v0, 640 x 640 cells", wpm[:4] == b"MP3W" and size == (0, 640, 640) and len(wpm) == 16 + 640 * 640)
-    check("doo v8.11, trees only", doo[:4] == b"W3do" and struct.unpack_from("<i", doo, 4)[0] == 8 and doo[8] == 11,
-          f"{struct.unpack_from('<I', doo, 12)[0]} trees")
+    kinds = doo_kinds(doo)
+    check("doo v8.11: trees and rocks only", doo[:4] == b"W3do" and struct.unpack_from("<i", doo, 4)[0] == 8
+          and doo[8] == 11 and set(kinds) <= set(trees.TYPES) | {convert.ROCK_ID} | {d for d, _t in trees.DECOR.values()},
+          str(kinds))
+    test_tree_models(written, doo, work)
     check("w3i v31 and war3mapUnits.doo v8.11",
           struct.unpack_from("<i", written["war3map.w3i"], 0)[0] == 31
           and struct.unpack_from("<iI", written["war3mapUnits.doo"], 4) == (8, 11))
@@ -383,6 +637,7 @@ def test_dota(dota, base, work):
           sorted(md["lanes"]) == ["bot", "mid", "top"] and sum(len(v) for v in md["dota"]["towers"].values()) == 11
           and sum(len(v) for v in md["dota"]["barracks"].values()) == 6 and len(md["camps"]) == 28
           and len(md["runes"]) == 2 and len(md.get("bounty_runes", [])) == 2)
+    test_blocked_ground(next(cache.glob("*/terrain-*")), cells, w3e)
     ok, log = mock_run(files["war3map.lua"].decode("utf-8"), work)
     want = ["structures created", "world: 28 neutral camps", "world: runes at 2 river and 2 bounty spots",
             "world: Roshan spawned"]
@@ -410,6 +665,9 @@ def main():
     test_ramp_shape()
     test_lua_patch()
     test_w3e_parity(work)
+    test_tree_plan()
+    test_object_merge()
+    test_tile_shapes()
     if base and DLL:
         test_start_patches(base)
     else:

@@ -2,7 +2,8 @@
 -- abilities, items, TP scroll, shop and hero selection; quick cast and
 -- double-tap self cast; camera distance and zoom lock; auto attack and
 -- right-clicks on allies. Also Dota's right-click hold, which keeps moving
--- toward the cursor while the button is held.
+-- toward the cursor while the button is held and shows the holder a move
+-- marker at each repeated move.
 --
 -- File: Documents\Warcraft III\CustomMapData\DotaVsCommander\dota_settings.txt,
 -- written per PC by launcher\dvc_launcher\dota_settings.py (format there). It
@@ -16,9 +17,10 @@
 -- those synced events (items through dota_items.lua, whose default Z X C V B N
 -- then skip the player). Ability and select-hero keys are local UI on the
 -- presser's client: ForceUIKey on the ability's own Warcraft hotkey,
--- selection. Quick casts and double-tap self casts of abilities are orders
--- sent back with BlzSendSyncData. Camera fields are local; auto attack and the
--- right-click hold act in synced code only.
+-- selection; Dota's failed-cast sounds for an ability key are synced. Quick
+-- casts and double-tap self casts of abilities are orders sent back with
+-- BlzSendSyncData. Camera fields are local; auto attack and the right-click
+-- hold act in synced code only.
 --
 -- The cursor: Reforged 2.0.1 has no native for the world point under the local
 -- cursor (its game binary has no BlzGetMouseWorldX/Y), so every client keeps
@@ -55,6 +57,8 @@ define("dota_settings", function()
     local STOP_KEY = 0x53                   -- Warcraft's Stop hotkey (S)
     local HOLD_REPEAT = 0.15                -- seconds between the moves of a right-click hold
     local HOLD_MIN_MOVE = 16                -- ... and only once the cursor moved this far
+    local CONFIRM_FX = "UI\\Feedback\\Confirmation\\Confirmation.mdl"   -- WC3's move marker
+    local CONFIRM_TIME = 0.6                -- seconds a held-move marker stays: a short trail
 
     -- Synced iteration order. Abilities: Dota's slots Q W E D F R by their
     -- Warcraft cell (y * 4 + x) and native hotkey letter.
@@ -197,20 +201,40 @@ define("dota_settings", function()
         return behavior[name] or ""
     end
 
+    -- Build data of a hero ability (tools/gen_objects.py): its order string
+    -- (ids.orders) and Channel target kind (ids.ability_targets: 0 none,
+    -- 1 unit, 2 point, 3 unit or point).
+    local nameById = nil
+    local function abilityName(id)
+        if not nameById then
+            nameById = {}
+            for name, code in pairs(use("data.ids").abilities or {}) do nameById[FourCC(code)] = name end
+        end
+        return nameById[id]
+    end
+
+    local function buildKind(name)
+        return name and (use("data.ids").ability_targets or {})[name]
+    end
+
     -- unit target, point target
     local function targets(e)
-        local f = e and flags(e.name) or ""
+        if not e then return false, false end
+        local k = buildKind(e.name)
+        if k then return k == 1 or k == 3, k == 2 or k == 3 end
+        local f = flags(e.name)
         return string.find(f, "UNIT_TARGET") ~= nil, string.find(f, "POINT") ~= nil
     end
 
-    -- The hero's own ability shown in `cell` on this screen. Local.
+    -- The hero's own ability in `cell` (y * 4 + x) by the build data's cell
+    -- (ids.ability_cells): the same on every client, so synced code may ask.
+    -- Warcraft's button positions can be local (Rubick moves a stolen spell's
+    -- button for its owner only).
     local function abilityAt(hero, cell)
         local key = heroes().keyOf[hero]
+        local cells = use("data.ids").ability_cells or {}
         for _, e in ipairs(key and use("dota_hud").rowOf(key) or {}) do
-            if e.id and GetUnitAbilityLevel(hero, e.id) > 0
-                    and BlzGetAbilityPosY(e.id) * 4 + BlzGetAbilityPosX(e.id) == cell then
-                return e
-            end
+            if e.id and cells[e.name] == cell and GetUnitAbilityLevel(hero, e.id) > 0 then return e end
         end
         return nil
     end
@@ -254,21 +278,40 @@ define("dota_settings", function()
         return found
     end
 
-    -- Channel-based abilities carry their order and targeting in Ncl6 / Ncl2
-    -- (1 unit, 2 point, 3 unit or point). Without a target unit: at x, y.
+    -- A hero ability cast by order, from the build data's order string and
+    -- target kind; the Channel fields read at run time (Ncl6, Ncl2) are only
+    -- a fallback. String orders go first, the way the bots cast (hero_bot.lua):
+    -- the run-time path alone refused every quick cast in game (2026-10-11).
+    -- Without a target unit the cast goes to x, y.
     local function castAbility(hero, id, target, x, y)
         local level = GetUnitAbilityLevel(hero, id)
-        if level < 1 then return false end
-        local ab = BlzGetUnitAbility(hero, id)
-        local order = ab and BlzGetAbilityStringLevelField(ab, ABILITY_SLF_BASE_ORDER_ID_NCL6, level - 1)
-        if not order or order == "" then return false end
-        local kind = BlzGetAbilityIntegerLevelField(ab, ABILITY_ILF_TARGET_TYPE, level - 1)
-        if target then
-            if kind == 1 or kind == 3 then return IssueTargetOrderById(hero, OrderId(order), target) end
-            x, y = GetUnitX(target), GetUnitY(target)
+        local name = abilityName(id)
+        local order, kind = name and use("data.ids").orders[name], buildKind(name)
+        local from = (order and "build" or "field") .. "/" .. (kind and "build" or "field")
+        if level >= 1 and not (order and kind) then
+            local ab = BlzGetUnitAbility(hero, id)
+            if ab and not order then order = BlzGetAbilityStringLevelField(ab, ABILITY_SLF_BASE_ORDER_ID_NCL6, level - 1) end
+            if ab and not kind then kind = BlzGetAbilityIntegerLevelField(ab, ABILITY_ILF_TARGET_TYPE, level - 1) end
         end
-        if kind == 2 or kind == 3 then return IssuePointOrderById(hero, OrderId(order), x, y) end
-        return false
+        if order == "" then order = nil end
+        local ok, how = false, "no cast"
+        if level >= 1 and order then
+            if target and (kind == 1 or kind == 3) then
+                ok, how = IssueTargetOrder(hero, order, target), "unit order by string"
+                if not ok then ok, how = IssueTargetOrderById(hero, OrderId(order), target), "unit order by id" end
+            elseif kind == 2 or kind == 3 then
+                if target then x, y = GetUnitX(target), GetUnitY(target) end
+                ok, how = IssuePointOrder(hero, order, x, y), "point order by string"
+                if not ok then ok, how = IssuePointOrderById(hero, OrderId(order), x, y), "point order by id" end
+            end
+        end
+        if BUILD_TEST_MODE then
+            trace("cast %s level %d: order %s (id %d), kind %s, from %s, cooldown %.1f, mana %d of %d, %s -> %s",
+                tostring(name), level, tostring(order), order and OrderId(order) or 0, tostring(kind), from,
+                BlzGetUnitAbilityCooldownRemaining(hero, id), math.floor(GetUnitState(hero, UNIT_STATE_MANA)),
+                level >= 1 and BlzGetUnitAbilityManaCost(hero, id, level - 1) or 0, how, tostring(ok))
+        end
+        return ok
     end
 
     -- An item waiting for its target (dota_items) takes the unit instead.
@@ -408,6 +451,17 @@ define("dota_settings", function()
         end
     end
 
+    -- Synced: the hero is one of the player's own selected units as last sent
+    -- through SEL; until the first report it counts as selected.
+    local function selected(slot, hero)
+        local list = chosen[slot]
+        if not list then return true end
+        for _, u in ipairs(list) do
+            if u == hero then return true end
+        end
+        return false
+    end
+
     -- Synced. A key acts when pressed, with the modifiers held at that moment.
     -- A held key repeats its key-down event; it acts again only after its
     -- release, which is registered without modifiers so it always arrives.
@@ -434,6 +488,13 @@ define("dota_settings", function()
                 if double then PanCameraToTimed(GetUnitX(hero), GetUnitY(hero), 0) end
             end
         elseif b.kind == "ability" then
+            -- Dota's failed-cast sounds (gamesounds), on every client alike
+            local e = alive(hero) and selected(slot, hero) and abilityAt(hero, b.cell)
+            if e and defined("gamesounds") then
+                local ready = use("gamesounds").checkCast(hero, e.id)
+                trace("player %d key %s: %s %s", slot, b.field, e.name,
+                    ready and "ready" or "not ready, failed-cast sound")
+            end
             if p == GetLocalPlayer() and mine then pressAbility(p, hero, b) end
         else
             pressItem(p, hero, b, st, double)
@@ -480,13 +541,24 @@ define("dota_settings", function()
     --   fr: right-click on a friendly unit: 0 follow it, 1 attack it, 2 deny it
     --       if deniable, else follow (in this map 1 also follows a unit that
     --       cannot be denied).
-    -- Warcraft's acquisition range carries the result. A unit that still takes
-    -- a new target while it may not (Warcraft also acquires in weapon range and
-    -- when attacked) is stopped at once by the acquisition guard.
+    -- Warcraft's worker type carries the result: workers never take a target
+    -- on their own, yet attack, deny and attack-move when told to. A unit
+    -- that may not auto attack is made a worker and loses the type when it
+    -- may again. The acquisition range did not hold: right after
+    -- SetUnitAcquireRange(u, 0) and the range field set to 0 the hero still
+    -- read 600 and kept running off to targets (log 2026-10-11). Units whose
+    -- unit type is a worker (a persuaded acolyte) are left alone. The
+    -- type is set again on the next tick of every order and twice a second.
+    -- A unit that still takes a new target while it may not is stopped by the
+    -- guard at once and again on the next tick unless a newer order came
+    -- meanwhile: a stop inside the acquisition event can be overridden like
+    -- one inside an order event.
     local units = {}         -- unit -> slot: the Dota players' units under these settings
     local lastOrder = {}     -- unit -> move, follow, stop, hold, deny, attack, amove or other
     local aim = {}           -- unit -> the target it was told to attack
     local forced = {}        -- unit -> the mode Hold or Stop forced (ta)
+    local worker = {}        -- unit -> true: a worker by its own type, never changed here
+    local orderNo = {}       -- unit -> count of its orders: a deferred stop yields to a newer one
     local QUIET = {move = true, follow = true, stop = true, hold = true, deny = true}
     local cancelling = nil   -- the unit the acquisition guard is stopping
     local holding = false    -- the right-click hold is issuing its moves
@@ -508,9 +580,15 @@ define("dota_settings", function()
 
     local function refresh(u)
         local st = players[units[u]]
-        if st and GetUnitTypeId(u) ~= 0 then
-            SetUnitAcquireRange(u, mayAcquire(u, st) and GetUnitDefaultAcquireRange(u) or 0)
+        if not st or GetUnitTypeId(u) == 0 or worker[u] then return end
+        local quiet = not mayAcquire(u, st)
+        if IsUnitType(u, UNIT_TYPE_PEON) ~= quiet then
+            if quiet then UnitAddType(u, UNIT_TYPE_PEON) else UnitRemoveType(u, UNIT_TYPE_PEON) end
         end
+    end
+
+    local function refreshSoon(u)
+        Timer.after(0, function() refresh(u) end)
     end
 
     local function track(u)
@@ -521,8 +599,21 @@ define("dota_settings", function()
         local slot = GetPlayerId(GetOwningPlayer(u))
         if not players[slot] then return end
         units[u] = slot
+        -- by the unit type, not the unit: an illusion may copy the added type
+        worker[u] = IsUnitIdType(GetUnitTypeId(u), UNIT_TYPE_PEON) or nil
         TriggerRegisterUnitEvent(acquireTrig, u, EVENT_UNIT_ACQUIRED_TARGET)
         refresh(u)
+    end
+
+    -- Twice a second: every tracked unit's type again; removed units leave.
+    local function reassert()
+        for u in pairs(units) do
+            if GetUnitTypeId(u) == 0 then
+                units[u], lastOrder[u], aim[u], forced[u], worker[u], orderNo[u] = nil, nil, nil, nil, nil, nil
+            else
+                refresh(u)
+            end
+        end
     end
 
     local function classify(u, order, target)
@@ -549,6 +640,7 @@ define("dota_settings", function()
     local function onOrder(u, order, target)
         local slot = units[u]
         if not slot or u == cancelling then return end
+        orderNo[u] = (orderNo[u] or 0) + 1
         local st = players[slot]
         local kind = classify(u, order, target)
         if kind == "follow" and st.fr > 0 and deniable(u, target) then
@@ -569,6 +661,7 @@ define("dota_settings", function()
         lastOrder[u] = kind
         aim[u] = (kind == "attack" or kind == "deny") and target or nil
         refresh(u)
+        refreshSoon(u)
         local h = hold[slot]
         if h and h.on and not holding and order ~= SMART and order ~= MOVE and order ~= AIMOVE then
             h.on = false
@@ -576,19 +669,34 @@ define("dota_settings", function()
         end
     end
 
+    local function stopUnit(u)
+        cancelling = u
+        IssueImmediateOrderById(u, STOP)
+        cancelling = nil
+        refresh(u)
+    end
+
     local function onAcquire()
         local u, t = GetTriggerUnit(), GetEventTargetUnit()
         local st = players[units[u] or -1]
         if not st or u == cancelling or t == aim[u] or mayAcquire(u, st) then return end
-        cancelling = u
-        IssueImmediateOrderById(u, STOP)
-        cancelling = nil
-        local now = Timer.now()
-        if now - (guardLogged[u] or -10) > 2 then
+        local wasWorker = IsUnitType(u, UNIT_TYPE_PEON)
+        stopUnit(u)
+        local slot, n, now = units[u], orderNo[u], Timer.now()
+        local logIt = now - (guardLogged[u] or -10) > 2
+        if logIt then
             guardLogged[u] = now
-            trace("player %d unit took a new target after %s (mode %d): stopped", units[u], tostring(lastOrder[u]),
-                modeOf(u, st))
+            trace("player %d unit took a new target after %s (mode %d, worker %s, target %.0f away): stopped",
+                slot, tostring(lastOrder[u]), modeOf(u, st), tostring(wasWorker),
+                t and math.sqrt((GetUnitX(t) - GetUnitX(u)) ^ 2 + (GetUnitY(t) - GetUnitY(u)) ^ 2) or -1)
         end
+        Timer.after(0, function()
+            if orderNo[u] ~= n or not alive(u) or mayAcquire(u, st) then return end
+            if logIt then
+                trace("player %d unit stopped again on the next tick, its order was %d", slot, GetUnitCurrentOrder(u))
+            end
+            stopUnit(u)
+        end)
     end
 
     -- ds: Warcraft's Stop key held
@@ -633,6 +741,14 @@ define("dota_settings", function()
         return list
     end
 
+    -- Dota shows its move marker for every repeated right-click of a hold; here
+    -- WC3's move confirmation, seen by the holder only: every client creates
+    -- and frees the effect, the other players' with no model.
+    local function marker(slot, x, y)
+        local fx = AddSpecialEffect(Player(slot) == GetLocalPlayer() and CONFIRM_FX or "", x, y)
+        Timer.after(CONFIRM_TIME, function() DestroyEffect(fx) end)
+    end
+
     local function repeatHolds()
         local now = Timer.now()
         for _, slot in ipairs(Roles.heroSlots) do
@@ -648,6 +764,7 @@ define("dota_settings", function()
                     holding = true
                     for _, u in ipairs(list) do IssuePointOrderById(u, MOVE, c.x, c.y) end
                     holding = false
+                    marker(slot, c.x, c.y)
                 end
             end
         end
@@ -761,6 +878,7 @@ define("dota_settings", function()
             end
         end)
         Timer.every(0.25, lockZoom)
+        Timer.every(0.5, reassert)
         local ticks = 0
         Timer.every(0.05, function()
             repeatHolds()

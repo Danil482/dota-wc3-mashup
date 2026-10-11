@@ -37,7 +37,10 @@ SAMPLE_ICONS = ["pudge_meat_hook", "nevermore_requiem", "hero_rubick", "item_tps
 OBJECT_FILES = ("war3map.w3u", "war3map.w3t", "war3map.w3a", "war3map.w3b", "war3map.w3d", "war3map.w3h",
                 "war3map.w3q")
 # Voice lines per event (tools/select_vo.py); cast_<ability> events get VO_CAST_CAP.
-VO_CAPS = {"move": 8, "attack": 8, "kill": 4, "death": 4, "levelup": 4, "laugh": 4, "spawn": 4}
+VO_CAPS = {"move": 8, "attack": 8, "kill": 4, "death": 4, "levelup": 4, "laugh": 4, "spawn": 4,
+           "respawn": 2, "battlebegins": 1, "notyet": 2, "nomana": 2, "firstblood": 1, "aegis": 1,
+           "rune_doubledamage": 1, "rune_haste": 1, "rune_illusion": 1, "rune_invisibility": 1,
+           "rune_regeneration": 1, "rune_arcane": 1, "rune_bounty": 1}
 VO_CAST_CAP = 3
 
 results = {}
@@ -219,7 +222,8 @@ def main():
     internal = {"(listfile)", "(attributes)", "(signature)"}
     # Dota's map layout replaces these (launcher/tests/test_terrain.py checks them).
     layout = set(terrain.MAP_FILES)
-    changed = [n for n, d in base_files.items() if n not in internal | layout and out_files.get(n) != d]
+    changed = [n for n, d in base_files.items() if n not in internal | layout and not terrain.is_terrain_asset(n)
+               and out_files.get(n) != d]
     check("every base map file outside the map layout is byte-for-byte identical", not changed,
           f"{len([n for n in base_files if n not in internal])} files" + (f", changed {changed}" if changed else ""))
     relaid = sorted(n for n in layout if out_files.get(n) != base_files.get(n))
@@ -254,6 +258,7 @@ def main():
     expected_assets = list(expected_assets) + mdx_names + model_textures
 
     extra = sorted(set(out_files) - set(base_files) - set(expected_assets) - internal)
+    extra = [n for n in extra if not terrain.is_terrain_asset(n)]     # Dota's trees and tiles (test_terrain.py)
     check("no unexpected files", not extra, ", ".join(extra[:5]))
     h = storm.open_archive(out)
     try:

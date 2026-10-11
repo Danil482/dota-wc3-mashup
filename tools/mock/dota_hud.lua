@@ -59,7 +59,7 @@ if not __mockHud then
     local SIMPLE = {SIMPLEFRAME = true, SIMPLEBUTTON = true, SIMPLESTATUSBAR = true, SIMPLECHECKBOX = true,
                     SIMPLETOP = true, SIMPLEGRID = true, TEXTURE = true, STRING = true}
     local TYPES = {FRAME = true, BUTTON = true, GLUEBUTTON = true, TEXT = true, BACKDROP = true, SIMPLEFRAME = true,
-                   SIMPLESTATUSBAR = true, SIMPLEBUTTON = true, HIGHLIGHT = true, SPRITE = true}
+                   SIMPLESTATUSBAR = true, SIMPLEBUTTON = true, HIGHLIGHT = true, SPRITE = true, STATUSBAR = true}
     local byName = {}
 
     local function fail(msg) error("frame mock: " .. msg, 3) end
@@ -234,6 +234,12 @@ if not __mockHud then
         f.texture = path
     end
     function BlzFrameSetVertexColor(f, c) if not isFrame(f) then fail("SetVertexColor") end end
+    function BlzFrameSetModel(f, path, camera)
+        if not isFrame(f) then fail("SetModel on a non-frame") end
+        if f.kind ~= "STATUSBAR" and f.kind ~= "SPRITE" and f.kind ~= "MODEL" then fail("SetModel on a " .. f.kind) end
+        if type(path) ~= "string" or path == "" then fail("SetModel with an empty path") end
+        f.model = path
+    end
     function BlzFrameSetMinMaxValue(f, a, b) num(a, "min") num(b, "max") f.min, f.max = a, b end
     function BlzFrameSetValue(f, v) num(v, "value") f.value = v end
     function BlzFrameGetValue(f) return f.value end
@@ -650,6 +656,105 @@ if not __mockHud then
         hero.dead = false
         Hud.tick()
 
+        ---------------------------------------------------------------- item slots
+        -- cooldown sweep (model and wipe), seconds and charges on the item buttons
+        do
+            local Items = use("items")
+            local names, activeName = {}, nil
+            for name in pairs(ids.item_abilities) do names[#names + 1] = name end
+            table.sort(names)
+            for _, name in ipairs(names) do
+                local e = Items.data(name)
+                if not activeName and e and (e.cooldown or 0) >= 10 and not e.consumable then activeName = name end
+            end
+            for _, c in ipairs(Items.carried(hero)) do Items.remove(hero, c.item) end
+            local it = UnitAddItemById(hero, FourCC(ids.items[activeName]))
+            local cdTotal = Items.data(activeName).cooldown
+            M.selection = {hero}
+            Kit.SWEEP = "model"
+            Items.used(hero, it, activeName)
+            Hud.tick()
+            Hud.tickSweeps()
+            local s = F.slots[0]
+            check("item shown in slot 0", M.shown(s.b) and s.item == it)
+            check("sweep shown on cooldown", M.shown(s.cd.box) and not M.shown(s.cd.wipe))
+            check("sweep starts dark", s.cd.bar.value < 0.05, s.cd.bar.value)
+            check("sweep uses the cooldown model", s.cd.bar.model == Kit.SWEEP_MODEL, s.cd.bar.model)
+            check("sweep model scaled to the slot", math.abs(s.cd.bar.scale - L.ITEM_H / 0.038) < 1e-6, s.cd.bar.scale)
+            check("cooldown seconds shown", M.shown(s.cd.text.box)
+                and string.find(s.cd.text.t.text, tostring(math.ceil(cdTotal)), 1, true) ~= nil, s.cd.text.t.text)
+            advance(cdTotal / 2)
+            Hud.tickSweeps()
+            check("sweep at half time", math.abs(s.cd.bar.value - 0.5) < 0.05, s.cd.bar.value)
+            Kit.SWEEP = "wipe"
+            Hud.tickSweeps()
+            local wy = s.cd.wipe.points[FRAMEPOINT_TOPRIGHT]
+            check("wipe mode shows the overlay", M.shown(s.cd.wipe) and not M.shown(s.cd.box))
+            check("wipe covers half the slot", wy ~= nil
+                and math.abs((wy.y - s.cd.y0) / (s.cd.y1 - s.cd.y0) - 0.5) < 0.06, wy and wy.y)
+            Kit.SWEEP = "model"
+            advance(cdTotal / 2 + 0.5)
+            Hud.tickSweeps()
+            check("sweep hidden when ready", not M.shown(s.cd.box) and not M.shown(s.cd.text.box))
+            -- WC3's own cooldown counts when it runs longer (a reduction or refresh by other code)
+            hero.cd = {[Items.abilityId(activeName)] = 4.2}
+            Hud.tickSweeps()
+            check("native cooldown shown", M.shown(s.cd.box) and string.find(s.cd.text.t.text, "5", 1, true) ~= nil,
+                s.cd.text.t.text)
+            hero.cd = nil
+            Hud.tickSweeps()
+            Items.remove(hero, it)
+            local tango = UnitAddItemById(hero, FourCC(ids.items.item_tango))
+            SetItemCharges(tango, 3)
+            Hud.tick()
+            check("charges shown", s.charges.t.text == "3", s.charges.t.text)
+            Items.remove(hero, tango)
+            Hud.tick()
+            check("empty slot hidden", not M.shown(s.b))
+        end
+
+        ---------------------------------------------------------------- click blockers
+        -- every button sits under a blocker that covers its panel; the WC3
+        -- portrait and minimap stay open
+        do
+            local function rect(f)
+                local a, b = f.points[FRAMEPOINT_BOTTOMLEFT], f.points[FRAMEPOINT_TOPRIGHT]
+                return a and b and {a.x, a.y, b.x, b.y} or nil
+            end
+            local function inside(f, box)
+                local r, q = rect(f), rect(box)
+                return r ~= nil and q ~= nil and r[1] >= q[1] - 1e-6 and r[2] >= q[2] - 1e-6
+                    and r[3] <= q[3] + 1e-6 and r[4] <= q[4] + 1e-6
+            end
+            local function overlaps(f, box)
+                local r, q = rect(f), rect(box)
+                return r ~= nil and q ~= nil and r[1] < q[3] - 1e-6 and q[1] < r[3] - 1e-6
+                    and r[2] < q[4] - 1e-6 and q[2] < r[4] - 1e-6
+            end
+            Hud.tick()
+            check("bottom blocker shown", F.fgBottom.kind == "GLUEBUTTON" and M.shown(F.fgBottom))
+            for i = 0, 5 do
+                check("item slot " .. i .. " under the bottom blocker", M.under(Kit.hit(F.slots[i].b), F.fgBottom))
+                check("item slot " .. i .. " inside the blocked area", inside(F.slots[i].b, F.fgBottom))
+            end
+            for k = 1, #F.learn do
+                check("learn " .. k .. " under the bottom blocker", M.under(Kit.hit(F.learn[k]), F.fgBottom))
+            end
+            check("SHOP button under the bottom blocker", M.under(Kit.hit(F.shopBtn), F.fgBottom)
+                and inside(F.shopBtn, F.fgBottom))
+            local loose = 0
+            for _, c in ipairs(Shop.cells) do
+                if not M.under(Kit.hit(c.b), SF.root) then loose = loose + 1 end
+            end
+            check("shop buttons under the shop blocker", loose == 0 and SF.root.kind == "GLUEBUTTON"
+                and rect(SF.root) ~= nil, loose)
+            check("top bar blocker over the hero icons", M.under(F.top[1].icon, F.fgTop) and inside(F.top[1].icon, F.fgTop))
+            for _, b in ipairs({F.fgBottom, F.blockStats, F.blockXp, F.fgTop}) do
+                check("blocker leaves the portrait open", not overlaps(D.portrait, b))
+                check("blocker leaves the minimap open", not overlaps(D.minimap, b))
+            end
+        end
+
         ---------------------------------------------------------------- shop
         local function gold(p) return GetPlayerState(p or p0, PLAYER_STATE_RESOURCE_GOLD) end
         local function setGold(n, p) SetPlayerState(p or p0, PLAYER_STATE_RESOURCE_GOLD, n) end
@@ -872,10 +977,11 @@ if not __mockHud then
         -- test builds have no Dota art: every button shows a WC3 texture or a
         -- label, and no texture points into the launcher's folders
         if not Kit.dota then
-            local isHit = {}                  -- transparent click layers have no visuals by design
+            local isHit = {}                  -- click layers and blockers have no visuals by design
             for _, h in pairs(Kit.hitOf) do isHit[h] = true end
+            for _, b in ipairs(Kit.blockers) do isHit[b] = true end
             for _, f in ipairs(M.created) do
-                if (f.kind == "BUTTON" or f.kind == "GLUEBUTTON") and f ~= SF.catcher and not isHit[f] then
+                if (f.kind == "BUTTON" or f.kind == "GLUEBUTTON") and not isHit[f] then
                     local ok = false
                     for _, c in ipairs(f.children) do
                         if c.kind == "BACKDROP" and c.texture then ok = true end

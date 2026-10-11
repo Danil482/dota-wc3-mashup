@@ -8,7 +8,9 @@ items.json (read by tools/gen_objects.py and by Lua as use("data.items")):
   items[name]  title, cost, shop, stats (summed passive props, fractions for
                percentages), values (raw Dota AbilityValues, "a b c" per
                level), cooldown, mana, range, channel, charges, stack,
-               consumable, stock, recipe {cost, scroll, parts[[...]]}, desc
+               consumable, stock, recipe {cost, scroll, parts[[...]]}, desc,
+               secret (sold only at a Secret Shop), shareable (allies may use
+               it: Dota's ITEM_FULLY_SHAREABLE)
   items["item_recipe_<x>"]  the recipe scroll: title, cost, shop, result
   shops[]      {key, title, items[]}: one WC3 shop unit each, 11 entries max
                (button 0,0 is the shop's select-hero button)
@@ -295,9 +297,10 @@ NOTES = {
              "are sold too.",
     "simplified": "Radiance burns permanently (no toggle). BKB gives full magic immunity (the patch gives 60% magic "
                   "resistance plus debuff immunity). Status resistance, slow resistance, Chasm Stone area bonus, "
-                  "Monkey King Bar melee range and Iron Branch tree planting are not modelled. Items are always "
-                  "bought at the fountain shops (no secret or side shop) and the 6 WC3 inventory slots are the "
-                  "only storage (no backpack or stash).",
+                  "Monkey King Bar melee range and Iron Branch tree planting are not modelled.",
+    "storage": "As in Dota: 6 main slots, a 3-slot backpack, a 6-slot stash, the TP scroll slot and a courier per "
+               "player (src/game/inventory.lua, courier.lua). Secret items are sold only at the Secret Shops "
+               "(mapdata.side_shops).",
 }
 
 
@@ -391,6 +394,10 @@ def main(data_dir, out_path):
             e["consumable"] = True
             e["charges"] = int(d.get("ItemInitialCharges", "1"))
             e["stack"] = d.get("ItemStackable") == "1"
+        if d.get("SecretShop") == "1":
+            e["secret"] = True
+        if d.get("ItemShareability") == "ITEM_FULLY_SHAREABLE":
+            e["shareable"] = True
         if d.get("ItemStockMax"):
             e["stock"] = {"max": int(d["ItemStockMax"]), "initial": int(d.get("ItemStockInitial", d["ItemStockMax"])),
                           "time": num(float(d.get("ItemStockTime", "0")))}

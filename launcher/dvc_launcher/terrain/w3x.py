@@ -53,13 +53,30 @@ def write_wpm(t):
     return b"MP3W" + struct.pack("<iii", 0, size, size) + bytes(t.pathing)
 
 
-def write_trees(t):
-    """war3map.doo v8 (subversion 11) with the trees as destructables."""
-    out = bytearray(b"W3do" + struct.pack("<i", 8) + bytes([11, 0, 0, 0]) + struct.pack("<I", len(t.trees)))
-    tid = convert.TREE_ID.encode("ascii")
-    for n, (x, y, z, variation, scale) in enumerate(t.trees):
-        out += tid + struct.pack("<i", variation) + struct.pack("<3f", x, y, z) + struct.pack("<f", 4.712389)
-        out += struct.pack("<3f", scale, scale, scale) + tid + struct.pack("<BB", 2, 100)
+def write_doo(t, dota_trees=True):
+    """war3map.doo v8 (subversion 11): the trees (destructables), then the
+    rocks and the decorative trees on raised ground (doodads; the pathing map
+    already holds Dota's pathing). With dota_trees the trees use the types,
+    variations, facings and scales that carry Dota's tree models (trees.py);
+    without, they are plain WC3 summer trees and the decorative trees are
+    left out (the map's look when the tree models could not be made)."""
+    # flags: 2 = visible and solid (trees: their pathing applies in game),
+    # 1 = visible, not solid (the doodads add no pathing of their own).
+    entries = []
+    for x, y, z, v, s, kind, angle in t.trees:
+        if dota_trees:
+            entries.append((kind, v, x, y, z, angle, s, 2))
+        else:
+            h = convert._hash(x, y, 13)
+            entries.append((convert.TREE_ID, h % 10, x, y, z, 4.712389, round(0.85 + (h >> 8) % 26 / 100.0, 2), 2))
+    entries += [(convert.ROCK_ID, v, x, y, z, a, s, 1) for x, y, z, v, s, a in getattr(t, "rocks", ())]
+    if dota_trees:                     # decorative Dota trees (doodads whose models trees.py replaces)
+        entries += [(kind, v, x, y, z, a, s, 1) for x, y, z, v, s, kind, a in getattr(t, "decor", ())]
+    out = bytearray(b"W3do" + struct.pack("<i", 8) + bytes([11, 0, 0, 0]) + struct.pack("<I", len(entries)))
+    for n, (kind, variation, x, y, z, angle, scale, flags) in enumerate(entries):
+        tid = kind.encode("ascii")
+        out += tid + struct.pack("<i", variation) + struct.pack("<3f", x, y, z) + struct.pack("<f", angle)
+        out += struct.pack("<3f", scale, scale, scale) + tid + struct.pack("<BB", flags, 100)
         out += struct.pack("<Ii", 0xFFFFFFFF, 0) + struct.pack("<i", n)
     out += bytes(4) + struct.pack("<I", 0)
     return bytes(out)

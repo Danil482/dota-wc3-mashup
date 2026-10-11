@@ -36,6 +36,9 @@ function config()
     for i = 0, PLAYER_COUNT - 1 do
         local p = Player(i)
         SetPlayerStartLocation(p, i)
+        -- without it WC3 deals start locations at random, as in melee, and the
+        -- AI commander may take a start away from its hall and mine
+        ForcePlayerStartLocation(p, i)
         SetPlayerColor(p, ConvertPlayerColor(i))
         if i <= SLOT_COMMANDER then
             SetPlayerController(p, MAP_CONTROL_USER)

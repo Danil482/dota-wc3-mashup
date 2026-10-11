@@ -8,7 +8,20 @@ Naming contract with the map script:
   BTNDota_<key>.blp and DISBTNDota_<key>.blp (no PASBTN) for every "icons"
   entry of src/data/items.json (item_tpscroll, item_recipe, ...)
   Sound\\Dota\\<hero>\\<event>_<n>.mp3                                   see vo_manifest.json
+  Sound\\Dota\\{music,announcer,sfx}\\<key>.{mp3,wav}                     see below
   <target> of every entry of specs/hud_assets.json                      see below
+
+Music, announcer and effects. vo_manifest.json "audio" maps each map path to
+  {"source": "<VPK path of the .vsnd_c>", "mono": true|false}
+(tools/select_vo.py writes it together with src/data/audio.json, the map
+script's list of the same paths with durations and loop points). The target's
+extension is the format the script expects: .mp3 targets take the MP3 that
+VRF exports as is (music, announcer), .wav targets the WAV (16-bit PCM
+effects); "mono" folds a stereo WAV to one channel, so Warcraft III can place
+it in 3D and the map stays smaller. A source missing from the player's Dota 2
+or in the other format gives a short silent file of the target's format, so
+every path of audio.json exists in the map (logged: audio_silent,
+audio_format).
 
 HUD images. specs/hud_assets.json is optional; build.ps1 bundles it when it
 exists. It is a JSON list of entries:
@@ -48,15 +61,18 @@ exists. It is a JSON list of entries:
   Output: BLP1 with a 256-colour palette and an 8-bit alpha plane (alpha is
   kept) and a full mipmap chain. The map script uses only the target paths.
 """
+import array
 import difflib
 import hashlib
 import io
 import json
+import struct
+import sys
 
 from PIL import Image
 
 from . import PLAN_VERSION, blp
-from .vrf import output_path
+from .vrf import find_output
 
 ICON_SIZE = 64
 SPELLICONS = "panorama/images/spellicons/"
@@ -92,6 +108,7 @@ RESERVED_PREFIXES = ("REPLACEABLETEXTURES\\COMMANDBUTTONS\\BTNDOTA_",
 # only when a voice line cannot be extracted, so every path in sounds.json
 # exists in the map.
 SILENT_MP3 = (b"\xff\xfb\x10\xc0" + bytes(100)) * 38
+SILENT_WAV_RATE = 22050         # a tenth of a second of mono silence for a .wav target
 
 
 def load_json(path):
@@ -169,6 +186,7 @@ def vpk_prefixes(manifest, item_icons=(), hud=()):
     every source the voice manifest, items.json and hud_assets.json name."""
     sources = list(manifest["files"].values())
     sources += [s for events in manifest.get("spares", {}).values() for lines in events.values() for s in lines]
+    sources += [e["source"] for e in manifest.get("audio", {}).values() if e.get("source")]
     sources += [s for entry in list(item_icons) + list(hud) for s in entry.get("sources") or []]
     folders = set(SEARCHED_FOLDERS) | {s.rsplit("/", 1)[0] + "/" for s in sources if "/" in s}
     return tuple(sorted(f for f in folders if not any(f != g and f.startswith(g) for g in folders)))
@@ -188,6 +206,7 @@ def expected_map_files(roster, manifest, item_icons=(), hud=()):
             names += icon_paths(key)
     names += [p for entry in item_icons for p in icon_paths(entry["key"], "item")]
     names += list(manifest["files"])
+    names += list(manifest.get("audio", {}))
     names += [entry["target"] for entry in hud]
     return names
 
@@ -293,9 +312,17 @@ def make_plan(files, roster, manifest, build, item_icons=(), hud=()):
             used.add(source)
         sounds.append({"target": target, "hero": hero, "event": event, "source": source, "note": note})
 
-    extract = sorted({s for i in icons + images for s in i["sources"]} | {s["source"] for s in sounds if s["source"]})
+    audio = []
+    for target in sorted(manifest.get("audio", {})):
+        entry = manifest["audio"][target]
+        source = entry.get("source") if entry.get("source") in files else None
+        audio.append({"target": target, "source": source, "mono": bool(entry.get("mono")),
+                      "note": "manifest" if source else "missing"})
+
+    extract = sorted({s for i in icons + images for s in i["sources"]} | {s["source"] for s in sounds if s["source"]}
+                     | {a["source"] for a in audio if a["source"]})
     return {"plan_version": PLAN_VERSION, "build": build, "icons": icons, "hud": images, "sounds": sounds,
-            "extract": extract, "failed": []}
+            "audio": audio, "extract": extract, "failed": []}
 
 
 # -------------------------------------------------------------- conversion
@@ -372,16 +399,71 @@ def is_mp3(data):
     return data[:3] == b"ID3" or (len(data) > 2 and data[0] == 0xFF and data[1] & 0xE0 == 0xE0)
 
 
+def is_wav(data):
+    return data[:4] == b"RIFF" and data[8:12] == b"WAVE"
+
+
+def wav_bytes(pcm, rate, channels=1, bits=16):
+    """A canonical 44-byte-header PCM WAV around raw little-endian samples."""
+    block = channels * bits // 8
+    return (b"RIFF" + struct.pack("<I", 36 + len(pcm)) + b"WAVEfmt "
+            + struct.pack("<IHHIIHH", 16, 1, channels, rate, rate * block, block, bits)
+            + b"data" + struct.pack("<I", len(pcm)) + pcm)
+
+
+def silent_wav():
+    return wav_bytes(bytes(SILENT_WAV_RATE // 10 * 2), SILENT_WAV_RATE)
+
+
+def wav_to_mono(data):
+    """Stereo 16-bit PCM WAV -> mono (the mean of both channels). Anything else
+    comes back unchanged. Raises ValueError on a broken RIFF file."""
+    chunks, pos = {}, 12
+    while pos + 8 <= len(data):
+        cid, size = data[pos:pos + 4], struct.unpack_from("<I", data, pos + 4)[0]
+        chunks.setdefault(cid, (pos + 8, size))
+        pos += 8 + size + (size & 1)
+    if b"fmt " not in chunks or b"data" not in chunks:
+        raise ValueError("WAV without fmt or data chunk")
+    fmt_at = chunks[b"fmt "][0]
+    tag, channels, rate, _, _, bits = struct.unpack_from("<HHIIHH", data, fmt_at)
+    if tag != 1 or bits != 16 or channels != 2:
+        return data
+    at, size = chunks[b"data"]
+    pcm = array.array("h")
+    pcm.frombytes(data[at:at + min(size, len(data) - at) // 4 * 4])
+    if sys.byteorder != "little":
+        pcm.byteswap()
+    mono = array.array("h", [(left + right) >> 1 for left, right in zip(pcm[0::2], pcm[1::2])])
+    if sys.byteorder != "little":
+        mono.byteswap()
+    return wav_bytes(mono.tobytes(), rate)
+
+
+def audio_file(data, target, mono):
+    """Map bytes for an audio target from the exported file, or None when the
+    file is not in the format the target's extension names."""
+    if target.lower().endswith(".wav"):
+        if not data or not is_wav(data):
+            return None
+        try:
+            return wav_to_mono(data) if mono else data
+        except (ValueError, struct.error):
+            return None
+    return data if data and is_mp3(data) else None
+
+
 def build_files(plan, raw_dir, log):
     """Convert extracted files into map files. Returns ({map path: bytes}, report)."""
     out = {}
     report = {"icon_fallbacks": [], "icon_placeholders": [], "hud_fallbacks": [], "hud_placeholders": [],
-              "hud_resized": [], "sound_substitutes": [], "sound_silent": []}
+              "hud_resized": [], "sound_substitutes": [], "sound_silent": [], "audio_format": [],
+              "audio_silent": []}
 
     def read(vpk_path):
-        p = raw_dir / output_path(vpk_path)
+        p = find_output(raw_dir, vpk_path)      # .png, or a sound's .mp3 / .wav
         try:
-            return p.read_bytes()
+            return p.read_bytes() if p else None
         except OSError:
             return None
 
@@ -449,4 +531,13 @@ def build_files(plan, raw_dir, log):
         else:
             out[sound["target"]] = SILENT_MP3
             report["sound_silent"].append(sound["target"])
+
+    for entry in plan.get("audio", []):
+        target = entry["target"]
+        data = read(entry["source"]) if entry["source"] else None
+        made = audio_file(data, target, entry["mono"])
+        if made is None:
+            report["audio_format" if data else "audio_silent"].append(target)
+            made = silent_wav() if target.lower().endswith(".wav") else SILENT_MP3
+        out[target] = made
     return out, report

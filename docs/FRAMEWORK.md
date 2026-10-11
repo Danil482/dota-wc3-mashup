@@ -18,8 +18,12 @@ other lazily with `use(name)`. Natives are the ones in `research/jass/common.j` 
 - `use("data.heroes")[hero]` – Dota 2 numbers from the player's patch: `stats`, `abilities[]` with `name`,
   `title`, `AbilityBehavior`, `AbilityCooldown`, `AbilityManaCost`, `AbilityCastRange`, `values{key = "a b c d"}`.
 - `use("data.ids")` – generated raw codes: `abilities[name]`, `heroes[hero]`, `heroes[hero .. "_innates"]`,
-  `units[key]`, `buffs[key]`, `orders[name]` (order string of Channel-based abilities, for bots/dummies).
+  `units[key]`, `buffs[key]`, `orders[name]` (order string of Channel-based abilities, for bots/dummies),
+  `ability_targets[name]` (a hero Channel's target type), `ability_cells[name]` (command card cell y * 4 + x, the
+  same on every client), `order_probe` (test-only probe Channels).
 - `use("data.sounds")[hero][event]` – voice-line paths extracted from Dota 2 (`cast_<ability>`, `kill`, ...).
+- `use("data.audio")` – Dota's default music pack, announcer and effects (`tools/select_vo.py`):
+  `music|announcer|sfx[key] = {path, duration, volume}`; loop tracks add `start`, `stop`, `sync{}`, `restart`.
 - `use("data.mapdata")` – every gameplay position: `bounds`, `lanes{top,mid,bot}` (Dota spawn → commander
   spawn), `dota{fountain, ancient, shop, towers{top,mid,bot,base}, barracks}`, `commander{start, mines,
   expansions, spawns}`, `roshan`, `runes`, optional `bounty_runes`, `side_shops`, `camps{name = pos}` (a camp's
@@ -88,13 +92,38 @@ layout, read from the player's Dota 2, together with the map's terrain (`war3map
 `hero_respawned`, `ability_cast` (caster, def, target, x, y), `research_finish`.
 
 ### sound – `use("sound")`
-`Sound.vo(unit, event, chance)`, `Sound.at(path, x, y, volume)`, `Sound.heroOf(unit)`.
+`Sound.vo(unit, event, chance, ownerOnly)`, `Sound.has(unit, event)`, `Sound.at(path, x, y, volume)`,
+`Sound.heroOf(unit)`. Dota audio: `Sound.sfx(key, audience, x, y, gain, opts)` plays `data.audio.sfx[key]`
+(3D when x, y are given), `Sound.play(path, audience, opts)`, `Sound.entry(group, key)`. `audience`: nil for
+everyone, `"dota"` for the Dota side, a player, or `function(player)`. Every sound is created on every client and
+muted by volume for the others; never call these inside a `GetLocalPlayer()` block.
+
+### music, announcer, gamesounds – Dota's music, announcer and gameplay sounds
+- `use("music")`: `init()` (after roles), `horn()`, `gameOver(winnerSide)`, `buyback(unit)`, `duck(seconds)`,
+  `state(slot)`. Dota players only; the commander keeps Warcraft's music.
+- `use("announcer")`: `init([secondsToHorn])` (default `creeps.first`), `say(key, priority, tag)`,
+  `gameOver(winnerSide)`, `horn()`; keys are `data.audio.announcer` keys (`fort_rad`, `scan_rad`, `cour_kill_rad`, ...).
+- `use("gamesounds")`: `init()`, `buy(p)`, `sell(p)`, `combine(p)`, `error(p)`, `castFail(hero, "cooldown"|"mana")`,
+  `checkCast(hero, abilId)` (from synced key code), `tpStart(unit, x, y)`, `tpEnd(unit, done)`.
 
 ### bots – `use("bots")`
 `Bots.hint(abilityName, spec)` – tell the generic hero bot how to use an ability (see `src/ai/bots.lua`).
 
+### commander, commander_base – the commander's base
+- `use("commander")`: `setup(raceKey)` (from `game.lua`), `halls()`, `player`, `raceKey`, `hall{x, y, half, unit}`,
+  `starters`/`starterTarget` (starter structures made/wanted). Test builds with the AI commander log its slot,
+  start location and setup once, then `summary()` every 30 s; `activity{orders, builds, trained}` counts what its
+  units were told to do.
+- `use("commander_base")`: the starter base, stock WC3 structures around the hall. Tune `STARTER[race]`
+  (`{id, count, role}`, role `tower` | `production` | `supply`) and `FOR` (`"ai"` default, `"all"`, `"none"`).
+  `plan(raceKey, site)` returns the spots, `build(p, raceKey, site)` creates them.
+
 ### log – `use("log")`
 `Log.info`, `Log.warn`, `Log.error`. Shown on screen in test builds.
+
+### controls_probe – `use("controls_probe")` (test builds)
+`run()` at the start logs which trigger orders the engine takes from Channel abilities (by target type, by string
+and by id) and whether the acquisition range calls hold, to `log.txt` and `controls_probe.txt`.
 
 ## Object specs – `specs/heroes/<hero>.json`
 `tools/gen_objects.py` builds every WC3 object from these plus the Dota data. Per ability under `abilities`:
@@ -103,7 +132,8 @@ layout, read from the player's Dota 2, together with the map's terrain (`war3map
   `"native"` → a real WC3 ability: `base` (raw code) plus `fields` (`{fieldId: value or [per level]}`, ids from
   `research/slk/abilitymetadata.slk`).
 - `target`: 0 none, 1 unit, 2 point, 3 unit or point (Channel only); `channel`: seconds of channelling;
-  `range`, `radiusKey` (Dota value key for the AoE circle), `targets` (atar string), `order` (Channel order string),
+  `range`, `radiusKey` (Dota value key for the AoE circle), `targets` (atar string), `order` (Channel order string;
+  without one a Channel gets an order of a WC3 hero spell with the same kind of target, `ORDERS` in gen_objects.py),
   `anim`, `desc` (English, your own words; never copy Valve text), `title`, `include` (keep a hidden/not-learnable
   ability), `innateActive` (granted at spawn, not learned), `skip`.
 - Hero-level `units`, `abilities_extra`, `buffs`: `{key: {"base": "xxxx", "fields": {...}}}` for summons,

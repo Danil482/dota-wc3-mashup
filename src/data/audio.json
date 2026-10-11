@@ -1,0 +1,537 @@
+{
+ "announcer": {
+  "anc_attack_yr": {
+   "duration": 2.064,
+   "path": "Sound\\Dota\\announcer\\anc_attack_yr.mp3",
+   "volume": 1.0
+  },
+  "battle_begin": {
+   "duration": 1.646,
+   "path": "Sound\\Dota\\announcer\\battle_begin.mp3",
+   "volume": 1.0
+  },
+  "battle_prepare": {
+   "duration": 1.541,
+   "path": "Sound\\Dota\\announcer\\battle_prepare.mp3",
+   "volume": 1.0
+  },
+  "count_battle_10": {
+   "duration": 1.75,
+   "path": "Sound\\Dota\\announcer\\count_battle_10.mp3",
+   "volume": 1.0
+  },
+  "count_battle_30": {
+   "duration": 1.829,
+   "path": "Sound\\Dota\\announcer\\count_battle_30.mp3",
+   "volume": 1.0
+  },
+  "cour_kill_rad": {
+   "duration": 2.247,
+   "path": "Sound\\Dota\\announcer\\cour_kill_rad.mp3",
+   "volume": 1.0
+  },
+  "first_blood": {
+   "duration": 1.776,
+   "path": "Sound\\Dota\\announcer\\first_blood.mp3",
+   "volume": 1.0
+  },
+  "fort_rad": {
+   "duration": 2.325,
+   "path": "Sound\\Dota\\announcer\\fort_rad.mp3",
+   "volume": 1.0
+  },
+  "kill_dominate": {
+   "duration": 1.907,
+   "path": "Sound\\Dota\\announcer\\kill_dominate.mp3",
+   "volume": 1.0
+  },
+  "kill_double": {
+   "duration": 2.116,
+   "path": "Sound\\Dota\\announcer\\kill_double.mp3",
+   "volume": 1.0
+  },
+  "kill_godlike": {
+   "duration": 1.907,
+   "path": "Sound\\Dota\\announcer\\kill_godlike.mp3",
+   "volume": 1.0
+  },
+  "kill_holy": {
+   "duration": 2.429,
+   "path": "Sound\\Dota\\announcer\\kill_holy.mp3",
+   "volume": 1.0
+  },
+  "kill_mega": {
+   "duration": 2.717,
+   "path": "Sound\\Dota\\announcer\\kill_mega.mp3",
+   "volume": 1.0
+  },
+  "kill_monster": {
+   "duration": 3.448,
+   "path": "Sound\\Dota\\announcer\\kill_monster.mp3",
+   "volume": 1.0
+  },
+  "kill_rampage": {
+   "duration": 2.064,
+   "path": "Sound\\Dota\\announcer\\kill_rampage.mp3",
+   "volume": 1.0
+  },
+  "kill_spree": {
+   "duration": 2.482,
+   "path": "Sound\\Dota\\announcer\\kill_spree.mp3",
+   "volume": 1.0
+  },
+  "kill_triple": {
+   "duration": 2.011,
+   "path": "Sound\\Dota\\announcer\\kill_triple.mp3",
+   "volume": 1.0
+  },
+  "kill_ultra": {
+   "duration": 2.691,
+   "path": "Sound\\Dota\\announcer\\kill_ultra.mp3",
+   "volume": 1.0
+  },
+  "kill_unstop": {
+   "duration": 2.116,
+   "path": "Sound\\Dota\\announcer\\kill_unstop.mp3",
+   "volume": 1.0
+  },
+  "kill_wicked": {
+   "duration": 2.717,
+   "path": "Sound\\Dota\\announcer\\kill_wicked.mp3",
+   "volume": 1.0
+  },
+  "rax_attack_yr_bot": {
+   "duration": 2.194,
+   "path": "Sound\\Dota\\announcer\\rax_attack_yr_bot.mp3",
+   "volume": 1.0
+  },
+  "rax_attack_yr_mid": {
+   "duration": 2.194,
+   "path": "Sound\\Dota\\announcer\\rax_attack_yr_mid.mp3",
+   "volume": 1.0
+  },
+  "rax_attack_yr_top": {
+   "duration": 2.09,
+   "path": "Sound\\Dota\\announcer\\rax_attack_yr_top.mp3",
+   "volume": 1.0
+  },
+  "rax_fall_yr_bot": {
+   "duration": 2.038,
+   "path": "Sound\\Dota\\announcer\\rax_fall_yr_bot.mp3",
+   "volume": 1.0
+  },
+  "rax_fall_yr_mid": {
+   "duration": 1.907,
+   "path": "Sound\\Dota\\announcer\\rax_fall_yr_mid.mp3",
+   "volume": 1.0
+  },
+  "rax_fall_yr_top": {
+   "duration": 1.802,
+   "path": "Sound\\Dota\\announcer\\rax_fall_yr_top.mp3",
+   "volume": 1.0
+  },
+  "roshan_fallen_dire": {
+   "duration": 2.325,
+   "path": "Sound\\Dota\\announcer\\roshan_fallen_dire.mp3",
+   "volume": 1.0
+  },
+  "roshan_fallen_rad": {
+   "duration": 2.612,
+   "path": "Sound\\Dota\\announcer\\roshan_fallen_rad.mp3",
+   "volume": 1.0
+  },
+  "scan_rad": {
+   "duration": 1.802,
+   "path": "Sound\\Dota\\announcer\\scan_rad.mp3",
+   "volume": 1.0
+  },
+  "tower_attack": {
+   "duration": 1.881,
+   "path": "Sound\\Dota\\announcer\\tower_attack.mp3",
+   "volume": 1.0
+  },
+  "tower_enemy_fallen": {
+   "duration": 2.09,
+   "path": "Sound\\Dota\\announcer\\tower_enemy_fallen.mp3",
+   "volume": 1.0
+  },
+  "tower_fallen": {
+   "duration": 1.646,
+   "path": "Sound\\Dota\\announcer\\tower_fallen.mp3",
+   "volume": 1.0
+  },
+  "twr_attack_yr_bot": {
+   "duration": 2.142,
+   "path": "Sound\\Dota\\announcer\\twr_attack_yr_bot.mp3",
+   "volume": 1.0
+  },
+  "twr_attack_yr_mid": {
+   "duration": 2.116,
+   "path": "Sound\\Dota\\announcer\\twr_attack_yr_mid.mp3",
+   "volume": 1.0
+  },
+  "twr_attack_yr_top": {
+   "duration": 2.038,
+   "path": "Sound\\Dota\\announcer\\twr_attack_yr_top.mp3",
+   "volume": 1.0
+  },
+  "twr_deny_yr_bot": {
+   "duration": 2.377,
+   "path": "Sound\\Dota\\announcer\\twr_deny_yr_bot.mp3",
+   "volume": 1.0
+  },
+  "twr_deny_yr_mid": {
+   "duration": 2.273,
+   "path": "Sound\\Dota\\announcer\\twr_deny_yr_mid.mp3",
+   "volume": 1.0
+  },
+  "twr_deny_yr_top": {
+   "duration": 2.09,
+   "path": "Sound\\Dota\\announcer\\twr_deny_yr_top.mp3",
+   "volume": 1.0
+  },
+  "twr_fall_yr_bot": {
+   "duration": 2.194,
+   "path": "Sound\\Dota\\announcer\\twr_fall_yr_bot.mp3",
+   "volume": 1.0
+  },
+  "twr_fall_yr_mid": {
+   "duration": 2.09,
+   "path": "Sound\\Dota\\announcer\\twr_fall_yr_mid.mp3",
+   "volume": 1.0
+  },
+  "twr_fall_yr_top": {
+   "duration": 2.038,
+   "path": "Sound\\Dota\\announcer\\twr_fall_yr_top.mp3",
+   "volume": 1.0
+  },
+  "victory_dire": {
+   "duration": 1.646,
+   "path": "Sound\\Dota\\announcer\\victory_dire.mp3",
+   "volume": 1.0
+  },
+  "victory_rad": {
+   "duration": 1.829,
+   "path": "Sound\\Dota\\announcer\\victory_rad.mp3",
+   "volume": 1.0
+  }
+ },
+ "music": {
+  "battle_01": {
+   "duration": 41.195,
+   "path": "Sound\\Dota\\music\\battle_01.mp3",
+   "restart": 35.772,
+   "start": 1.118,
+   "stop": 36.89,
+   "sync": [
+    1.118,
+    5.59,
+    10.062,
+    14.534,
+    19.006,
+    23.478,
+    27.95,
+    32.422,
+    36.89
+   ],
+   "volume": 0.8
+  },
+  "battle_01_end": {
+   "duration": 10.24,
+   "path": "Sound\\Dota\\music\\battle_01_end.mp3",
+   "start": 1.118,
+   "stop": 5.59,
+   "sync": [
+    1.118,
+    5.59
+   ],
+   "volume": 0.7
+  },
+  "battle_02": {
+   "duration": 48.274,
+   "path": "Sound\\Dota\\music\\battle_02.mp3",
+   "start": 1.173,
+   "stop": 43.845,
+   "sync": [
+    1.173,
+    3.84,
+    6.507,
+    9.174,
+    11.841,
+    14.508,
+    17.175,
+    19.842,
+    22.509,
+    25.176,
+    27.843,
+    30.51,
+    33.177,
+    35.844,
+    38.511,
+    41.178,
+    43.845
+   ],
+   "volume": 0.8
+  },
+  "battle_02_end": {
+   "duration": 9.613,
+   "path": "Sound\\Dota\\music\\battle_02_end.mp3",
+   "start": 1.173,
+   "stop": 9.304,
+   "sync": [
+    1.173,
+    9.304
+   ],
+   "volume": 0.7
+  },
+  "battle_03": {
+   "duration": 74.998,
+   "path": "Sound\\Dota\\music\\battle_03.mp3",
+   "start": 0.65,
+   "stop": 72.638,
+   "sync": [
+    0.65,
+    4.078,
+    7.506,
+    10.934,
+    14.362,
+    17.79,
+    21.218,
+    24.646,
+    28.074,
+    31.502,
+    34.93,
+    38.358,
+    41.786,
+    45.214,
+    48.462,
+    52.07,
+    55.498,
+    58.926,
+    62.354,
+    65.782,
+    69.21,
+    72.638
+   ],
+   "volume": 0.8
+  },
+  "battle_03_end": {
+   "duration": 11.285,
+   "path": "Sound\\Dota\\music\\battle_03_end.mp3",
+   "start": 0.645,
+   "stop": 9.0,
+   "sync": [
+    0.645,
+    9.0
+   ],
+   "volume": 0.7
+  },
+  "buy_back": {
+   "duration": 5.042,
+   "path": "Sound\\Dota\\music\\buy_back.mp3",
+   "volume": 0.8
+  },
+  "countdown": {
+   "duration": 153.417,
+   "path": "Sound\\Dota\\music\\countdown.mp3",
+   "volume": 1.0
+  },
+  "killed": {
+   "duration": 92.604,
+   "path": "Sound\\Dota\\music\\killed.mp3",
+   "volume": 1.0
+  },
+  "laning_01": {
+   "duration": 161.802,
+   "path": "Sound\\Dota\\music\\laning_01.mp3",
+   "volume": 0.4
+  },
+  "laning_02": {
+   "duration": 87.428,
+   "path": "Sound\\Dota\\music\\laning_02.mp3",
+   "volume": 0.3
+  },
+  "laning_03": {
+   "duration": 100.415,
+   "path": "Sound\\Dota\\music\\laning_03.mp3",
+   "volume": 0.3
+  },
+  "radiant_lose": {
+   "duration": 24.033,
+   "path": "Sound\\Dota\\music\\radiant_lose.mp3",
+   "volume": 0.6
+  },
+  "radiant_win": {
+   "duration": 53.002,
+   "path": "Sound\\Dota\\music\\radiant_win.mp3",
+   "volume": 0.6
+  },
+  "respawn": {
+   "duration": 9.404,
+   "path": "Sound\\Dota\\music\\respawn.mp3",
+   "volume": 1.0
+  },
+  "roshan": {
+   "duration": 42.553,
+   "path": "Sound\\Dota\\music\\roshan.mp3",
+   "start": 0.5,
+   "stop": 42.5,
+   "sync": [
+    0.5,
+    4.0,
+    7.5,
+    11.0,
+    14.5,
+    18.0,
+    21.5,
+    25.0,
+    28.5,
+    32.0,
+    35.5,
+    39.0,
+    42.5
+   ],
+   "volume": 1.0
+  },
+  "roshan_end": {
+   "duration": 5.016,
+   "path": "Sound\\Dota\\music\\roshan_end.mp3",
+   "start": 0.5,
+   "stop": 2.5,
+   "sync": [
+    0.5,
+    2.5
+   ],
+   "volume": 1.0
+  }
+ },
+ "pack": "valve_dota_001",
+ "selected_from_build": "25845666",
+ "sfx": {
+  "buy": {
+   "duration": 1.181,
+   "path": "Sound\\Dota\\sfx\\buy.wav",
+   "volume": 0.75
+  },
+  "coins": {
+   "duration": 1.59,
+   "path": "Sound\\Dota\\sfx\\coins.wav",
+   "volume": 1.0
+  },
+  "combine": {
+   "duration": 1.047,
+   "path": "Sound\\Dota\\sfx\\combine.wav",
+   "volume": 1.0
+  },
+  "deny": {
+   "duration": 1.117,
+   "path": "Sound\\Dota\\sfx\\deny.wav",
+   "volume": 1.0
+  },
+  "error": {
+   "duration": 0.168,
+   "path": "Sound\\Dota\\sfx\\error.wav",
+   "volume": 0.5
+  },
+  "fail_cooldown": {
+   "duration": 0.796,
+   "path": "Sound\\Dota\\sfx\\fail_cooldown.wav",
+   "volume": 0.7
+  },
+  "fail_mana": {
+   "duration": 1.463,
+   "path": "Sound\\Dota\\sfx\\fail_mana.wav",
+   "volume": 0.5
+  },
+  "horn": {
+   "duration": 9.015,
+   "path": "Sound\\Dota\\sfx\\horn.wav",
+   "volume": 1.0
+  },
+  "learn": {
+   "duration": 0.062,
+   "path": "Sound\\Dota\\sfx\\learn.wav",
+   "volume": 0.2
+  },
+  "levelup": {
+   "duration": 5.621,
+   "path": "Sound\\Dota\\sfx\\levelup.wav",
+   "volume": 1.0
+  },
+  "reincarnate": {
+   "duration": 7.988,
+   "path": "Sound\\Dota\\sfx\\reincarnate.wav",
+   "volume": 0.9
+  },
+  "roshan_death": {
+   "duration": 3.975,
+   "path": "Sound\\Dota\\sfx\\roshan_death.wav",
+   "volume": 1.0
+  },
+  "rune_arcane": {
+   "duration": 2.781,
+   "path": "Sound\\Dota\\sfx\\rune_arcane.wav",
+   "volume": 1.0
+  },
+  "rune_bounty": {
+   "duration": 2.647,
+   "path": "Sound\\Dota\\sfx\\rune_bounty.wav",
+   "volume": 0.8
+  },
+  "rune_doubledamage": {
+   "duration": 2.652,
+   "path": "Sound\\Dota\\sfx\\rune_doubledamage.wav",
+   "volume": 1.0
+  },
+  "rune_haste": {
+   "duration": 1.692,
+   "path": "Sound\\Dota\\sfx\\rune_haste.wav",
+   "volume": 1.0
+  },
+  "rune_illusion": {
+   "duration": 2.671,
+   "path": "Sound\\Dota\\sfx\\rune_illusion.wav",
+   "volume": 1.0
+  },
+  "rune_invisibility": {
+   "duration": 2.472,
+   "path": "Sound\\Dota\\sfx\\rune_invisibility.wav",
+   "volume": 1.0
+  },
+  "rune_regeneration": {
+   "duration": 3.476,
+   "path": "Sound\\Dota\\sfx\\rune_regeneration.wav",
+   "volume": 1.0
+  },
+  "rune_shield": {
+   "duration": 6.017,
+   "path": "Sound\\Dota\\sfx\\rune_shield.wav",
+   "volume": 1.0
+  },
+  "rune_water": {
+   "duration": 2.457,
+   "path": "Sound\\Dota\\sfx\\rune_water.wav",
+   "volume": 1.0
+  },
+  "tp_appear": {
+   "duration": 2.092,
+   "path": "Sound\\Dota\\sfx\\tp_appear.wav",
+   "volume": 1.0
+  },
+  "tp_disappear": {
+   "duration": 2.556,
+   "path": "Sound\\Dota\\sfx\\tp_disappear.wav",
+   "volume": 1.0
+  },
+  "tp_loop_dest": {
+   "duration": 4.053,
+   "path": "Sound\\Dota\\sfx\\tp_loop_dest.wav",
+   "volume": 0.5
+  },
+  "tp_loop_origin": {
+   "duration": 4.053,
+   "path": "Sound\\Dota\\sfx\\tp_loop_origin.wav",
+   "volume": 0.5
+  }
+ }
+}

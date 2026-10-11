@@ -13,6 +13,7 @@ define("victory", function()
         V.over = true
         Log.info("game over, winner: " .. winnerSide)
         Log.flush()
+        use("safe").call(function() use("announcer").gameOver(winnerSide) end)   -- "Radiant/Dire victory!" + music stinger
         for slot = 0, SLOT_COMMANDER do
             local p = Player(slot)
             if GetPlayerSlotState(p) == PLAYER_SLOT_STATE_PLAYING then

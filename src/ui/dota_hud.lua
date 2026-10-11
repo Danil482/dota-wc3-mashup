@@ -346,6 +346,21 @@ define("dota_hud", function()
 
     ---------------------------------------------------------------- building
 
+    -- An item slot: button, icon, cooldown sweep and seconds, charges.
+    local function newSlot(parent, chargeScale)
+        local s = {}
+        s.b, s.img = Kit.button(parent, Kit.C.dark)
+        s.cd = Kit.sweep(s.b)
+        s.charges = Kit.label(s.b, chargeScale or 0.75, TEXT_JUSTIFY_RIGHT, TEXT_JUSTIFY_BOTTOM)
+        Kit.show(s.b, false)
+        return s
+    end
+
+    local function placeSlot(s, x0, y0, x1, y1)
+        Kit.place(s.b, x0, y0, x1, y1)
+        Kit.placeSweep(s.cd, x0, y0, x1, y1)
+    end
+
     -- Every frame is created here, for every player, hidden until the local
     -- view decides. Layers: bg (child of ConsoleUIBackdrop: below the WC3
     -- buttons), simple (SimpleFrames: bars), fg (child of the game UI: texts
@@ -357,7 +372,11 @@ define("dota_hud", function()
         F.bgRoot = Kit.frame(F.bgBelow and D.backdrop or gameUI)
         F.fgRoot = Kit.frame(gameUI)
         F.bgBottom, F.bgTop = Kit.frame(F.bgRoot), Kit.frame(F.bgRoot)
-        F.fgBottom, F.fgTop = Kit.frame(F.fgRoot), Kit.frame(F.fgRoot)
+        -- the fg containers are click blockers over the ability/item block and
+        -- the top bar, parents of every button there; two more cover the stats
+        -- column and the strip under the portrait (the WC3 portrait stays open)
+        F.fgBottom, F.fgTop = Kit.blocker(F.fgRoot), Kit.blocker(F.fgRoot)
+        F.blockStats, F.blockXp = Kit.blocker(F.fgRoot), Kit.blocker(F.fgRoot)
         local simpleParent = D.consoleUI or BlzGetOriginFrame(ORIGIN_FRAME_SIMPLE_UI_PARENT, 0)
         F.simBottom, F.simTop = Kit.simple(simpleParent), Kit.simple(simpleParent)
         for _, f in ipairs({F.bgRoot, F.fgRoot, F.simBottom, F.simTop}) do BlzFrameSetVisible(f, false) end
@@ -417,13 +436,9 @@ define("dota_hud", function()
         F.shopBtn, F.shopImg = Kit.button(F.fgBottom, Kit.tex("shop_button", C.gold))
         F.shopText = Kit.label(F.shopBtn, 0.85)
         Kit.setText(F.shopText, Kit.dota and "|cffffe6a0SHOP|r" or "|cff202020SHOP|r")
-        -- our own item buttons over the slots: icon, charges, use (dota_items)
-        F.itemBtns, F.itemIcons, F.itemCharges = {}, {}, {}
-        for i = 0, 5 do
-            F.itemBtns[i], F.itemIcons[i] = Kit.button(F.fgBottom, C.dark)
-            F.itemCharges[i] = Kit.label(F.itemBtns[i], 0.75, TEXT_JUSTIFY_RIGHT, TEXT_JUSTIFY_BOTTOM)
-            Kit.show(F.itemBtns[i], false)
-        end
+        -- our own item buttons over the slots (dota_items uses them)
+        F.slots = {}
+        for i = 0, 5 do F.slots[i] = newSlot(F.fgBottom) end
         -- selected-units bar (see updateSelection)
         F.sel = {}
         for i = 1, SEL_MAX do
@@ -462,6 +477,9 @@ define("dota_hud", function()
 
     local function placeBottom()
         local P = L.PANEL_H
+        Kit.place(F.fgBottom, G.abilL, 0, G.itemsR, P)
+        Kit.place(F.blockStats, G.statsL, 0, G.portL, P)
+        Kit.place(F.blockXp, G.portL, 0, G.abilL, 0.016)
         if F.bgBelow then
             Kit.place(F.panelBg, G.statsL, 0, G.abilR, P)
             Kit.place(F.itemsBg, G.itemsL - 0.002, 0, G.itemsR, P + 0.004)
@@ -471,7 +489,7 @@ define("dota_hud", function()
                 Kit.place(F.itemWells[i], x0 - 0.001, y0 - 0.001, x1 + 0.001, y1 + 0.001)
             end
         end
-        for i = 0, 5 do Kit.place(F.itemBtns[i], itemRect(i)) end
+        for i = 0, 5 do placeSlot(F.slots[i], itemRect(i)) end
         -- portrait column
         local pl, pr = G.portL + 0.004, G.portL + L.PORT_W - 0.004
         Kit.place(F.xpBg, pl, 0.005, pr, 0.012)
@@ -596,6 +614,7 @@ define("dota_hud", function()
         local h = L.HERO_H * w / L.HERO_W
         local x0 = right - (5 * w + 4 * L.HERO_GAP)
         Kit.place(F.topBg, x0 - 0.004, top - h - 0.012, right + 0.003, top)
+        Kit.place(F.fgTop, x0 - 0.004, top - h - 0.012, cr + 0.004 + L.CMD_W, top)
         for i = 1, 5 do
             local t = F.top[i]
             local x = x0 + (i - 1) * (w + L.HERO_GAP)
@@ -881,17 +900,53 @@ define("dota_hud", function()
         end
     end
 
+    -- Cooldown of an item for the sweep: the Lua-timed one (items.lua), or
+    -- WC3's when a main inventory holds the item and WC3 counts longer (a
+    -- reduction or refresh started by other code). Local reads only.
+    local function itemCooldown(it, holder)
+        local Items = use("items")
+        local left, total = Items.cdLeft(it, holder)
+        local name = holder and Items.nameOf(it)
+        local id = name and Items.abilityId(name)
+        if id then
+            local native = BlzGetUnitAbilityCooldownRemaining(holder, id)
+            if native > left + 0.05 then
+                left = native
+                total = math.max(total, native, (Items.data(name) or {}).cooldown or 0)
+            end
+        end
+        return left, total
+    end
+
+    -- Shows `it` in slot `s` (nil hides the slot); `holder` is the unit whose
+    -- main inventory holds it. The sweep itself runs in updateSweeps.
+    local function showSlot(s, it, holder)
+        local path = ""
+        if it then
+            -- maps without the launcher's item icons show the shop's WC3 stand-ins
+            local name = use("items").nameOf(it)
+            path = (Kit.dota or not name) and BlzGetItemIconPath(it) or use("dota_shop").iconOf(name)
+        end
+        if path == "" then it = nil end
+        s.item, s.holder = it, holder
+        Kit.show(s.b, it ~= nil)
+        if not it then return end
+        Kit.setTex(s.img, path)
+        local n = GetItemCharges(it)
+        Kit.setText(s.charges, n > 0 and tostring(n) or "")
+    end
+
     -- Item buttons drawn from the unit's items: the native item buttons show
     -- no icons and take no clicks or hotkeys once the console bars are hidden
     -- (2026-10-10); using items goes through dota_items.
     local function updateItems(u)
-        for i = 0, 5 do
-            local it = u and UnitItemInSlot(u, i) or nil
-            local path = it and BlzGetItemIconPath(it) or ""
-            Kit.show(F.itemBtns[i], path ~= "")
-            if path ~= "" then Kit.setTex(F.itemIcons[i], path) end
-            local n = (it and path ~= "") and GetItemCharges(it) or 0
-            Kit.setText(F.itemCharges[i], n > 0 and tostring(n) or "")
+        for i = 0, 5 do showSlot(F.slots[i], u and UnitItemInSlot(u, i) or nil, u) end
+    end
+
+    -- Every frame (1/32 s): the cooldown sweeps of the shown items.
+    local function updateSweeps()
+        for _, s in pairs(F.slots) do
+            if s.item then Kit.setSweep(s.cd, itemCooldown(s.item, s.holder)) end
         end
     end
 
@@ -1064,6 +1119,7 @@ define("dota_hud", function()
         updateTop(now)
     end
     Hud.tick = update
+    Hud.tickSweeps = updateSweeps
 
     ---------------------------------------------------------------- views
 
@@ -1123,8 +1179,8 @@ define("dota_hud", function()
         -- items: click a slot or press Z X C V B N (dota_items)
         local Use = use("dota_items")
         for i = 0, 5 do
-            local hit = Kit.hit(F.itemBtns[i])
-            Kit.probe(F.itemBtns[i], "item slot " .. i)
+            local hit = Kit.hit(F.slots[i].b)
+            Kit.probe(F.slots[i].b, "item slot " .. i)
             local trig = CreateTrigger()
             BlzTriggerRegisterFrameEvent(trig, hit, FRAMEEVENT_CONTROL_CLICK)
             TriggerAddAction(trig, function()
@@ -1209,6 +1265,38 @@ define("dota_hud", function()
             local Cmd = use("commander")
             if Cmd.player then halls = Cmd.halls() end
         end)
+        if BUILD_TEST_MODE then
+            -- clicks that land on the blockers (empty HUD space)
+            Kit.probe(F.fgBottom, "hud blocker bottom", true)
+            Kit.probe(F.fgTop, "hud blocker top", true)
+            Kit.probe(F.blockStats, "hud blocker stats", true)
+            Kit.probe(F.blockXp, "hud blocker xp", true)
+            local function chat(text, fn)
+                local trig = CreateTrigger()
+                for slot = 0, SLOT_DOTA_MAX do TriggerRegisterPlayerChatEvent(trig, Player(slot), text, true) end
+                TriggerAddAction(trig, function()
+                    Safe.call(function()
+                        if GetTriggerPlayer() == GetLocalPlayer() then
+                            fn()
+                            Log.flush()
+                        end
+                    end)
+                end)
+            end
+            -- -sweep: item cooldowns switch between the sweep model and the dark wipe
+            chat("-sweep", function()
+                Kit.SWEEP = Kit.SWEEP == "model" and "wipe" or "model"
+                Log.info("item cooldowns now use the " .. Kit.SWEEP)
+            end)
+            -- -block: the HUD's click blockers off and on (local: only the mouse
+            -- of the typing player changes)
+            local blocking = true
+            chat("-block", function()
+                blocking = not blocking
+                for _, b in ipairs(Kit.blockers) do BlzFrameSetEnable(b, blocking) end
+                Log.info("hud click blockers " .. (blocking and "on" or "off"))
+            end)
+        end
     end
 
     ---------------------------------------------------------------- init
@@ -1234,6 +1322,11 @@ define("dota_hud", function()
         Timer.every(L.TICK, function()
             if view and failures < 5 then
                 if not Safe.call(update) then failures = failures + 1 end
+            end
+        end)
+        Timer.every(1 / 32, function()
+            if view and failures < 5 then
+                if not Safe.call(updateSweeps) then failures = failures + 1 end
             end
         end)
         local found = 0

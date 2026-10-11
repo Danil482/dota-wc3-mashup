@@ -15,9 +15,16 @@ Steps (source -> convert -> w3x):
   4. The base map's war3map.w3i and war3mapUnits.doo get the new start
      locations, and its war3map.lua the new data.mapdata module (the block
      between the "-- @dvc-data-begin/end data.mapdata" markers).
+  5. Dota's tree models replace the WC3 tree models (trees.py): MDX files,
+     war3map.w3b, and war3map.w3d for the decorative trees on raised ground.
+     If that fails, the trees stay WC3 summer trees, without decoration.
+  6. Dota's ground textures replace the textures of the tiles the terrain
+     uses (ground.py). If that fails, the tiles keep Warcraft III's look.
 
 Steps 1-3 are cached per dota.vpk content and CONVERTER_VERSION in
-%LOCALAPPDATA%\\DotaVsCommander\\cache\\<Dota build>\\terrain-<version>-<hash>.
+%LOCALAPPDATA%\\DotaVsCommander\\cache\\<Dota build>\\terrain-<version>-<hash>,
+step 5 per tree plan and TREES_VERSION in ...\\<Dota build>\\trees-<version>-<hash>,
+step 6 per tile set and GROUND_VERSION in ...\\<Dota build>\\ground-<version>-<hash>.
 The output is deterministic, so players with the same Dota 2 build and mod
 version get identical maps.
 """
@@ -33,11 +40,14 @@ from .. import installs, stormlib
 
 # Bump whenever the output changes for the same dota.vpk (cached files are
 # keyed by it, and players must all get the same map).
-CONVERTER_VERSION = 2
+CONVERTER_VERSION = 7
 CACHE_PREFIX = "terrain-"
 TERRAIN_FILES = ("war3map.w3e", "war3map.wpm", "war3map.doo", "war3mapMap.blp")
 PATCHED_FILES = ("war3map.w3i", "war3mapUnits.doo", "war3map.lua")
 MAP_FILES = TERRAIN_FILES + PATCHED_FILES
+# Cached beside the map files: the gameplay data, the tree plan (trees.py)
+# and war3map.doo with plain WC3 trees, used when the tree models fail.
+CACHE_ONLY = ("mapdata.json", "trees.json", "war3map_wc3trees.doo")
 # Slots as in tools/build_map.js: 0-4 Dota, 5 commander, 6 the Ancients,
 # 7 commander AI, 8 Horde.
 DOTA_SLOTS, COMMANDER_SLOTS, ANCIENTS_SLOT = (0, 1, 2, 3, 4), (5, 7, 8), 6
@@ -79,7 +89,7 @@ def read_cache(folder):
         if _sha(data) != digest:
             return None
         files[name] = data
-    if set(files) != set(TERRAIN_FILES) | {"mapdata.json"}:
+    if set(files) != set(TERRAIN_FILES) | set(CACHE_ONLY):
         return None
     return files
 
@@ -101,13 +111,17 @@ def build_terrain(vpk, vrf_exe, folder, log):
         files = {
             "war3map.w3e": w3x.write_w3e(terrain),
             "war3map.wpm": w3x.write_wpm(terrain),
-            "war3map.doo": w3x.write_trees(terrain),
+            "war3map.doo": w3x.write_doo(terrain),
             "war3mapMap.blp": w3x.minimap_blp(terrain),
             "mapdata.json": json.dumps(terrain.mapdata, indent=1, sort_keys=True).encode("utf-8"),
+            "trees.json": json.dumps(terrain.tree_plan, indent=1, sort_keys=True).encode("utf-8"),
+            "war3map_wc3trees.doo": w3x.write_doo(terrain, dota_trees=False),
         }
         t3 = time.perf_counter()
         (tmp / "description.json").write_text(json.dumps(desc), encoding="utf-8")
-        report = {"ramps": terrain.ramps, "notes": terrain.notes, "trees": len(terrain.trees)}
+        report = {"ramps": terrain.ramps, "notes": terrain.notes, "trees": len(terrain.trees),
+                  "rocks": len(terrain.rocks), "decorative_trees": len(terrain.decor),
+                  "raised_corners": sum(terrain.raised)}
         (tmp / "report.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
         render.preview_dota(desc, tmp / "dota.png", mapdata=terrain.mapdata)
         render.render_wc3(terrain, tmp / "wc3.png")
@@ -171,15 +185,72 @@ def patch_base(base, terrain_files):
 
 
 def read_base_files(base_map, stormlib_dll):
+    """The base map files the terrain step reads; war3map.w3b and w3d
+    (destructable and doodad object data) only if the map has them."""
     try:
         storm = stormlib.StormLib(stormlib_dll)
         h = storm.open_archive(base_map)
         try:
-            return {n: storm.read_file(h, n.encode("ascii")) for n in ("war3map.w3e",) + PATCHED_FILES}
+            files = {n: storm.read_file(h, n.encode("ascii")) for n in ("war3map.w3e",) + PATCHED_FILES}
+            for name in ("war3map.w3b", "war3map.w3d"):
+                try:
+                    files[name] = storm.read_file(h, name.encode("ascii"))
+                except stormlib.StormError:
+                    pass
+            return files
         finally:
             storm.SFileCloseArchive(h)
     except stormlib.StormError as e:
         raise TerrainError(f"could not read the base map: {e}") from e
+
+
+def is_terrain_asset(name):
+    """True for the files the terrain step adds beside MAP_FILES: Dota's tree
+    models and textures, the tile textures, war3map.w3b and war3map.w3d."""
+    from . import ground, trees
+    if name in ("war3map.w3b", "war3map.w3d") or name.startswith(trees.MAP_DIR):
+        return True
+    return any(name in (ground.classic_path(t), ground.classic_dds_path(t), ground.hd_path(t))
+               for t in ground.TILE_FILES)
+
+
+def used_tiles(w3e):
+    """Tile type ids the corners of a w3e (v11) use."""
+    pos = 13
+    count = struct.unpack_from("<i", w3e, pos)[0]
+    ids = [w3e[pos + 4 + 4 * n:pos + 8 + 4 * n].decode("ascii") for n in range(count)]
+    pos += 4 + 4 * count
+    pos += 4 + 4 * struct.unpack_from("<i", w3e, pos)[0]
+    width, height = struct.unpack_from("<ii", w3e, pos)
+    pos += 16
+    used = {w3e[pos + 7 * k + 4] & 0x0F for k in range(width * height)}
+    return sorted(ids[n] for n in used if n < len(ids))
+
+
+def dota_ground(dota_root, vrf_exe, build_dir, w3e, log):
+    """Dota's ground textures for the tiles the terrain uses ({map path:
+    bytes}), or {} (with a warning): the tiles then keep Warcraft III's look."""
+    from . import ground
+    try:
+        return ground.prepare(dota_root, vrf_exe, build_dir, used_tiles(w3e), log)
+    except Exception as e:  # noqa: BLE001 - optional look; never lose Dota's layout over it
+        log(f"terrain: the map keeps Warcraft III ground textures, Dota's failed: {type(e).__name__}: {e}")
+        return {}
+
+
+def dota_trees(dota_root, vrf_exe, build_dir, cached, base, log):
+    """Dota's tree models and the war3map.w3b and w3d that point the map's
+    tree types and decorative tree doodads at them ({map path: bytes}), or {}
+    (with a warning) when they cannot be made: the map then keeps Warcraft
+    III's trees."""
+    from . import trees
+    try:
+        plan = json.loads(cached["trees.json"].decode("utf-8"))
+        return trees.prepare(dota_root, vrf_exe, build_dir, plan, base.get("war3map.w3b"), log,
+                             base_w3d=base.get("war3map.w3d"))
+    except Exception as e:  # noqa: BLE001 - optional look; never lose Dota's layout over it
+        log(f"terrain: the map keeps Warcraft III trees, Dota's tree models failed: {type(e).__name__}: {e}")
+        return {}
 
 
 def cache_folder(dota_root, vpk, cache_root):
@@ -208,4 +279,11 @@ def prepare(dota_root, base_map, vrf_exe, stormlib_dll, cache_root, log):
             if old.is_dir() and old.name != folder.name:
                 shutil.rmtree(old, ignore_errors=True)
         cached = build_terrain(vpk, Path(vrf_exe).resolve(), folder, log)
-    return patch_base(base, cached)
+    out = patch_base(base, cached)
+    tree_files = dota_trees(dota_root, Path(vrf_exe).resolve(), folder.parent, cached, base, log)
+    if tree_files:
+        out.update(tree_files)
+    else:
+        out["war3map.doo"] = cached["war3map_wc3trees.doo"]
+    out.update(dota_ground(dota_root, Path(vrf_exe).resolve(), folder.parent, cached["war3map.w3e"], log))
+    return out

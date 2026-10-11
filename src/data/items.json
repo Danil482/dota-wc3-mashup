@@ -1263,6 +1263,7 @@
   },
   "item_demon_edge": {
    "cost": 2200,
+   "secret": true,
    "shop": "relics",
    "stats": {
     "damage": 40
@@ -1319,6 +1320,7 @@
    "cost": 80,
    "desc": "Exposes and slows (20%) invisible enemy heroes within 1050 of where you stand for 12 seconds.",
    "range": 1050,
+   "shareable": true,
    "shop": "consumables",
    "stack": true,
    "title": "Dust of Appearance",
@@ -1332,6 +1334,7 @@
   },
   "item_eagle": {
    "cost": 2800,
+   "secret": true,
    "shop": "relics",
    "stats": {
     "agi": 25
@@ -1365,6 +1368,7 @@
   },
   "item_energy_booster": {
    "cost": 800,
+   "secret": true,
    "shop": "secret",
    "stats": {
     "max_mana": 250
@@ -1573,6 +1577,7 @@
   },
   "item_hyperstone": {
    "cost": 2000,
+   "secret": true,
    "shop": "secret",
    "stats": {
     "attack_speed": 60
@@ -1819,6 +1824,7 @@
   },
   "item_mystic_staff": {
    "cost": 2800,
+   "secret": true,
    "shop": "relics",
    "stats": {
     "int": 25
@@ -1926,6 +1932,7 @@
   },
   "item_platemail": {
    "cost": 1400,
+   "secret": true,
    "shop": "secret",
    "stats": {
     "armor": 10
@@ -1937,6 +1944,7 @@
   },
   "item_point_booster": {
    "cost": 1200,
+   "secret": true,
    "shop": "secret",
    "stats": {
     "max_hp": 175,
@@ -2030,6 +2038,7 @@
   },
   "item_reaver": {
    "cost": 2800,
+   "secret": true,
    "shop": "relics",
    "stats": {
     "str": 25
@@ -2245,6 +2254,7 @@
   },
   "item_relic": {
    "cost": 3400,
+   "secret": true,
    "shop": "relics",
    "stats": {
     "damage": 55
@@ -2280,6 +2290,7 @@
   },
   "item_ring_of_health": {
    "cost": 700,
+   "secret": true,
    "shop": "secret",
    "stats": {
     "hp_regen": 4.5
@@ -2313,6 +2324,7 @@
   },
   "item_ring_of_tarrasque": {
    "cost": 1700,
+   "secret": true,
    "shop": "secret",
    "stats": {
     "hp_regen": 12
@@ -2531,6 +2543,7 @@
   "item_talisman_of_evasion": {
    "cost": 1300,
    "desc": "Gives a chance to dodge attacks.",
+   "secret": true,
    "shop": "secret",
    "stats": {
     "evasion": 0.15
@@ -2562,6 +2575,7 @@
   },
   "item_tiara_of_selemene": {
    "cost": 1700,
+   "secret": true,
    "shop": "secret",
    "stats": {
     "mana_regen": 6
@@ -2579,6 +2593,7 @@
    "cost": 100,
    "desc": "Channel for 3 seconds, then teleport next to the friendly building nearest to the target point.",
    "mana": 75,
+   "shareable": true,
    "shop": "consumables",
    "stack": true,
    "title": "Town Portal Scroll",
@@ -2592,6 +2607,7 @@
   },
   "item_ultimate_orb": {
    "cost": 2800,
+   "secret": true,
    "shop": "relics",
    "stats": {
     "agi": 15,
@@ -2605,6 +2621,7 @@
   },
   "item_vitality_booster": {
    "cost": 1000,
+   "secret": true,
    "shop": "secret",
    "stats": {
     "max_hp": 250
@@ -2616,6 +2633,7 @@
   },
   "item_void_stone": {
    "cost": 700,
+   "secret": true,
    "shop": "secret",
    "stats": {
     "mana_regen": 1.75
@@ -2632,6 +2650,7 @@
    "cost": 0,
    "desc": "Plants an invisible ward that watches a 1600 radius for 360 seconds.",
    "range": 500,
+   "shareable": true,
    "shop": "consumables",
    "stack": true,
    "stock": {
@@ -2654,6 +2673,7 @@
    "cost": 50,
    "desc": "Plants an invisible ward that exposes invisible enemies within 1050 for 420 seconds. It gives no vision by itself.",
    "range": 500,
+   "shareable": true,
    "shop": "consumables",
    "stack": true,
    "stock": {
@@ -2751,7 +2771,8 @@
  },
  "notes": {
   "patch": "All 78 requested items exist in the installed patch. Recipes follow it: Arcane Boots use Ring of Basilius + Wizard Hat, Shiva's Guard uses Splintmail + Chasm Stone, Refresher Orb uses Ring of Tarrasque + Tiara of Selemene, Manta uses Diadem, Dagon uses Crown + Wizard Hat. Their components are sold too.",
-  "simplified": "Radiance burns permanently (no toggle). BKB gives full magic immunity (the patch gives 60% magic resistance plus debuff immunity). Status resistance, slow resistance, Chasm Stone area bonus, Monkey King Bar melee range and Iron Branch tree planting are not modelled. Items are always bought at the fountain shops (no secret or side shop) and the 6 WC3 inventory slots are the only storage (no backpack or stash)."
+  "simplified": "Radiance burns permanently (no toggle). BKB gives full magic immunity (the patch gives 60% magic resistance plus debuff immunity). Status resistance, slow resistance, Chasm Stone area bonus, Monkey King Bar melee range and Iron Branch tree planting are not modelled.",
+  "storage": "As in Dota: 6 main slots, a 3-slot backpack, a 6-slot stash, the TP scroll slot and a courier per player (src/game/inventory.lua, courier.lua). Secret items are sold only at the Secret Shops (mapdata.side_shops)."
  },
  "shops": [
   {

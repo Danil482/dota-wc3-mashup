@@ -116,7 +116,10 @@ def default_stormlib():
 
 
 def user_dir():
-    return winapi.local_app_data_dir() / APP
+    # DVC_USER_DIR is for development only: parallel source runs get their own
+    # cache, logs and work folders instead of sharing %LOCALAPPDATA%.
+    override = os.environ.get("DVC_USER_DIR")
+    return Path(override) if override else winapi.local_app_data_dir() / APP
 
 
 def default_out():
@@ -168,21 +171,13 @@ def cache_complete(plan, raw):
     for source in plan["extract"]:
         if source in failed:
             continue
-        p = raw / vrf.output_path(source)
-        try:
-            if p.stat().st_size == 0:
-                return False
-        except OSError:
+        if vrf.find_output(raw, source) is None:
             return False
     return True
 
 
 def extract_missing(plan, vpk, raw, build_dir, vrf_exe):
-    todo = []
-    for source in plan["extract"]:
-        p = raw / vrf.output_path(source)
-        if not (p.is_file() and p.stat().st_size > 0):
-            todo.append(source)
+    todo = [source for source in plan["extract"] if vrf.find_output(raw, source) is None]
     if not todo:
         return
     staging = build_dir / f"staging-{os.getpid()}"
@@ -193,10 +188,9 @@ def extract_missing(plan, vpk, raw, build_dir, vrf_exe):
         vrf.extract(vrf_exe, vpk, todo, staging, work, log.info, threads=min(4, os.cpu_count() or 1))
         log.info(f"VRF exported {len(todo)} files in {time.perf_counter() - t:.1f} s")
         for source in todo:
-            rel = vrf.output_path(source)
-            src = staging / rel
-            if src.is_file() and src.stat().st_size > 0:
-                dst = raw / rel
+            src = vrf.find_output(staging, source)      # sounds come out as .mp3 or .wav
+            if src is not None:
+                dst = raw / src.relative_to(staging)
                 dst.parent.mkdir(parents=True, exist_ok=True)
                 os.replace(src, dst)
     finally:
@@ -256,7 +250,7 @@ def prepare_assets(dota, vpk, vrf_exe):
             extract_missing(plan, vpk, raw, build_dir, vrf_exe)
         except vrf.VrfError as e:
             raise LauncherError(EXIT_EXTRACT_FAILED, f"Could not export assets from Dota 2:\n{e}") from e
-        plan["failed"] = [s for s in plan["extract"] if not (raw / vrf.output_path(s)).is_file()]
+        plan["failed"] = [s for s in plan["extract"] if vrf.find_output(raw, s) is None]
         if plan["extract"] and len(plan["failed"]) == len(plan["extract"]):
             raise LauncherError(EXIT_EXTRACT_FAILED, "The asset exporter (VRF) produced no files.")
         for s in plan["failed"]:

@@ -1,5 +1,8 @@
 {
  "antimage": {
+  "aegis": [
+   "Sound\\Dota\\antimage\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\antimage\\attack_1.mp3",
    "Sound\\Dota\\antimage\\attack_2.mp3",
@@ -20,6 +23,9 @@
    "Sound\\Dota\\antimage\\death_2.mp3",
    "Sound\\Dota\\antimage\\death_3.mp3",
    "Sound\\Dota\\antimage\\death_4.mp3"
+  ],
+  "firstblood": [
+   "Sound\\Dota\\antimage\\firstblood_1.mp3"
   ],
   "kill": [
    "Sound\\Dota\\antimage\\kill_1.mp3",
@@ -49,6 +55,33 @@
    "Sound\\Dota\\antimage\\move_7.mp3",
    "Sound\\Dota\\antimage\\move_8.mp3"
   ],
+  "nomana": [
+   "Sound\\Dota\\antimage\\nomana_1.mp3",
+   "Sound\\Dota\\antimage\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\antimage\\notyet_1.mp3",
+   "Sound\\Dota\\antimage\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\antimage\\respawn_1.mp3",
+   "Sound\\Dota\\antimage\\respawn_2.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\antimage\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\antimage\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\antimage\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\antimage\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\antimage\\rune_regeneration_1.mp3"
+  ],
   "spawn": [
    "Sound\\Dota\\antimage\\spawn_1.mp3",
    "Sound\\Dota\\antimage\\spawn_2.mp3",
@@ -57,6 +90,9 @@
   ]
  },
  "chen": {
+  "aegis": [
+   "Sound\\Dota\\chen\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\chen\\attack_1.mp3",
    "Sound\\Dota\\chen\\attack_2.mp3",
@@ -66,6 +102,9 @@
    "Sound\\Dota\\chen\\attack_6.mp3",
    "Sound\\Dota\\chen\\attack_7.mp3",
    "Sound\\Dota\\chen\\attack_8.mp3"
+  ],
+  "battlebegins": [
+   "Sound\\Dota\\chen\\battlebegins_1.mp3"
   ],
   "cast_chen_hand_of_god": [
    "Sound\\Dota\\chen\\cast_chen_hand_of_god_1.mp3",
@@ -87,6 +126,9 @@
    "Sound\\Dota\\chen\\death_2.mp3",
    "Sound\\Dota\\chen\\death_3.mp3",
    "Sound\\Dota\\chen\\death_4.mp3"
+  ],
+  "firstblood": [
+   "Sound\\Dota\\chen\\firstblood_1.mp3"
   ],
   "kill": [
    "Sound\\Dota\\chen\\kill_1.mp3",
@@ -116,6 +158,33 @@
    "Sound\\Dota\\chen\\move_7.mp3",
    "Sound\\Dota\\chen\\move_8.mp3"
   ],
+  "nomana": [
+   "Sound\\Dota\\chen\\nomana_1.mp3",
+   "Sound\\Dota\\chen\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\chen\\notyet_1.mp3",
+   "Sound\\Dota\\chen\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\chen\\respawn_1.mp3",
+   "Sound\\Dota\\chen\\respawn_2.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\chen\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\chen\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\chen\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\chen\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\chen\\rune_regeneration_1.mp3"
+  ],
   "spawn": [
    "Sound\\Dota\\chen\\spawn_1.mp3",
    "Sound\\Dota\\chen\\spawn_2.mp3",
@@ -124,6 +193,9 @@
   ]
  },
  "furion": {
+  "aegis": [
+   "Sound\\Dota\\furion\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\furion\\attack_1.mp3",
    "Sound\\Dota\\furion\\attack_2.mp3",
@@ -133,6 +205,9 @@
    "Sound\\Dota\\furion\\attack_6.mp3",
    "Sound\\Dota\\furion\\attack_7.mp3",
    "Sound\\Dota\\furion\\attack_8.mp3"
+  ],
+  "battlebegins": [
+   "Sound\\Dota\\furion\\battlebegins_1.mp3"
   ],
   "cast_furion_force_of_nature": [
    "Sound\\Dota\\furion\\cast_furion_force_of_nature_1.mp3",
@@ -188,6 +263,33 @@
    "Sound\\Dota\\furion\\move_7.mp3",
    "Sound\\Dota\\furion\\move_8.mp3"
   ],
+  "nomana": [
+   "Sound\\Dota\\furion\\nomana_1.mp3",
+   "Sound\\Dota\\furion\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\furion\\notyet_1.mp3",
+   "Sound\\Dota\\furion\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\furion\\respawn_1.mp3",
+   "Sound\\Dota\\furion\\respawn_2.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\furion\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\furion\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\furion\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\furion\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\furion\\rune_regeneration_1.mp3"
+  ],
   "spawn": [
    "Sound\\Dota\\furion\\spawn_1.mp3",
    "Sound\\Dota\\furion\\spawn_2.mp3",
@@ -195,6 +297,9 @@
   ]
  },
  "meepo": {
+  "aegis": [
+   "Sound\\Dota\\meepo\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\meepo\\attack_1.mp3",
    "Sound\\Dota\\meepo\\attack_2.mp3",
@@ -204,6 +309,9 @@
    "Sound\\Dota\\meepo\\attack_6.mp3",
    "Sound\\Dota\\meepo\\attack_7.mp3",
    "Sound\\Dota\\meepo\\attack_8.mp3"
+  ],
+  "battlebegins": [
+   "Sound\\Dota\\meepo\\battlebegins_1.mp3"
   ],
   "cast_meepo_divided_we_stand": [
    "Sound\\Dota\\meepo\\cast_meepo_divided_we_stand_1.mp3",
@@ -225,6 +333,9 @@
    "Sound\\Dota\\meepo\\death_2.mp3",
    "Sound\\Dota\\meepo\\death_3.mp3",
    "Sound\\Dota\\meepo\\death_4.mp3"
+  ],
+  "firstblood": [
+   "Sound\\Dota\\meepo\\firstblood_1.mp3"
   ],
   "kill": [
    "Sound\\Dota\\meepo\\kill_1.mp3",
@@ -254,6 +365,39 @@
    "Sound\\Dota\\meepo\\move_7.mp3",
    "Sound\\Dota\\meepo\\move_8.mp3"
   ],
+  "nomana": [
+   "Sound\\Dota\\meepo\\nomana_1.mp3",
+   "Sound\\Dota\\meepo\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\meepo\\notyet_1.mp3",
+   "Sound\\Dota\\meepo\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\meepo\\respawn_1.mp3",
+   "Sound\\Dota\\meepo\\respawn_2.mp3"
+  ],
+  "rune_arcane": [
+   "Sound\\Dota\\meepo\\rune_arcane_1.mp3"
+  ],
+  "rune_bounty": [
+   "Sound\\Dota\\meepo\\rune_bounty_1.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\meepo\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\meepo\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\meepo\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\meepo\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\meepo\\rune_regeneration_1.mp3"
+  ],
   "spawn": [
    "Sound\\Dota\\meepo\\spawn_1.mp3",
    "Sound\\Dota\\meepo\\spawn_2.mp3",
@@ -262,6 +406,9 @@
   ]
  },
  "morphling": {
+  "aegis": [
+   "Sound\\Dota\\morphling\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\morphling\\attack_1.mp3",
    "Sound\\Dota\\morphling\\attack_2.mp3",
@@ -284,6 +431,9 @@
    "Sound\\Dota\\morphling\\death_2.mp3",
    "Sound\\Dota\\morphling\\death_3.mp3",
    "Sound\\Dota\\morphling\\death_4.mp3"
+  ],
+  "firstblood": [
+   "Sound\\Dota\\morphling\\firstblood_1.mp3"
   ],
   "kill": [
    "Sound\\Dota\\morphling\\kill_1.mp3",
@@ -313,6 +463,33 @@
    "Sound\\Dota\\morphling\\move_7.mp3",
    "Sound\\Dota\\morphling\\move_8.mp3"
   ],
+  "nomana": [
+   "Sound\\Dota\\morphling\\nomana_1.mp3",
+   "Sound\\Dota\\morphling\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\morphling\\notyet_1.mp3",
+   "Sound\\Dota\\morphling\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\morphling\\respawn_1.mp3",
+   "Sound\\Dota\\morphling\\respawn_2.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\morphling\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\morphling\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\morphling\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\morphling\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\morphling\\rune_regeneration_1.mp3"
+  ],
   "spawn": [
    "Sound\\Dota\\morphling\\spawn_1.mp3",
    "Sound\\Dota\\morphling\\spawn_2.mp3",
@@ -321,6 +498,9 @@
   ]
  },
  "nevermore": {
+  "aegis": [
+   "Sound\\Dota\\nevermore\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\nevermore\\attack_1.mp3",
    "Sound\\Dota\\nevermore\\attack_2.mp3",
@@ -330,6 +510,9 @@
    "Sound\\Dota\\nevermore\\attack_6.mp3",
    "Sound\\Dota\\nevermore\\attack_7.mp3",
    "Sound\\Dota\\nevermore\\attack_8.mp3"
+  ],
+  "battlebegins": [
+   "Sound\\Dota\\nevermore\\battlebegins_1.mp3"
   ],
   "cast_nevermore_dark_lord": [
    "Sound\\Dota\\nevermore\\cast_nevermore_dark_lord_1.mp3",
@@ -365,6 +548,9 @@
    "Sound\\Dota\\nevermore\\death_3.mp3",
    "Sound\\Dota\\nevermore\\death_4.mp3"
   ],
+  "firstblood": [
+   "Sound\\Dota\\nevermore\\firstblood_1.mp3"
+  ],
   "kill": [
    "Sound\\Dota\\nevermore\\kill_1.mp3",
    "Sound\\Dota\\nevermore\\kill_2.mp3",
@@ -393,6 +579,33 @@
    "Sound\\Dota\\nevermore\\move_7.mp3",
    "Sound\\Dota\\nevermore\\move_8.mp3"
   ],
+  "nomana": [
+   "Sound\\Dota\\nevermore\\nomana_1.mp3",
+   "Sound\\Dota\\nevermore\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\nevermore\\notyet_1.mp3",
+   "Sound\\Dota\\nevermore\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\nevermore\\respawn_1.mp3",
+   "Sound\\Dota\\nevermore\\respawn_2.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\nevermore\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\nevermore\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\nevermore\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\nevermore\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\nevermore\\rune_regeneration_1.mp3"
+  ],
   "spawn": [
    "Sound\\Dota\\nevermore\\spawn_1.mp3",
    "Sound\\Dota\\nevermore\\spawn_2.mp3",
@@ -401,6 +614,9 @@
   ]
  },
  "ogre_magi": {
+  "aegis": [
+   "Sound\\Dota\\ogre_magi\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\ogre_magi\\attack_1.mp3",
    "Sound\\Dota\\ogre_magi\\attack_2.mp3",
@@ -410,6 +626,9 @@
    "Sound\\Dota\\ogre_magi\\attack_6.mp3",
    "Sound\\Dota\\ogre_magi\\attack_7.mp3",
    "Sound\\Dota\\ogre_magi\\attack_8.mp3"
+  ],
+  "battlebegins": [
+   "Sound\\Dota\\ogre_magi\\battlebegins_1.mp3"
   ],
   "cast_ogre_magi_bloodlust": [
    "Sound\\Dota\\ogre_magi\\cast_ogre_magi_bloodlust_1.mp3",
@@ -442,6 +661,9 @@
    "Sound\\Dota\\ogre_magi\\death_3.mp3",
    "Sound\\Dota\\ogre_magi\\death_4.mp3"
   ],
+  "firstblood": [
+   "Sound\\Dota\\ogre_magi\\firstblood_1.mp3"
+  ],
   "kill": [
    "Sound\\Dota\\ogre_magi\\kill_1.mp3",
    "Sound\\Dota\\ogre_magi\\kill_2.mp3",
@@ -470,6 +692,33 @@
    "Sound\\Dota\\ogre_magi\\move_7.mp3",
    "Sound\\Dota\\ogre_magi\\move_8.mp3"
   ],
+  "nomana": [
+   "Sound\\Dota\\ogre_magi\\nomana_1.mp3",
+   "Sound\\Dota\\ogre_magi\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\ogre_magi\\notyet_1.mp3",
+   "Sound\\Dota\\ogre_magi\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\ogre_magi\\respawn_1.mp3",
+   "Sound\\Dota\\ogre_magi\\respawn_2.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\ogre_magi\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\ogre_magi\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\ogre_magi\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\ogre_magi\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\ogre_magi\\rune_regeneration_1.mp3"
+  ],
   "spawn": [
    "Sound\\Dota\\ogre_magi\\spawn_1.mp3",
    "Sound\\Dota\\ogre_magi\\spawn_2.mp3",
@@ -478,6 +727,9 @@
   ]
  },
  "pudge": {
+  "aegis": [
+   "Sound\\Dota\\pudge\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\pudge\\attack_1.mp3",
    "Sound\\Dota\\pudge\\attack_2.mp3",
@@ -487,6 +739,9 @@
    "Sound\\Dota\\pudge\\attack_6.mp3",
    "Sound\\Dota\\pudge\\attack_7.mp3",
    "Sound\\Dota\\pudge\\attack_8.mp3"
+  ],
+  "battlebegins": [
+   "Sound\\Dota\\pudge\\battlebegins_1.mp3"
   ],
   "cast_pudge_dismember": [
    "Sound\\Dota\\pudge\\cast_pudge_dismember_1.mp3",
@@ -512,6 +767,9 @@
    "Sound\\Dota\\pudge\\death_2.mp3",
    "Sound\\Dota\\pudge\\death_3.mp3",
    "Sound\\Dota\\pudge\\death_4.mp3"
+  ],
+  "firstblood": [
+   "Sound\\Dota\\pudge\\firstblood_1.mp3"
   ],
   "kill": [
    "Sound\\Dota\\pudge\\kill_1.mp3",
@@ -541,6 +799,33 @@
    "Sound\\Dota\\pudge\\move_7.mp3",
    "Sound\\Dota\\pudge\\move_8.mp3"
   ],
+  "nomana": [
+   "Sound\\Dota\\pudge\\nomana_1.mp3",
+   "Sound\\Dota\\pudge\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\pudge\\notyet_1.mp3",
+   "Sound\\Dota\\pudge\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\pudge\\respawn_1.mp3",
+   "Sound\\Dota\\pudge\\respawn_2.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\pudge\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\pudge\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\pudge\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\pudge\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\pudge\\rune_regeneration_1.mp3"
+  ],
   "spawn": [
    "Sound\\Dota\\pudge\\spawn_1.mp3",
    "Sound\\Dota\\pudge\\spawn_2.mp3",
@@ -549,6 +834,9 @@
   ]
  },
  "rubick": {
+  "aegis": [
+   "Sound\\Dota\\rubick\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\rubick\\attack_1.mp3",
    "Sound\\Dota\\rubick\\attack_2.mp3",
@@ -558,6 +846,9 @@
    "Sound\\Dota\\rubick\\attack_6.mp3",
    "Sound\\Dota\\rubick\\attack_7.mp3",
    "Sound\\Dota\\rubick\\attack_8.mp3"
+  ],
+  "battlebegins": [
+   "Sound\\Dota\\rubick\\battlebegins_1.mp3"
   ],
   "cast_rubick_fade_bolt": [
    "Sound\\Dota\\rubick\\cast_rubick_fade_bolt_1.mp3",
@@ -579,6 +870,9 @@
    "Sound\\Dota\\rubick\\death_2.mp3",
    "Sound\\Dota\\rubick\\death_3.mp3",
    "Sound\\Dota\\rubick\\death_4.mp3"
+  ],
+  "firstblood": [
+   "Sound\\Dota\\rubick\\firstblood_1.mp3"
   ],
   "kill": [
    "Sound\\Dota\\rubick\\kill_1.mp3",
@@ -608,6 +902,33 @@
    "Sound\\Dota\\rubick\\move_7.mp3",
    "Sound\\Dota\\rubick\\move_8.mp3"
   ],
+  "nomana": [
+   "Sound\\Dota\\rubick\\nomana_1.mp3",
+   "Sound\\Dota\\rubick\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\rubick\\notyet_1.mp3",
+   "Sound\\Dota\\rubick\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\rubick\\respawn_1.mp3",
+   "Sound\\Dota\\rubick\\respawn_2.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\rubick\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\rubick\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\rubick\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\rubick\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\rubick\\rune_regeneration_1.mp3"
+  ],
   "spawn": [
    "Sound\\Dota\\rubick\\spawn_1.mp3",
    "Sound\\Dota\\rubick\\spawn_2.mp3",
@@ -616,6 +937,9 @@
   ]
  },
  "techies": {
+  "aegis": [
+   "Sound\\Dota\\techies\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\techies\\attack_1.mp3",
    "Sound\\Dota\\techies\\attack_2.mp3",
@@ -625,6 +949,9 @@
    "Sound\\Dota\\techies\\attack_6.mp3",
    "Sound\\Dota\\techies\\attack_7.mp3",
    "Sound\\Dota\\techies\\attack_8.mp3"
+  ],
+  "battlebegins": [
+   "Sound\\Dota\\techies\\battlebegins_1.mp3"
   ],
   "cast_techies_focused_detonate": [
    "Sound\\Dota\\techies\\cast_techies_focused_detonate_1.mp3",
@@ -646,6 +973,9 @@
    "Sound\\Dota\\techies\\death_2.mp3",
    "Sound\\Dota\\techies\\death_3.mp3",
    "Sound\\Dota\\techies\\death_4.mp3"
+  ],
+  "firstblood": [
+   "Sound\\Dota\\techies\\firstblood_1.mp3"
   ],
   "kill": [
    "Sound\\Dota\\techies\\kill_1.mp3",
@@ -669,6 +999,33 @@
    "Sound\\Dota\\techies\\move_7.mp3",
    "Sound\\Dota\\techies\\move_8.mp3"
   ],
+  "nomana": [
+   "Sound\\Dota\\techies\\nomana_1.mp3",
+   "Sound\\Dota\\techies\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\techies\\notyet_1.mp3",
+   "Sound\\Dota\\techies\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\techies\\respawn_1.mp3",
+   "Sound\\Dota\\techies\\respawn_2.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\techies\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\techies\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\techies\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\techies\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\techies\\rune_regeneration_1.mp3"
+  ],
   "spawn": [
    "Sound\\Dota\\techies\\spawn_1.mp3",
    "Sound\\Dota\\techies\\spawn_2.mp3",
@@ -677,6 +1034,9 @@
   ]
  },
  "tinker": {
+  "aegis": [
+   "Sound\\Dota\\tinker\\aegis_1.mp3"
+  ],
   "attack": [
    "Sound\\Dota\\tinker\\attack_1.mp3",
    "Sound\\Dota\\tinker\\attack_2.mp3",
@@ -686,6 +1046,9 @@
    "Sound\\Dota\\tinker\\attack_6.mp3",
    "Sound\\Dota\\tinker\\attack_7.mp3",
    "Sound\\Dota\\tinker\\attack_8.mp3"
+  ],
+  "battlebegins": [
+   "Sound\\Dota\\tinker\\battlebegins_1.mp3"
   ],
   "cast_tinker_laser": [
    "Sound\\Dota\\tinker\\cast_tinker_laser_1.mp3",
@@ -735,6 +1098,33 @@
    "Sound\\Dota\\tinker\\move_6.mp3",
    "Sound\\Dota\\tinker\\move_7.mp3",
    "Sound\\Dota\\tinker\\move_8.mp3"
+  ],
+  "nomana": [
+   "Sound\\Dota\\tinker\\nomana_1.mp3",
+   "Sound\\Dota\\tinker\\nomana_2.mp3"
+  ],
+  "notyet": [
+   "Sound\\Dota\\tinker\\notyet_1.mp3",
+   "Sound\\Dota\\tinker\\notyet_2.mp3"
+  ],
+  "respawn": [
+   "Sound\\Dota\\tinker\\respawn_1.mp3",
+   "Sound\\Dota\\tinker\\respawn_2.mp3"
+  ],
+  "rune_doubledamage": [
+   "Sound\\Dota\\tinker\\rune_doubledamage_1.mp3"
+  ],
+  "rune_haste": [
+   "Sound\\Dota\\tinker\\rune_haste_1.mp3"
+  ],
+  "rune_illusion": [
+   "Sound\\Dota\\tinker\\rune_illusion_1.mp3"
+  ],
+  "rune_invisibility": [
+   "Sound\\Dota\\tinker\\rune_invisibility_1.mp3"
+  ],
+  "rune_regeneration": [
+   "Sound\\Dota\\tinker\\rune_regeneration_1.mp3"
   ],
   "spawn": [
    "Sound\\Dota\\tinker\\spawn_1.mp3",

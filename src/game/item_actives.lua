@@ -469,9 +469,15 @@ define("item_actives", function()
         local c = A.context(caster, abil, target, x, y)
         if not c then return nil end
         local h = H[c.name]
-        if phase == "onChannel" and Mods.flag(caster, "hex") then return cancel(c, "Muted") end
-        if h and h[phase] then return h[phase](c) end
-        return nil
+        if phase == "onChannel" then
+            if Mods.flag(caster, "hex") then return cancel(c, "Muted") end
+            -- a lock WC3 may not have taken (backpack swap, Blink's damage lock)
+            if c.item and I().locked(c.item) > 0.05 then return cancel(c, "Item is on cooldown") end
+        end
+        local result = nil
+        if h and h[phase] then result = h[phase](c) end
+        if phase == "onCast" and c.item then I().used(caster, c.item, c.name) end
+        return result
     end
 
     function A.init()
@@ -537,7 +543,7 @@ define("item_actives", function()
             local rule = USE[c.name]
             local id = I().abilityId(c.name)
             local data = I().data(c.name)
-            if rule and id and BlzGetUnitAbilityCooldownRemaining(u, id) <= 0
+            if rule and id and BlzGetUnitAbilityCooldownRemaining(u, id) <= 0 and I().locked(c.item) <= 0
                 and GetUnitState(u, UNIT_STATE_MANA) >= (data.mana or 0) and rule(u, c.item, s) then
                 return true
             end

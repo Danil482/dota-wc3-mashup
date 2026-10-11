@@ -43,6 +43,25 @@ define("autotest", function()
         return Cmd.halls() >= 1, "halls " .. Cmd.halls() .. ", race " .. tostring(Cmd.raceKey)
     end)
 
+    T.at(2, "commander start location", function()
+        local Cmd = use("commander")
+        local s = use("data.mapdata").commander.start
+        local k = GetPlayerStartLocation(Cmd.player)
+        local d = U.dist(GetStartLocationX(k), GetStartLocationY(k), s.x, s.y)
+        return d < 64, "slot " .. GetPlayerId(Cmd.player) .. " start location " .. k .. ", " .. math.floor(d) .. " from the base"
+    end)
+
+    T.at(3, "commander starter base", function()
+        local Cmd = use("commander")
+        return Cmd.starters == Cmd.starterTarget, "structures " .. Cmd.starters .. " of " .. Cmd.starterTarget
+    end)
+
+    T.at(90, "commander AI builds", function()
+        local a = use("commander").activity
+        if not Roles.commanderIsAI then return true, "human commander" end
+        return a.builds > 0, "orders " .. a.orders .. ", builds " .. a.builds .. ", trained " .. a.trained
+    end)
+
     -- Gameplay constants: Dota hero HP = 120 + 22 per strength point.
     T.at(3, "dota attribute constants", function()
         local H = use("heroes")

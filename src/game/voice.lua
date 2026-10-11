@@ -1,7 +1,9 @@
 -- Dota voice lines for heroes in place of Warcraft's unit responses (the
 -- personalized map gives heroes no WC3 sound set): move and attack orders
 -- for the hero's own player, kills, deaths, level-ups and respawns. Spawn
--- lines play in "heroes", cast lines in "abilities".
+-- lines play in "heroes", cast lines in "abilities"; rune, Aegis and
+-- failed-cast lines in "gamesounds", battle-begins and first-blood lines in
+-- "announcer".
 define("voice", function()
     local Events = use("events")
     local Timer = use("timer")
@@ -38,7 +40,8 @@ define("voice", function()
             end
         end)
         Events.on("hero_level", function(u) S.vo(u, "levelup", 0.6) end)
-        Events.on("hero_respawned", function(u) S.vo(u, "spawn") end)
+        -- Dota has its own respawn lines; spawn lines remain the fallback
+        Events.on("hero_respawned", function(u) S.vo(u, S.has(u, "respawn") and "respawn" or "spawn") end)
     end
 
     return V

@@ -8,11 +8,16 @@ from . import convert, source
 
 LEVEL_COLORS = {-2: (20, 30, 80), -1: (30, 50, 120), 0: (40, 90, 200), 1: (60, 150, 60), 2: (170, 150, 90),
                 3: (205, 205, 205), 4: (125, 85, 160), 5: (95, 60, 125), 6: (70, 40, 100)}
-TILE_COLORS = {"Ldrt": (150, 124, 82), "Ldro": (110, 100, 80), "Ldrg": (126, 120, 74), "Lrok": (120, 120, 120),
-               "Lgrs": (60, 112, 48), "Lgrd": (44, 86, 40), "Yrtl": (170, 165, 150), "Bdrt": (150, 96, 60),
-               "Bdrr": (120, 84, 60), "Bdsd": (96, 72, 52), "Adrd": (80, 62, 46)}
+# Average colours of the tiles as ground.py textures them from Dota's layers
+# (the minimap and the previews use them).
+TILE_COLORS = {"Lrok": (106, 109, 88), "Adrd": (42, 53, 43), "Ldro": (110, 102, 70), "Bdrr": (110, 102, 70),
+               "Bflr": (142, 66, 22), "Yrtl": (103, 110, 73), "Bdrt": (52, 62, 49), "Bdsd": (66, 77, 63),
+               "Bdsr": (80, 88, 73), "Ldrt": (126, 119, 76), "Ldrg": (76, 99, 35), "Lgrd": (67, 95, 32),
+               "Lgrs": (98, 118, 47)}
 WATER = (40, 80, 170)
 TREE = (18, 52, 22)
+DECOR = (30, 70, 34)
+ROCK = (150, 150, 155)
 
 
 def _scale_point(x, y, size, half=10240.0):
@@ -75,7 +80,7 @@ def preview_dota(desc, path, size=1280, mapdata=None):
     img = img.resize((size, size), Image.NEAREST)
     draw = ImageDraw.Draw(img)
     half = 64 * size / 20480.0
-    for x, y in desc["entities"]["trees"]:
+    for x, y, *_rest in desc["entities"]["trees"]:
         px, py = _scale_point(x, y, size)
         draw.rectangle([px - half, py - half, px + half - 1, py + half - 1], fill=TREE)
     if mapdata:
@@ -114,9 +119,16 @@ def render_wc3(t, path, size=1280, pathing=True):
     img = img.resize((size, size), Image.NEAREST)
     draw = ImageDraw.Draw(img)
     half = 64 * size / 20480.0
-    for x, y, _z, _v, _s in t.trees:
+    for x, y, *_rest in t.trees:
         px, py = _scale_point(x, y, size)
         draw.rectangle([px - half, py - half, px + half - 1, py + half - 1], fill=TREE)
+    for x, y, *_rest in getattr(t, "decor", ()):
+        px, py = _scale_point(x, y, size)
+        draw.rectangle([px - half, py - half, px + half - 1, py + half - 1], fill=DECOR)
+    for x, y, _z, _v, s, _a in getattr(t, "rocks", ()):
+        px, py = _scale_point(x, y, size)
+        rad = max(1.0, 85.0 * s * size / 20480.0)
+        draw.ellipse([px - rad, py - rad, px + rad, py + rad], fill=ROCK, outline=(40, 40, 40))
     if t.mapdata:
         _markers(draw, t.mapdata, size)
     img.save(path)
@@ -129,7 +141,7 @@ def minimap(t, size=256):
     pix = img.load()
     step = 2 * 10240.0 / size
     trees = set()
-    for x, y, _z, _v, _s in t.trees:
+    for x, y, *_rest in list(t.trees) + list(getattr(t, "decor", ())):
         trees.add((int((x + 10240) / step), int((10240 - y) / step)))
     for j in range(size):
         for i in range(size):

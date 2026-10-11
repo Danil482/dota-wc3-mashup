@@ -19,6 +19,12 @@ Pathing follows the game's rules: a cliff tile is unwalkable unless all four
 corners are ramp corners, the two side pieces of a ramp are unwalkable, and
 everything else is walkable where Dota's gridnav is.
 
+Blocked ground looks blocked: Dota's unwalkable areas (map edges, behind the
+fountains, rock formations) rise into WC3 cliffs wherever they are wide enough
+for a cliff tile to sit wholly on unwalkable cells, so no walkable cell is
+lost; the strips too narrow for that get rocks (doodads, visual only: the
+pathing map stays Dota's).
+
 The commander replaces the Dire: the Dire high ground (with the fountain
 platform) becomes one flat, buildable level without trees or props, and the
 commander's town hall stands where the Dire Ancient stood.
@@ -26,7 +32,7 @@ commander's town hall stands where the Dire Ancient stood.
 import base64
 import math
 
-from . import source
+from . import source, trees
 
 TILES = 160
 N = TILES + 1                      # corners per side
@@ -35,22 +41,50 @@ PLAY = 9216                        # playable half size, as in the base map
 LAYER0 = 2                         # WC3 layer of Dota level 0 (z 0)
 CELLS = TILES * 4                  # pathing cells per side (32 units)
 
-# Ground tiles: Lordaeron Summer plus tiles every one of which appears in a
-# Blizzard ladder map on this tileset (Lost Temple, Rusty Creek, Secret Valley).
-TILE_IDS = ["Ldrt", "Ldro", "Ldrg", "Lrok", "Lgrs", "Lgrd", "Yrtl", "Bdrt", "Bdrr", "Bdsd", "Adrd"]
+# Ground tiles. Each stands for one layer of Dota's ground materials, and
+# ground.py gives it that layer's texture (on the personalized map; without
+# it they keep the nearest Warcraft III look). Later tiles draw over earlier
+# ones, so grass overlaps paths and paths overlap rock, as in Dota.
+TILE_IDS = ["Lrok", "Adrd", "Ldro", "Bdrr", "Bflr", "Yrtl", "Bdrt", "Bdsd", "Bdsr", "Ldrt", "Ldrg", "Lgrd", "Lgrs"]
 CLIFF_IDS = ["CLdi", "CLgr"]
 T = {name: i for i, name in enumerate(TILE_IDS)}
-MATERIAL_TILES = {
-    "radiant_ground": ("Lgrs", "Lgrd"), "radiant_path": ("Ldrt", "Ldrt"), "radiant_river": ("Ldro", "Ldro"),
-    "radiant_base": ("Lrok", "Ldrg"), "radiant_cracked": ("Ldrt", "Ldrg"),
-    "mixed_ground": ("Ldrg", "Ldrg"), "mixed_path": ("Ldrg", "Ldrt"), "mixed_river": ("Ldro", "Ldro"),
-    "dire_ground": ("Bdsd", "Adrd"), "dire_path": ("Bdrt", "Bdrt"), "dire_river": ("Bdrr", "Ldro"),
-    "dire_cracked": ("Adrd", "Bdrr"), "dire_base": ("Bdrt", "Bdsd"),
+UNBUILDABLE = {"Lrok", "Bdrr", "Bflr", "Yrtl"}     # TerrainArt\Terrain.slk buildable = 0
+# Dota ground material (the worldnode mesh name) -> the tile of each of its
+# four multiblend layers (source.layer_bins). The layers, from the
+# materials' colour textures: radiant: sand path, long grass, grass, rock;
+# *_path: + flagstones on top; riverbed: sand, river rocks, river rocks,
+# rock; dire: rock, cracked earth, pale cracked sand, rock; dire_path: stone
+# path, cracked earth, pale sand, dark sand; dire_path_cracked: + molten cracks.
+LAYER_TILES = {
+    "radiant": ("Ldrt", "Lgrd", "Lgrs", "Lrok"),
+    "radiant_path": ("Ldrt", "Ldrg", "Lgrs", "Yrtl"),
+    "radiant_base_angled": ("Ldrt", "Lgrd", "Lgrs", "Yrtl"),
+    "radiant_riverbed_path": ("Ldrt", "Ldro", "Ldro", "Lrok"),
+    "radiant_dire": ("Adrd", "Bdsr", "Lgrs", "Lrok"),
+    "radiant_dire_path": ("Ldrt", "Bdsr", "Lgrs", "Bdrt"),
+    "radiant_path_destruction": ("Lrok", "Lrok", "Lrok", "Lrok"),
+    "dire": ("Adrd", "Bdsd", "Bdsr", "Adrd"),
+    "dire_path": ("Bdrt", "Bdsd", "Bdsr", "Bdsd"),
+    "dire_path_cracked": ("Bdrt", "Bdsd", "Bdsr", "Bflr"),
+    "dire_riverbed_path": ("Bdrt", "Bdrr", "Bdrr", "Bdrt"),
 }
+BASE_TILES = ("Bdrt", "Bdsd")                     # the commander's flattened Dire base (buildable)
+RAISED_TILES = {"radiant": ("Lrok", "Lgrd"), "dire": ("Adrd", "Bdsd")}     # tops of raised blocked ground
 # Pathing cell values as the World Editor writes them (Blizzard maps).
 LAND, WATER, BLOCKED, BOUNDARY = 0x40, 0x08, 0xCA, 0xCE
 RIVER_BED = -0.1875                # layers: 24 units under the bed, water 40 deep (shallow < 51.2)
 TREE_ID = "LTlt"
+ROCK_ID = "LRrk"                   # Lordaeron Summer rocks (doodad, 10 variations, about 170 units wide)
+# Raised blocked ground: the first ring of corners rises this many levels
+# above the ground beside it, the corners further in RAISE_INNER.
+RAISE_RING, RAISE_INNER = 1, 2
+# No raised ground (KEEP_RAISE) or rocks (KEEP_ROCKS) this close to the
+# entities the game puts units or structures at. The Dota fountains, their
+# shops, the secret shops and the lotus pools stand on gridnav-blocked ground.
+KEEP_RAISE = {"fountains": 500, "forts": 600, "barracks": 400, "towers": 300, "shops": 350, "camps": 250,
+              "outposts": 300, "lotus_pools": 200, "twin_gates": 300, "tormentors": 300, "wisdom_shrines": 300,
+              "roshan": 300, "runes": 250}
+KEEP_ROCKS = dict(KEEP_RAISE, fountains=450, shops=250)
 
 CAMP_KINDS = {0: "small", 1: "medium", 2: "large", 3: "ancient"}
 LANES = ("top", "mid", "bot")
@@ -94,11 +128,15 @@ class Terrain:
         self.cliff_tex = bytearray(N * N)
         self.frozen = bytearray(N * N)     # set by ramps, pads and the commander base
         self.base = bytearray(N * N)       # commander base corners
+        self.raised = bytearray(N * N)     # corners of blocked ground raised into cliffs
         self.ramp_tiles = set()            # (i, j) tiles walkable as ramp interiors
         self.romp_tiles = set()            # (i, j) ramp side pieces (unwalkable)
         self.ramps = []
         self.pathing = bytearray(CELLS * CELLS)
-        self.trees = []                    # (x, y, z, variation, scale)
+        self.trees = []                    # (x, y, z, variation, scale, tree type, facing in radians)
+        self.tree_plan = {"types": {}, "kinds": []}    # trees.plan_trees
+        self.rocks = []                    # (x, y, z, variation, scale, angle)
+        self.decor = []                    # (x, y, z, variation, scale, doodad id, angle)
         self.mapdata = None
         self.notes = []
 
@@ -493,6 +531,311 @@ def fountain_pad(t, pos, walk_count, radius):
                 t.height[k] = 0.0
 
 
+# ------------------------------------------------------------------ blocked ground
+
+def keep_points(desc, radii):
+    """(x, y, radius) around every entity of the kinds in radii (KEEP_RAISE,
+    KEEP_ROCKS). Dire structures, the Dire fountain and its shop are left
+    out: the commander's base replaces them."""
+    e = desc["entities"]
+    out = []
+
+    def add(kind, p):
+        if p and radii.get(kind):
+            out.append((p[0], p[1], radii[kind]))
+    for towers in e["towers"].get("good", {}).values():
+        for tw in towers:
+            add("towers", tw["pos"])
+    for rax in e["barracks"].get("good", {}).values():
+        for p in rax.values():
+            add("barracks", p)
+    for kind in ("forts", "fountains"):
+        add(kind, e[kind].get("good"))
+    for s in e["shops"]:
+        if s["type"] != 0 or s["pos"][0] + s["pos"][1] < 0:
+            add("shops", s["pos"])
+    for c in e["camps"]:
+        add("camps", c["pos"])
+    for kind in ("outposts", "lotus_pools", "twin_gates", "tormentors", "wisdom_shrines", "roshan"):
+        for p in e.get(kind, []):
+            add(kind, p)
+    for p in e["runes"]["power"] + e["runes"]["bounty"]:
+        add("runes", p)
+    return out
+
+
+def _disc_mask(points, size, step, origin=ORIGIN, centred=False):
+    """bytearray(size * size) of the grid points (corners, or cell centres
+    with centred) within any (x, y, radius) of points."""
+    mask = bytearray(size * size)
+    off = step / 2.0 if centred else 0.0
+    for x, y, rad in points:
+        i0, i1 = int((x - rad - origin) // step) - 1, int((x + rad - origin) // step) + 2
+        j0, j1 = int((y - rad - origin) // step) - 1, int((y + rad - origin) // step) + 2
+        for j in range(max(0, j0), min(size, j1)):
+            py = origin + step * j + off - y
+            for i in range(max(0, i0), min(size, i1)):
+                px = origin + step * i + off - x
+                if px * px + py * py <= rad * rad:
+                    mask[j * size + i] = 1
+    return mask
+
+
+NEIGHBOURS = [(a, b) for a in (-1, 0, 1) for b in (-1, 0, 1) if a or b]      # the 8 neighbours
+
+
+def raise_blocked(t, r, desc, walk_count):
+    """Dota's unwalkable areas become WC3 cliffs where a cliff fits: a corner
+    rises when the four tiles around it are wholly unwalkable in Dota, so every
+    cliff tile it makes covers blocked cells only and the pathing does not
+    change. Ramps (and two corners around them), the commander base and the
+    ground by structures (KEEP_RAISE) stay as they are. The first ring of
+    raised corners stands RAISE_RING levels above the highest ground beside
+    it, the corners further in RAISE_INNER (limit_steps settles the rest).
+    Returns the number of raised corners."""
+    walk = r.walk
+    full = bytearray(TILES * TILES)
+    for tj in range(TILES):
+        for ti in range(TILES):
+            k0 = 4 * tj * CELLS + 4 * ti
+            full[tj * TILES + ti] = not any(walk[k0 + b * CELLS + a] for b in range(4) for a in range(4))
+    busy = bytearray(N * N)
+    for k in range(N * N):
+        if t.ramp[k] or t.frozen[k]:
+            i, j = k % N, k // N
+            for b in range(max(0, j - 2), min(N, j + 3)):
+                for a in range(max(0, i - 2), min(N, i + 3)):
+                    busy[b * N + a] = 1
+    keep = _disc_mask(keep_points(desc, KEEP_RAISE), N, 128)
+    up = bytearray(N * N)
+    for j in range(N):
+        for i in range(N):
+            k = j * N + i
+            if busy[k] or keep[k] or t.base[k]:
+                continue
+            if all(full[b * TILES + a] for a in (i - 1, i) for b in (j - 1, j) if 0 <= a < TILES and 0 <= b < TILES):
+                up[k] = 1
+    # The level of the walkable ground nearest to each corner (corners mostly
+    # on walkable cells, ramps and the commander base are ground): the blocked
+    # corners beside raised ground may sit a level above it (corner_votes).
+    steps = NEIGHBOURS
+    gref = [None] * (N * N)
+    front = [k for k in range(N * N) if walk_count[k] >= 8 or t.base[k] or t.frozen[k]]
+    for k in front:
+        gref[k] = t.level[k]
+    while front:
+        nxt = {}
+        for k in front:
+            i, j = k % N, k // N
+            for a, b in steps:
+                if 0 <= i + a < N and 0 <= j + b < N:
+                    n = (j + b) * N + i + a
+                    if gref[n] is None:
+                        nxt[n] = max(nxt.get(n, gref[k]), gref[k])
+        for n, lv in nxt.items():
+            gref[n] = lv
+        front = sorted(nxt)
+    # Distance (8-neighbour rings) from the ground, and the highest ground level
+    # beside each ring, carried inward.
+    dist = [0] * (N * N)
+    ref = [0] * (N * N)
+    front = []
+    for k in range(N * N):
+        if not up[k]:
+            continue
+        i, j = k % N, k // N
+        beside = [gref[(j + b) * N + i + a] for a, b in steps
+                  if 0 <= i + a < N and 0 <= j + b < N and not up[(j + b) * N + i + a]]
+        beside = [lv for lv in beside if lv is not None]
+        if beside:
+            dist[k], ref[k] = 1, max(beside)
+            front.append(k)
+    d = 1
+    while front:
+        nxt = {}
+        for k in front:
+            i, j = k % N, k // N
+            for a, b in steps:
+                if 0 <= i + a < N and 0 <= j + b < N:
+                    n = (j + b) * N + i + a
+                    if up[n] and not dist[n]:
+                        nxt[n] = max(nxt.get(n, ref[k]), ref[k])
+        d += 1
+        for n, lv in nxt.items():
+            dist[n], ref[n] = d, lv
+        front = sorted(nxt)
+    count = 0
+    for k in range(N * N):
+        if up[k] and dist[k]:
+            lv = ref[k] + (RAISE_RING if dist[k] == 1 else RAISE_INNER)
+            t.level[k] = lv
+            t.height[k] = 0.0
+            t.raised[k] = 1
+            count += 1
+    return count
+
+
+def roughen_raised(t):
+    """Uneven tops on raised ground: small height offsets on raised corners
+    whose eight neighbours share their level (never next to a cliff, where
+    an offset would tear the cliff model from the ground)."""
+    for j in range(1, N - 1):
+        for i in range(1, N - 1):
+            k = ci(i, j)
+            if not t.raised[k]:
+                continue
+            lv = t.level[k]
+            if any(t.level[ci(i + a, j + b)] != lv or not t.raised[ci(i + a, j + b)] for a, b in NEIGHBOURS):
+                continue
+            t.height[k] = (_hash(i, j, 29) % 9) / 16.0          # 0 .. 0.5 layers
+
+
+# Decorative trees on raised ground: Dota's border is forest on cliffs. They
+# are doodads (no pathing, vision blocking or targeting) whose models are the
+# Dota tree models (trees.DECOR maps each doodad type to a tree type).
+DECOR_SPACING = 176                # units between grid points (jittered)
+DECOR_MIN_CORNERS = 40             # raised areas smaller than this stay bare (rock formations)
+
+
+def place_decor(t, kinds):
+    """Decorative trees on the tops of raised blocked ground (all four tile
+    corners raised) of large raised areas, inside the playable area plus a
+    margin: a jittered grid, the Radiant's trees on the Radiant half, the
+    Dire's on the Dire half. kinds: {"radiant"|"dire": (doodad id,
+    variations)}; a side without a kind gets none."""
+    size = [0] * (N * N)
+    seen = bytearray(N * N)
+    for s in range(N * N):
+        if not t.raised[s] or seen[s]:
+            continue
+        stack, comp = [s], []
+        seen[s] = 1
+        while stack:
+            k = stack.pop()
+            comp.append(k)
+            i, j = k % N, k // N
+            for a, b in NEIGHBOURS:
+                if 0 <= i + a < N and 0 <= j + b < N:
+                    n = (j + b) * N + i + a
+                    if t.raised[n] and not seen[n]:
+                        seen[n] = 1
+                        stack.append(n)
+        for k in comp:
+            size[k] = len(comp)
+    out = []
+    reach = PLAY + 384
+    n = int(reach // DECOR_SPACING)
+    for gj in range(-n, n + 1):
+        for gi in range(-n, n + 1):
+            h = _hash(gi, gj, 53)
+            x = gi * DECOR_SPACING + (h % 121) - 60
+            y = gj * DECOR_SPACING + ((h >> 8) % 121) - 60
+            if abs(x) > reach or abs(y) > reach:
+                continue
+            ti, tj = int((x - ORIGIN) // 128), int((y - ORIGIN) // 128)
+            if t.cliff[tj * TILES + ti]:
+                continue                               # a step inside the raised ground
+            corners = [ci(ti + a, tj + b) for a in (0, 1) for b in (0, 1)]
+            if not all(t.raised[c] and size[c] >= DECOR_MIN_CORNERS for c in corners):
+                continue
+            kind = kinds.get("radiant" if x + y < 0 else "dire")
+            if not kind:
+                continue
+            doodad, variations = kind
+            out.append((x, y, round(t.ground_z(x, y), 3), (h >> 16) % variations,
+                        round(0.85 + (h >> 20) % 31 / 100.0, 2), doodad, round((h >> 4) % 628 / 100.0, 2)))
+    t.decor = out
+    return len(out)
+
+
+# Rocks: a rock may reach this far over open ground (units have a collision
+# radius of 16 to 32, so they never seem to walk into it).
+ROCK_OVERHANG = 24
+ROCK_RADIUS = 85.0                 # LRrk half width at scale 1
+
+
+def place_rocks(t, r, desc):
+    """Rocks on the blocked ground that stayed level with the walkable ground
+    around it (strips narrower than a cliff, small obstacles): cells blocked
+    in Dota and in the WC3 pathing (the commander base is open), not under a
+    cliff tile, raised ground or a tree, and away from structures
+    (KEEP_ROCKS). Deepest cells first (distance to open ground); a rock's
+    size follows that distance, so it barely reaches over walkable ground.
+    Pathing is not touched: doodads are visual, the pathing map is Dota's."""
+    p = t.pathing
+    keep = _disc_mask(keep_points(desc, KEEP_ROCKS), CELLS, 32, centred=True)
+    covered = bytearray(CELLS * CELLS)
+    for x, y, *_rest in t.trees:
+        i0, j0 = int((x - 64 - ORIGIN) // 32), int((y - 64 - ORIGIN) // 32)
+        for b in range(max(0, j0), min(CELLS, j0 + 4)):
+            for a in range(max(0, i0), min(CELLS, i0 + 4)):
+                covered[b * CELLS + a] = 1
+    left = bytearray(CELLS * CELLS)
+    for pj in range(CELLS):
+        tj = pj // 4
+        for pi in range(CELLS):
+            k = pj * CELLS + pi
+            if p[k] != BLOCKED or r.walk[k] or covered[k] or keep[k]:
+                continue
+            ti = pi // 4
+            if t.blocked[tj * TILES + ti]:
+                continue
+            corners = [ci(ti + a, tj + b) for a in (0, 1) for b in (0, 1)]
+            if all(t.raised[c] for c in corners):
+                continue
+            left[k] = 1
+    # Distance (8-neighbour rings) to the nearest open cell.
+    INF = 1 << 20
+    dist = [INF] * (CELLS * CELLS)
+    front = [k for k in range(CELLS * CELLS) if p[k] in (LAND, WATER)]
+    for k in front:
+        dist[k] = 0
+    steps = NEIGHBOURS
+    d = 0
+    while front:
+        d += 1
+        nxt = []
+        for k in front:
+            a, b = k % CELLS, k // CELLS
+            for da, db in steps:
+                if 0 <= a + da < CELLS and 0 <= b + db < CELLS:
+                    n = (b + db) * CELLS + a + da
+                    if dist[n] == INF:
+                        dist[n] = d
+                        nxt.append(n)
+        front = nxt
+        if d > 8:
+            break
+    cands = sorted((k for k in range(CELLS * CELLS) if left[k]),
+                   key=lambda k: (-min(dist[k], 8), _hash(k, 41)))
+    rocks = []
+    grid = {}
+    for k in cands:
+        a, b = k % CELLS, k // CELLS
+        x, y = ORIGIN + 32 * a + 16, ORIGIN + 32 * b + 16
+        rad = min(1.2 * ROCK_RADIUS, (min(dist[k], 8) - 0.5) * 32 + ROCK_OVERHANG)
+        g = (a // 8, b // 8)
+        clash = False
+        for ga in (g[0] - 1, g[0], g[0] + 1):
+            for gb in (g[1] - 1, g[1], g[1] + 1):
+                for qx, qy, qr in grid.get((ga, gb), ()):
+                    if (x - qx) ** 2 + (y - qy) ** 2 < (0.8 * (rad + qr)) ** 2:
+                        clash = True
+                        break
+                if clash:
+                    break
+            if clash:
+                break
+        if clash:
+            continue
+        grid.setdefault(g, []).append((x, y, rad))
+        h = _hash(a, b, 43)
+        scale = round(rad / ROCK_RADIUS, 2)
+        rocks.append((x, y, round(t.ground_z(x, y), 3), h % 10, scale, round((h >> 8) % 628 / 100.0, 2)))
+    t.rocks = sorted(rocks, key=lambda q: (q[1], q[0]))
+    return sum(left)
+
+
 # ------------------------------------------------------------------ water and heights
 
 def water_and_heights(t, r, walk_count):
@@ -565,11 +908,17 @@ def textures(t, r, desc):
                             counts[names[m]] = counts.get(names[m], 0) + 1
             h = _hash(i, j, 7)
             if t.base[k]:
-                pair = MATERIAL_TILES["dire_base"]
+                pair = BASE_TILES
+            elif t.raised[k]:
+                pair = RAISED_TILES["radiant" if x + y < 0 else "dire"]
             elif counts:
                 best = max(counts.values())
                 name = min(n for n, c in counts.items() if c == best)
-                pair = MATERIAL_TILES.get(name, ("Ldrg", "Ldrg"))
+                material, _, layer = name.rpartition(":")
+                tiles = LAYER_TILES.get(material)
+                tile = tiles[int(layer)] if tiles and layer.isdigit() and int(layer) < 4 else (
+                    "Lgrs" if x + y < 0 else "Bdsd")
+                pair = (tile, tile)
             elif x + y < 0 and t.level[k] >= 2:
                 pair = ("Yrtl", "Lrok") if t.level[k] == 2 else ("Lrok", "Lrok")
             else:
@@ -578,6 +927,21 @@ def textures(t, r, desc):
             g = (h >> 8) % 100
             t.var[k] = (h >> 12) % 4 if g < 80 else 4 + (h >> 12) % 12
             t.cliff_tex[k] = 1 if x + y < 0 else 0
+
+
+def buildable_ground(t, spots, radius):
+    """Corners within radius of the spots (the commander's mines and
+    expansions) on a tile WC3 builds on: unbuildable tiles there (rock,
+    river stones, flagstones) become the base's ground."""
+    for x0, y0 in spots:
+        i0, j0 = int(round((x0 - ORIGIN) / 128)), int(round((y0 - ORIGIN) / 128))
+        r = int(radius // 128) + 1
+        for j in range(max(0, j0 - r), min(N, j0 + r + 1)):
+            for i in range(max(0, i0 - r), min(N, i0 + r + 1)):
+                x, y = corner_xy(i, j)
+                k = ci(i, j)
+                if (x - x0) ** 2 + (y - y0) ** 2 <= radius * radius and TILE_IDS[t.tex[k]] in UNBUILDABLE:
+                    t.tex[k] = T[BASE_TILES[_hash(i, j, 7) % 2]]
 
 
 # ------------------------------------------------------------------ pathing
@@ -605,6 +969,22 @@ def pathing(t, r, base_tiles):
             c = ci(int(round(pi / 4.0)), int(round(pj / 4.0)))
             under = t.water[c] and t.water_z[c] > (t.level[c] + t.height[c]) * 128
             p[k] = WATER if under else LAND
+
+
+def walkable_share(t, r):
+    """Share of Dota's walkable cells inside the playable area that are
+    open (land or shallow water) in the WC3 pathing."""
+    total = opened = 0
+    for pj in range(CELLS):
+        y = ORIGIN + (pj + 0.5) * 32
+        if abs(y) > PLAY:
+            continue
+        for pi in range(CELLS):
+            k = pj * CELLS + pi
+            if r.walk[k] and abs(ORIGIN + (pi + 0.5) * 32) <= PLAY:
+                total += 1
+                opened += t.pathing[k] in (LAND, WATER)
+    return opened / max(1, total)
 
 
 def check_reachable(t):
@@ -859,11 +1239,19 @@ def gameplay(t, r, desc, base_region):
 
 # ------------------------------------------------------------------ trees
 
+DEGREES = 0.017453292519943295       # pi / 180
+
+
 def place_trees(t, desc, clear):
-    """Dota's trees as WC3 trees, minus those on cliffs, ramps, the commander
-    base and the cleared spots (list of (x, y, radius))."""
+    """Dota's trees as WC3 tree destructables, minus those on cliffs, ramps,
+    the commander base and the cleared spots (list of (x, y, radius)). Each
+    keeps Dota's facing and scale, and gets the WC3 tree type and variation
+    that carries its Dota model (trees.plan_trees)."""
+    plan = trees.plan_trees(desc)
+    kinds = plan["kinds"]
     out = []
-    for x, y in desc["entities"]["trees"]:
+    for row in desc["entities"]["trees"]:
+        x, y = row[0], row[1]
         if abs(x) > PLAY - 64 or abs(y) > PLAY - 64:
             continue
         i, j = int((x - ORIGIN) // 128), int((y - ORIGIN) // 128)
@@ -877,9 +1265,13 @@ def place_trees(t, desc, clear):
             continue
         if any(math.hypot(x - cx, y - cy) < rad for cx, cy, rad in clear):
             continue
-        h = _hash(x, y, 13)
-        out.append((x, y, round(t.ground_z(x, y), 3), h % 10, round(0.85 + (h >> 8) % 26 / 100.0, 2)))
+        pick = kinds[row[2]] if len(row) > 2 and row[2] < len(kinds) else None
+        kind, variation = pick if pick else (TREE_ID, _hash(x, y, 13) % 10)
+        yaw = row[3] if len(row) > 3 else 270.0
+        scale = row[4] if len(row) > 4 else 1.0
+        out.append((x, y, round(t.ground_z(x, y), 3), variation, round(scale, 3), kind, round(yaw * DEGREES, 4)))
     t.trees = out
+    t.tree_plan = plan
 
 
 # ------------------------------------------------------------------ all of it
@@ -892,7 +1284,9 @@ def convert(desc, log=lambda s: None):
     base_region = commander_base(t, desc, walk_count)
     fountain_pad(t, desc["entities"]["fountains"]["good"], walk_count, radius=1050)
     place_ramps(t, desc, walk_count)
+    raised = raise_blocked(t, r, desc, walk_count)
     limit_steps(t, walk_count)
+    roughen_raised(t)
     water_and_heights(t, r, walk_count)
     textures(t, r, desc)
     t.finalize_tiles()
@@ -904,6 +1298,8 @@ def convert(desc, log=lambda s: None):
     clear = [(md["commander"]["start"]["x"], md["commander"]["start"]["y"], 900)]
     clear += [(p["x"], p["y"], 640) for p in md["commander"]["mines"] + md["commander"]["expansions"]]
     place_trees(t, desc, clear)
+    decor = place_decor(t, trees.decor_kinds(t.tree_plan))
+    buildable_ground(t, [(p["x"], p["y"]) for p in md["commander"]["mines"] + md["commander"]["expansions"]], 900)
     # The expansions' ground: open and buildable around the mine and the hall.
     for p in md["commander"]["expansions"]:
         for b in range(-20, 21):
@@ -913,12 +1309,16 @@ def convert(desc, log=lambda s: None):
                 if k is not None and a * a + b * b <= 400 and t.pathing[k] == BLOCKED and not t.tile_blocked(
                         int((x - ORIGIN) // 128), int((y - ORIGIN) // 128)):
                     t.pathing[k] = LAND
+    strips = place_rocks(t, r, desc)
     cells = check_reachable(t)
     odd = sorted(set(transition_names(t.level, t.ramp)) - RAMP_SIDES - FLAT_SIDES)
     if odd:
         raise ConvertError(f"cliffs ask for ramp models WC3 may not have: {', '.join(odd[:5])}")
     log(f"terrain: {len(t.ramps)} WC3 ramps, {len(t.trees)} trees, {len(base_region)} commander base corners, "
         f"{cells} pathing cells reachable from the fountain")
+    log(f"terrain: {raised} corners of blocked ground raised, {decor} decorative trees on them, {len(t.rocks)} "
+        f"rocks on {strips} blocked cells too narrow for a cliff, {walkable_share(t, r):.2%} of Dota's walkable "
+        "ground walkable")
     for n in t.notes:
         log(f"terrain: {n}")
     return t

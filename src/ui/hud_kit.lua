@@ -43,30 +43,31 @@ define("hud_kit", function()
     end
 
     -- A launcher-built map has the Dota voice lines; sounds that are not in
-    -- the map have no duration. Local result, used for visuals only.
+    -- the map have no duration. Any first line of the events every launcher
+    -- version extracts will do: a map made by an older launcher lacks newer
+    -- events such as "aegis" (2026-10-11). Local result, used for visuals only.
+    local LASTING = {"spawn", "move", "attack", "kill", "death", "levelup"}
     function Kit.detect()
         if Kit.FORCE_DOTA_TEXTURES ~= nil then
             Kit.dota = Kit.FORCE_DOTA_TEXTURES
             return Kit.dota
         end
+        Kit.dota = false
         local ok, sounds = pcall(use, "data.sounds")
-        local path = nil
         if ok and type(sounds) == "table" then
             local heroes = {}
             for hero in pairs(sounds) do heroes[#heroes + 1] = hero end
             table.sort(heroes)
             for _, hero in ipairs(heroes) do
-                local events = {}
-                for ev in pairs(sounds[hero]) do events[#events + 1] = ev end
-                table.sort(events)
-                local list = sounds[hero][events[1] or ""]
-                if type(list) == "table" and list[1] then
-                    path = list[1]
-                    break
+                for _, ev in ipairs(LASTING) do
+                    local list = sounds[hero][ev]
+                    if type(list) == "table" and list[1] and GetSoundFileDuration(list[1]) > 0 then
+                        Kit.dota = true
+                        return true
+                    end
                 end
             end
         end
-        Kit.dota = path ~= nil and GetSoundFileDuration(path) > 0
         return Kit.dota
     end
 
@@ -142,6 +143,19 @@ define("hud_kit", function()
         return Kit.hitOf[button] or button
     end
 
+    -- A transparent frame that takes the mouse, so clicks on the HUD's empty
+    -- space never reach the world. Our buttons stay usable as its
+    -- descendants: in game a child button gets the mouse before its parent
+    -- (Kit.label's click layers work that way), while an unrelated catcher
+    -- over a panel took every click from the buttons on it (2026-10-10).
+    -- Test builds switch all blockers off and on with -block.
+    Kit.blockers = {}
+    function Kit.blocker(parent)
+        local b = BlzCreateFrameByType("GLUEBUTTON", "", parent, "ScoreScreenTabButtonTemplate", 0)
+        Kit.blockers[#Kit.blockers + 1] = b
+        return b
+    end
+
     -- Status bar (SimpleFrame family: drawn above the HUD backgrounds).
     function Kit.bar(parent, tex)
         local b = BlzCreateFrameByType("SIMPLESTATUSBAR", "", parent, "", 0)
@@ -151,14 +165,73 @@ define("hud_kit", function()
         return b
     end
 
+    -- Cooldown display on an item button, the way Dota shows it: a dark
+    -- clockwise sweep with the seconds left in the middle. The sweep is WC3's
+    -- own cooldown indicator model on a STATUSBAR, whose value picks the point
+    -- of the model's sweep animation; Kit.SWEEP = "wipe" shows a dark overlay
+    -- that shrinks downwards instead (test builds toggle it with -sweep).
+    -- The model is a 0.038 square drawn from its bottom-left corner, so it is
+    -- scaled to the slot's height and centred.
+    Kit.SWEEP = "model"
+    Kit.SWEEP_MODEL = "UI\\Feedback\\Cooldown\\UI-Cooldown-Indicator.mdl"
+    local SWEEP_SIZE = 0.038
+
+    function Kit.sweep(button)
+        local cd = {box = BlzCreateFrameByType("FRAME", "", button, "", 0)}
+        cd.bar = BlzCreateFrameByType("STATUSBAR", "", cd.box, "", 0)
+        BlzFrameSetAllPoints(cd.bar, cd.box)
+        BlzFrameSetModel(cd.bar, Kit.SWEEP_MODEL, 0)
+        BlzFrameSetMinMaxValue(cd.bar, 0, 1)
+        BlzFrameSetValue(cd.bar, 0)
+        cd.wipe = Kit.backdrop(button, Kit.C.dark, 170)
+        cd.text = Kit.text(button, 1.0)
+        BlzFrameSetAllPoints(cd.text.box, button)
+        Kit.show(cd.box, false)
+        Kit.show(cd.wipe, false)
+        Kit.show(cd.text.box, false)
+        return cd
+    end
+
+    function Kit.placeSweep(cd, x0, y0, x1, y1)
+        local h = y1 - y0
+        local cx = (x0 + x1) / 2
+        Kit.place(cd.box, cx - h / 2, y0, cx + h / 2, y1)
+        if cd.scale ~= h / SWEEP_SIZE then
+            cd.scale = h / SWEEP_SIZE
+            BlzFrameSetScale(cd.bar, cd.scale)
+        end
+        cd.x0, cd.y0, cd.x1, cd.y1, cd.wipeH = x0, y0, x1, y1, nil
+    end
+
+    -- Local: seconds left and the cooldown's full length (0: none).
+    function Kit.setSweep(cd, left, total)
+        local on = left > 0.05 and total > 0 and cd.x0 ~= nil
+        local model = Kit.SWEEP == "model"
+        Kit.show(cd.box, on and model)
+        Kit.show(cd.wipe, on and not model)
+        Kit.show(cd.text.box, on)
+        if not on then return end
+        local share = math.min(1, left / total)
+        if model then
+            Kit.setValue(cd.bar, 1 - share)
+        else
+            local h = math.floor((cd.y1 - cd.y0) * share * 1000 + 0.5) / 1000
+            if h ~= cd.wipeH then
+                cd.wipeH = h
+                Kit.place(cd.wipe, cd.x0, cd.y0, cd.x1, cd.y0 + math.max(0.0005, h))
+            end
+        end
+        Kit.setText(cd.text, "|cffffffff" .. math.ceil(left) .. "|r")
+    end
+
     -- Test builds: logs every hover and click a frame receives, to see which
     -- of our buttons get mouse input in game at all. Separate trigger, so the
     -- frame's own handlers keep their behaviour.
-    function Kit.probe(frame, label)
+    function Kit.probe(frame, label, clicksOnly)
         if not BUILD_TEST_MODE or not frame then return end
         frame = Kit.hit(frame)
         local t = CreateTrigger()
-        BlzTriggerRegisterFrameEvent(t, frame, FRAMEEVENT_MOUSE_ENTER)
+        if not clicksOnly then BlzTriggerRegisterFrameEvent(t, frame, FRAMEEVENT_MOUSE_ENTER) end
         BlzTriggerRegisterFrameEvent(t, frame, FRAMEEVENT_CONTROL_CLICK)
         TriggerAddAction(t, function()
             use("log").info(string.format("ui probe %s event %d player %d", label,
@@ -221,6 +294,31 @@ define("hud_kit", function()
             Kit.probe(b, "variant " .. i)
         end
         for i = 1, 8 do make(i) end
+        -- 9 and 10: a panel that should keep clicks on its empty part from the
+        -- world while its child button still gets the mouse. 9 is Kit.blocker
+        -- (a GLUEBUTTON, what the HUD uses), 10 a disabled TEXT frame. Click
+        -- the child, then left- and right-click the empty right part: the
+        -- hero must neither lose its selection nor move.
+        for i = 9, 10 do
+            local x = 0.02 + (i - 1) * 0.05 + (i - 9) * 0.035
+            local panel
+            if i == 9 then
+                panel = Kit.blocker(root)
+            else
+                panel = BlzCreateFrameByType("TEXT", "", root, "", 0)
+                BlzFrameSetEnable(panel, false)
+                BlzFrameSetText(panel, "")
+            end
+            Kit.place(panel, x, 0.30, x + 0.075, 0.335)
+            Kit.place(Kit.backdrop(panel, Kit.C.dark, 160), x, 0.30, x + 0.075, 0.335)
+            local b = Kit.button(panel, Kit.btn("BTNHolyBolt"))
+            Kit.place(b, x + 0.002, 0.302, x + 0.033, 0.333)
+            local cap = Kit.text(root, 1.0)
+            Kit.placeText(cap, x, 0.337, x + 0.075, 0.352)
+            Kit.setText(cap, tostring(i))
+            Kit.probe(b, "variant " .. i .. " child")
+            if i == 9 then Kit.probe(panel, "variant 9 blocker", true) end
+        end
         BlzFrameSetVisible(root, false)
     end
 
