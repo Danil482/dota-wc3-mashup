@@ -1,5 +1,6 @@
 -- Dota 2 settings of the hero players, imported by the launcher: keys for the
--- abilities, items, TP scroll, shop and hero selection; quick cast and
+-- abilities, items, TP scroll, shop and hero selection, the courier (select,
+-- deliver, Speed Burst, Shield) and the stash's Grab All; quick cast and
 -- double-tap self cast; camera distance and zoom lock; auto attack and
 -- right-clicks on allies. Also Dota's right-click hold, which keeps moving
 -- toward the cursor while the button is held and shows the holder a move
@@ -50,7 +51,7 @@ define("dota_settings", function()
     local VERSION = "1"
     -- Dota's keybind template ARROW and game defaults; cd is Dota's camera distance.
     S.DEFAULTS = "v=1;a1=81;a2=87;a3=69;a4=68;a5=70;a6=82;i1=90;i2=88;i3=67;i4=86;i5=66;i6=78;tp=84;"
-        .. "sh=115;hs=112;aa=1;as=-1;ds=0;ta=0;fr=0;dt=1;di=1;to=0.6;qd=1;zl=0;rs=0;cd=1134"
+        .. "sh=115;hs=112;cs=113;cv=114;cb=;ch=;gs=;aa=1;as=-1;ds=0;ta=0;fr=0;dt=1;di=1;to=0.6;qd=1;zl=0;rs=0;cd=1134"
 
     -- Warcraft's order ids
     local SMART, STOP, ATTACK, MOVE, AIMOVE, PATROL, HOLD = 851971, 851972, 851983, 851986, 851988, 851990, 851993
@@ -78,6 +79,12 @@ define("dota_settings", function()
         {field = "tp", kind = "tp"},
         {field = "sh", kind = "shop", handled = 0x73},  -- dota_shop.lua registers F4 itself
         {field = "hs", kind = "hero", handled = 0x70},  -- Warcraft's F1 selects the hero
+        -- the courier (courier.lua) and the stash's Grab All
+        {field = "cs", kind = "courier"},
+        {field = "cv", kind = "deliver"},
+        {field = "cb", kind = "burst"},
+        {field = "ch", kind = "shield"},
+        {field = "gs", kind = "grab"},
     }
     local NATIVE = {}
     for _, c in ipairs({"Q", "W", "E", "R", "D", "F", "G", "M", "S", "H", "A", "P", "O"}) do
@@ -250,14 +257,6 @@ define("dota_settings", function()
         return name and (use("data.ids").item_targets or {})[name] or "none"
     end
 
-    local function tpSlot(hero)
-        for i = 0, 5 do
-            local it = UnitItemInSlot(hero, i)
-            if it and use("items").nameOf(it) == "item_tpscroll" then return i end
-        end
-        return nil
-    end
-
     -- Local: ask every client for a cast order at unit u.
     local function send(kind, what, u)
         BlzSendSyncData(CAST, string.format("%s|%d|%d|%d|%d", kind, what, GetHandleId(u),
@@ -422,9 +421,31 @@ define("dota_settings", function()
     -- Synced. A double tap uses a unit-target item on the hero. Quick cast:
     -- a point item fires at the cursor; a unit item takes the hovered unit
     -- once it waits for its target.
+    -- The TP key uses the TP slot (inventory.lua): double tap teleports to
+    -- the fountain, quick cast to the cursor, else it waits for a target.
+    local function pressTp(p, hero, b, st, double)
+        local Items = use("dota_items")
+        if not alive(hero) or not use("inventory").get(p, "tp", 0) then
+            st.last[b.field] = nil
+            return
+        end
+        if double then
+            st.last[b.field] = nil
+            Items.tpHome(p)
+            return
+        end
+        local c = cursor[GetPlayerId(p)]
+        if b.quick and c and c.x then
+            Items.pending[p] = nil
+            use("inventory").teleport(p, c.x, c.y)
+            return
+        end
+        Items.useTp(p)
+    end
+
     local function pressItem(p, hero, b, st, double)
+        if b.kind == "tp" then return pressTp(p, hero, b, st, double) end
         local slot = b.slot
-        if b.kind == "tp" then slot = alive(hero) and tpSlot(hero) end
         local it = slot and alive(hero) and UnitItemInSlot(hero, slot)
         if not it then
             st.last[b.field] = nil
@@ -496,6 +517,14 @@ define("dota_settings", function()
                     ready and "ready" or "not ready, failed-cast sound")
             end
             if p == GetLocalPlayer() and mine then pressAbility(p, hero, b) end
+        elseif b.kind == "courier" then
+            if defined("courier") then use("courier").select(p, double) end
+        elseif b.kind == "deliver" then
+            if defined("courier") then use("courier").deliver(p) end
+        elseif b.kind == "burst" or b.kind == "shield" then
+            if defined("courier") then use("courier").cast(p, "courier_" .. b.kind) end
+        elseif b.kind == "grab" then
+            use("dota_items").grab(p)
         else
             pressItem(p, hero, b, st, double)
         end

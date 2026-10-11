@@ -710,7 +710,7 @@ if not __mockHud then
             check("charges shown", s.charges.t.text == "3", s.charges.t.text)
             Items.remove(hero, tango)
             Hud.tick()
-            check("empty slot hidden", not M.shown(s.b))
+            check("an empty slot keeps its button (a drop target), without an icon", M.shown(s.b) and not M.shown(s.img))
         end
 
         ---------------------------------------------------------------- click blockers
@@ -784,7 +784,7 @@ if not __mockHud then
                     local plain = true
                     for _, part in ipairs(e.recipe.parts[1]) do
                         local pe = Items.data(part)
-                        if not pe or pe.recipe or pe.stack then plain = false end
+                        if not pe or pe.recipe or pe.stack or pe.secret then plain = false end
                     end
                     if plain then upgrade = n end
                 end
@@ -846,23 +846,43 @@ if not __mockHud then
         check("click buys " .. upgrade .. " with the carried part", Items.find(hero, upgrade) ~= nil
             and Items.find(hero, firstPart) == nil and gold() == before - price, gold() .. " vs " .. (before - price))
 
-        -- refusals: no gold and no item change hands
-        local function refused(label, setup, undo)
+        -- Dota: no gold, no item; away from the fountain or dead the item
+        -- waits in the stash; a full inventory spills into the backpack
+        local Inv = use("inventory")
+        local function wipe()
             clear(hero)
+            for _, where in ipairs({"bag", "stash"}) do
+                for i = 0, Inv.size(where) - 1 do
+                    local it = Inv.take(p0, where, i)
+                    if it then Items.remove(nil, it) end
+                end
+            end
+        end
+        local function buyWhen(label, setup, want, undo)
+            wipe()
             atShop(hero)
             setGold(5000)
             setup()
-            local g, n = gold(), count(hero)
+            local g = gold()
             M.click(bc.b, p0)
-            check(label, gold() == g and count(hero) == n, gold() .. " gold, " .. count(hero) .. " items")
+            local where = Inv.find(p0, (Inv.list(p0, "stash")[1] or Inv.list(p0, "bag")[1] or {}).item)
+            if want == nil then
+                check(label, gold() == g and #Inv.list(p0, "stash") == 0 and #Inv.list(p0, "bag") == 0,
+                    gold() .. " gold")
+            else
+                check(label, gold() == g - be.cost and where == want, tostring(where) .. ", " .. (g - gold()) .. " paid")
+            end
             if undo then undo() end
+            wipe()
         end
-        refused("refused without enough gold", function() setGold(be.cost - 1) end)
-        refused("refused away from the shops", function() hero.x = hero.x + 5000 end)
-        refused("refused while the hero is dead", function() hero.dead = true end, function() hero.dead = false end)
-        refused("refused with a full inventory", function()
+        buyWhen("refused without enough gold", function() setGold(be.cost - 1) end, nil)
+        buyWhen("bought away from the shops goes to the stash", function() hero.x = hero.x + 5000 end, "stash")
+        buyWhen("bought while the hero is dead goes to the stash", function() hero.dead = true end, "stash",
+            function() hero.dead = false end)
+        buyWhen("bought with a full inventory goes to the backpack", function()
             for _ = 1, 6 do UnitAddItemById(hero, FourCC(ids.items[basicItem])) end
-        end)
+        end, "bag")
+        atShop(hero)
 
         -- another player's click buys for that player's hero only
         clear(hero)
@@ -888,7 +908,7 @@ if not __mockHud then
         check("sell button shown for the item", slot ~= nil and M.shown(Shop.sells[slot].b))
         local g1 = gold()
         M.click(Shop.sells[slot or 0].b, p0)
-        check("sell click gives half the cost back", gold() == g1 + math.floor(be.cost * 0.5 + 0.5)
+        check("sell click right after buying gives the full cost back", gold() == g1 + be.cost
             and Items.find(hero, basicItem) == nil, gold() - g1)
 
         -- keys: F4 toggles, Esc closes

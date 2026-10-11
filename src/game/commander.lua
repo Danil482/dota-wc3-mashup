@@ -210,6 +210,14 @@ define("commander", function()
         Cmd.player = p
         Cmd.raceKey = raceKey or raceKeyOf(GetPlayerRace(p))
         local m = use("data.mapdata").commander
+        -- the melee AI builds around its start location, and a commander in a
+        -- Dota user slot (a lone human, or the computer of a game started
+        -- straight from the map) starts at the fountain: move that start here
+        local k = GetPlayerStartLocation(p)
+        if U.dist(GetStartLocationX(k), GetStartLocationY(k), m.start.x, m.start.y) >= 64 then
+            DefineStartLocation(k, m.start.x, m.start.y)
+            Log.info("commander " .. GetPlayerId(p) .. ": start location " .. k .. " moved to the base")
+        end
         local mines = {}
         for _, pos in ipairs(m.mines) do
             local u = CreateUnit(Player(PLAYER_NEUTRAL_PASSIVE), FourCC("ngol"), pos.x, pos.y, 270)

@@ -14,7 +14,7 @@
    "target": 3,
    "channel": 1.2,
    "range": 99999,
-   "order": "blink",
+   "order": "massteleport",
    "targets": "air,ground,friend,self,hero,vuln,invu",
    "desc": "After a short channel this Meepo jumps to another Meepo (or the Meepo closest to the target point), hurting enemies around both the spot it leaves and the spot it reaches. Target itself to hit the same area twice. Interrupting the channel costs nothing."
   },

@@ -126,17 +126,40 @@ define("heroes", function()
         return math.min(100, 4 + 3.2 * level)
     end
 
+    H.respawnAt = {}          -- dead hero -> game time of its fountain respawn
+    H.respawnPenalty = {}     -- hero -> seconds added to its next respawn (after a buyback)
+    local respawnGen = {}
+
+    local function respawn(hero, key, slot)
+        H.respawnAt[hero] = nil
+        respawnGen[hero] = (respawnGen[hero] or 0) + 1
+        local f = fountain()
+        ReviveHero(hero, f.x + 350, f.y + 350, true)
+        Events.emit("hero_respawned", hero, key, slot)
+    end
+
+    -- Respawns a dead hero that waits for its fountain respawn now (buyback);
+    -- false when it is not waiting for one.
+    function H.revive(hero)
+        local key = H.keyOf[hero]
+        if not key or not H.respawnAt[hero] or U.alive(hero) then return false end
+        respawn(hero, key, GetPlayerId(GetOwningPlayer(hero)))
+        return true
+    end
+
     function H.init()
         Events.on("death", function(dying)
             local key = H.keyOf[dying]
             if not key then return end
             local slot = GetPlayerId(GetOwningPlayer(dying))
-            local t = H.respawnTime(GetHeroLevel(dying))
+            local t = H.respawnTime(GetHeroLevel(dying)) + (H.respawnPenalty[dying] or 0)
+            H.respawnPenalty[dying] = nil
+            H.respawnAt[dying] = Timer.now() + t
+            local gen = (respawnGen[dying] or 0) + 1
+            respawnGen[dying] = gen
             Log.info(key .. " died, respawn in " .. string.format("%.0f", t))
             Timer.after(t, function()
-                local f = fountain()
-                ReviveHero(dying, f.x + 350, f.y + 350, true)
-                Events.emit("hero_respawned", dying, key, slot)
+                if respawnGen[dying] == gen then respawn(dying, key, slot) end
             end)
         end)
     end

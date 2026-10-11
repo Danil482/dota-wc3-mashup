@@ -10,6 +10,20 @@
   "radius": 900,
   "regen_rate": 90
  },
+ "buildings": {
+  "fort": {
+   "day": 2600,
+   "night": 2600
+  },
+  "rax_melee": {
+   "day": 900,
+   "night": 600
+  },
+  "rax_ranged": {
+   "day": 900,
+   "night": 600
+  }
+ },
  "cheese": {
   "cooldown": 40,
   "health_restore": 2500,
@@ -17,18 +31,24 @@
  },
  "lane": {
   "melee": {
+   "day": 750,
    "gold_max": 39,
    "gold_min": 34,
+   "night": 750,
    "xp": 57
   },
   "ranged": {
+   "day": 750,
    "gold_max": 52,
    "gold_min": 43,
+   "night": 750,
    "xp": 69
   },
   "siege": {
+   "day": 750,
    "gold_max": 72,
    "gold_min": 59,
+   "night": 750,
    "xp": 88
   }
  },
@@ -797,15 +817,23 @@
  },
  "towers": {
   "1": {
+   "day": 1900,
+   "night": 800,
    "range": 700
   },
   "2": {
+   "day": 1900,
+   "night": 1100,
    "range": 700
   },
   "3": {
+   "day": 1900,
+   "night": 1100,
    "range": 700
   },
   "4": {
+   "day": 1900,
+   "night": 1100,
    "range": 700
   }
  }

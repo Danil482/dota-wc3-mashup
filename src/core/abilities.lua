@@ -9,7 +9,8 @@
 --   onEndCast(ctx)         channel finished or was interrupted (SPELL_ENDCAST)
 --   onLearn(unit, level)   hero learned or levelled the ability
 --   onToggle(unit, on)     toggle abilities (Immolation-based) switched
--- ctx.v("key") reads the value for ctx.level; ctx.cast("AbilityCooldown") too.
+-- ctx.v("key") reads the caster's value for ctx.level, with every upgrade the
+-- caster has (A.value with a unit, below).
 define("abilities", function()
     local Events = use("events")
     local Log = use("log")
@@ -78,15 +79,98 @@ define("abilities", function()
 
     function A.get(name) return byName[name] end
 
+    -- The upgrade sources a unit has: {talent name | "scepter" | "shard" = true}
+    -- (src/game/talents.lua sets this; nil means none).
+    A.sourcesOf = function(u) return nil end
+
+    local function token(raw, level)
+        local n, last = 0, nil
+        for t in string.gmatch(raw, "[^%s]+") do
+            n = n + 1
+            last = t
+            if n == level then return t end
+        end
+        return last
+    end
+
+    -- Dota's upgrade operations (data.heroes ability "bonus"): "=v" sets,
+    -- "+v"/"-v"/"v" add, "+v%" adds that share of the base, "xv" multiplies,
+    -- in that order; one token per ability level.
+    local function upgraded(base, ops, have, level)
+        local set, add, pct, mul = nil, 0, 0, 1
+        for source, raw in pairs(ops) do
+            local t = have[source] and token(raw, level)
+            if t then
+                local op, rest = string.match(t, "^([x=]?)(.*)$")
+                local percent = string.sub(rest, -1) == "%"
+                if percent then rest = string.sub(rest, 1, -2) end
+                local v = tonumber((string.gsub(rest, "^%+", ""))) or 0
+                if op == "=" then set = v
+                elseif op == "x" then mul = mul * v
+                elseif percent then pct = pct + v
+                else add = add + v end
+            end
+        end
+        return ((set or base) + add + base * pct / 100) * mul
+    end
+
+    -- `base` with the upgrades of `key` that unit u has.
+    function A.apply(name, key, base, level, u)
+        local d = A.data(name)
+        local ops = u and d and d.bonus and d.bonus[key]
+        local have = ops and A.sourcesOf(u)
+        if not have then return base end
+        return upgraded(base, ops, have, math.max(1, level))
+    end
+
     -- Dota value for a key at a level: AbilityValues first, then the
-    -- ability's own fields (AbilityCooldown, AbilityCastRange, ...).
-    function A.value(name, key, level)
+    -- ability's own fields (AbilityCooldown, AbilityCastRange, ...). With a
+    -- unit, its talents, Aghanim's Scepter and Shard upgrades are applied.
+    function A.value(name, key, level, u)
         local d = A.data(name)
         if not d then return 0 end
         local raw = d.values and d.values[key]
         if raw == nil then raw = d[key] end
-        if raw == nil then return 0 end
-        return U.levelValue(raw, math.max(1, level))
+        local v = raw ~= nil and U.levelValue(raw, math.max(1, level)) or 0
+        if u then v = A.apply(name, key, v, level, u) end
+        return v
+    end
+
+    -- Cast range bonuses: every source (items, talents, Ebb and Flow, ...)
+    -- sets its own flat bonus on a unit's ability, and the ability's range
+    -- field gets the object range plus their sum, on every level.
+    local rangeBase = {}      -- unit -> {abilId -> {levelIndex -> object range}}
+    local rangeBonus = {}     -- unit -> {abilId -> {source -> bonus}}
+
+    function A.applyRange(u, id)
+        local ab = BlzGetUnitAbility(u, id)
+        if not ab then return end
+        local total = 0
+        for _, b in pairs((rangeBonus[u] or {})[id] or {}) do total = total + b end
+        local per = rangeBase[u]
+        if not per then per = {}; rangeBase[u] = per end
+        local base = per[id]
+        if not base then base = {}; per[id] = base end
+        for li = 0, math.max(1, BlzGetAbilityIntegerField(ab, ABILITY_IF_LEVELS), GetUnitAbilityLevel(u, id)) - 1 do
+            if base[li] == nil then base[li] = BlzGetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, li) end
+            if base[li] > 0 and math.abs(BlzGetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, li) - (base[li] + total)) > 0.5 then
+                BlzSetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, li, base[li] + total)
+            end
+        end
+    end
+
+    function A.rangeBonus(u, id, source)
+        local per = rangeBonus[u]
+        return per and per[id] and per[id][source] or 0
+    end
+
+    function A.setRangeBonus(u, id, source, bonus)
+        local per = rangeBonus[u]
+        if not per then per = {}; rangeBonus[u] = per end
+        local list = per[id]
+        if not list then list = {}; per[id] = list end
+        list[source] = bonus ~= 0 and bonus or nil
+        A.applyRange(u, id)
     end
 
     -- castId: the object actually cast, the ability's own or Spell Steal's copy.
@@ -95,7 +179,7 @@ define("abilities", function()
         local level = GetUnitAbilityLevel(caster, castId)
         local ctx = {def = def, caster = caster, owner = GetOwningPlayer(caster), level = level,
                      target = target, x = x, y = y, castId = castId}
-        function ctx.v(key) return A.value(def.name, key, level) end
+        function ctx.v(key) return A.value(def.name, key, level, caster) end
         return ctx
     end
 

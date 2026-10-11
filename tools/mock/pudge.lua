@@ -268,6 +268,43 @@ __heroesA.at(20, function()
 
     H.after(9.0, function()
         H.check("pudge bot rot auto-off", not P.rotOn(pudge))
+    end)
+
+    -- Talents, Aghanim's Shard (Meat Hook) and Scepter (Rot)
+    local T = use("talents")
+    local far, near
+    H.after(9.5, function()
+        if not T.started then T.init() end
+        use("heroes").keyOf[pudge] = "pudge"
+        T.register(pudge)
+        pudge.level = 25
+        T.pick(pudge, "special_bonus_unique_pudge_7")          -- +150 hook damage
+        T.consumeShard(pudge)
+        far = H.unit(11, "Hamg", X + 1000, Y, {hero = true, life = 3000})
+        H.cast(pudge, "pudge_meat_hook", nil, X + 1300, Y)
+    end)
+    H.after(11.0, function()
+        -- 360 + 150, and 20 % of the ~900 the hook flew
+        local taken = 3000 - far.life
+        H.check("pudge hook talent and shard distance damage", taken > 650 and taken < 730, taken)
+        H.check("pudge shard reports", T.hasShard(pudge))
+        local code = use("data.ids").items.item_ultimate_scepter
+        if code and UnitAddItem then
+            UnitAddItem(pudge, CreateItem(FourCC(code), 0, 0))
+            use("items").refresh(pudge)
+        end
+        H.check("pudge scepter", T.hasScepter(pudge))
+        near = H.unit(11, "Hamg", X + 400, Y - 100, {hero = true, life = 3000})
+        pudge.life = 3000
+        H.emit("order", pudge, 852177)
+    end)
+    H.after(11.6, function()
+        local m = Mods.get(near, "pudge_rot")
+        H.check("pudge scepter rot reaches 450", m ~= nil, near.taken)
+        H.check("pudge scepter rot cuts healing", m ~= nil and math.abs((m.props.heal_amp or 0) + 0.2) < 1e-6)
+        H.emit("order", pudge, 852178)
+        T.forget(pudge)
+        use("heroes").keyOf[pudge] = nil
         use("log").info("heroesA pudge exercise done")
     end)
 end)

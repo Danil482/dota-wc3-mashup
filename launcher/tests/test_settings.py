@@ -66,6 +66,8 @@ TEMPLATES = """// cut-down cfg/dotakeys.lst
                 "Inventory6" { "Key" "N" }
                 "InventoryTP" { "Key" "T" }
                 "ShopToggle" { "Key" "F4" }
+                "CourierSelect" { "Key" "F2" }
+                "CourierDeliver" { "Key" "F3" }
             }
         }
         "LOL"
@@ -85,7 +87,9 @@ TEMPLATES = """// cut-down cfg/dotakeys.lst
 
 # Quick cast on Q (the template's normal Q goes), D and F swapped, Alt+B for
 # slot 5, slot 6 unbound but quick on Space, TP on B, shop on F5, hero on 1,
-# an unknown key on slot 3, a WC3-only key name and a conditional.
+# the courier's Speed Burst on F7 and Grab All on F8 (the courier's select
+# and deliver keys stay the template's F2 and F3), an unknown key on slot 3,
+# a WC3-only key name and a conditional.
 PERSONAL = """"KeyBindings"
 {
     "Name"      "ARROW"
@@ -102,6 +106,8 @@ PERSONAL = """"KeyBindings"
         "InventoryTP"                { "Key" "B"  "Mode" "0" }
         "ShopToggle"                 { "Key" "F5" }   // moved off F4
         "HeroSelect"                 { "Key" "1"  "Mode" "0" }  [$WIN32]
+        "CourierBurst"               { "Key" "F7" }
+        "GrabStashItems"             { "Key" "F8" }
         "Console"                    { "Key" "\\" }
     }
     "Items" { "item_blink" { "Mode" "1" } }
@@ -130,7 +136,7 @@ CONVARS = """"config"
 """
 
 EXPECTED = ("v=1;a1=81q;a2=87;a3=69;a4=70q;a5=68q;a6=82;i1=90;i2=88;i3=;i4=86;i5=66-4;i6=32q;tp=66;"
-            "sh=116;hs=49;aa=0;as=-1;ds=1;ta=0;fr=2;dt=1;di=0;to=1.25;qd=0;zl=1;rs=0")
+            "sh=116;hs=49;cs=113;cv=114;cb=118;ch=;gs=119;aa=0;as=-1;ds=1;ta=0;fr=2;dt=1;di=0;to=1.25;qd=0;zl=1;rs=0")
 
 
 def make_vpk(path, files, inline=True):
@@ -278,6 +284,10 @@ def test_keys(steam, vpk):
     check("keys: unbound normal, quick on Space", keys["i6"] == "32q", keys["i6"])
     check("keys: unknown key unbinds", keys["i3"] == "", keys["i3"])
     check("keys: TP moved to B", keys["tp"] == "66" and keys["sh"] == "116" and keys["hs"] == "49")
+    check("keys: courier select and deliver from the template", keys["cs"] == "113" and keys["cv"] == "114",
+          (keys["cs"], keys["cv"]))
+    check("keys: Speed Burst and Grab All bound, Shield unbound", keys["cb"] == "118" and keys["gs"] == "119"
+          and keys["ch"] == "", (keys["cb"], keys["gs"], keys["ch"]))
     lol, name, _ = ds.read_keybinds(steam / "userdata" / "101" / "570", vpk)
     check("keys: another template", name == "LOL" and lol["i1"] == "49" and lol["i2"] == "", (lol["i1"], lol["i2"]))
     check("keys: template mode 1 is quick cast", lol["a1"] == "81q", lol["a1"])
@@ -330,6 +340,18 @@ def test_export(steam, dota, vpk, work):
         check("export: quote refused", False)
     except ValueError:
         check("export: quote refused", True)
+    # every key on its longest binding: the file still takes it, and what the
+    # map sends to the other players (dota_settings.lua syncPayload: the key
+    # fields and aa as ds ta fr di to qd) fits BlzSendSyncData's 255 bytes
+    worst = {"v": "1", **{f: "222-7q" for f in ds.KEY_FIELDS}, "aa": "2", "as": "-1", "ds": "1", "ta": "1",
+             "fr": "2", "dt": "1", "di": "1", "to": "1.25", "qd": "1", "zl": "1", "rs": "1", "cd": "2500"}
+    try:
+        full = ds.encode(worst)
+        check("export: the longest bindings fit the file", len(full) <= ds.MAX_DATA, len(full))
+    except ValueError as e:
+        check("export: the longest bindings fit the file", False, e)
+    synced = ";".join(f"{k}={worst[k]}" for k in ["v", *ds.KEY_FIELDS, "aa", "as", "ds", "ta", "fr", "di", "to", "qd"])
+    check("export: the synced part fits one sync message", len(synced) <= 255, len(synced))
 
 
 def main():

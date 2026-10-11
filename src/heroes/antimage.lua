@@ -1,6 +1,8 @@
 -- Anti-Mage (npc_dota_hero_antimage): Mana Break, Blink, Counterspell,
 -- Persecutor (innate antimage_persectur) and Mana Void, using the Dota 2 values
--- from data.heroes. WC3 objects: specs/heroes/antimage.json.
+-- from data.heroes. Aghanim's Scepter empowers the first Mana Break after a
+-- Blink; Aghanim's Shard sends an image at each caster Counterspell reflects.
+-- WC3 objects: specs/heroes/antimage.json.
 define("hero_antimage", function()
     local A = use("abilities")
     local Mods = use("mods")
@@ -38,6 +40,19 @@ define("hero_antimage", function()
 
     local function level(u, name)
         return A.level(u, name)
+    end
+
+    -- Aghanim's Scepter: mana gained after an empowered Mana Break is taken
+    -- back at once for the debuff's duration (https://liquipedia.net/dota2/Anti-Mage).
+    local function lockMana(t, source, duration)
+        if duration <= 0 then return end
+        local m = Mods.add(t, "antimage_mana_lock", {duration = duration, source = source, debuff = true,
+            dispel = "none", tick = 0.1, effect = FX.burn, attach = "overhead",
+            onTick = function(m)
+                local mana = GetUnitState(t, UNIT_STATE_MANA)
+                if mana > m.cap then SetUnitState(t, UNIT_STATE_MANA, m.cap) else m.cap = mana end
+            end})
+        if m then m.cap = GetUnitState(t, UNIT_STATE_MANA) end
     end
 
     -- Counterspell passive: magic resistance, switched off while broken.
@@ -82,22 +97,29 @@ define("hero_antimage", function()
         if maxMana <= 0 then return end
         if lb > 0 then
             local mana = GetUnitState(target, UNIT_STATE_MANA)
-            local burn = A.value(BREAK, "mana_per_hit", lb) + maxMana * A.value(BREAK, "mana_per_hit_pct", lb) / 100
-            if IsUnitIllusion(source) then burn = burn * A.value(BREAK, "illusion_percentage", lb) / 100 end
+            local burn = A.value(BREAK, "mana_per_hit", lb, source)
+                + maxMana * A.value(BREAK, "mana_per_hit_pct", lb, source) / 100
+            if IsUnitIllusion(source) then burn = burn * A.value(BREAK, "illusion_percentage", lb, source) / 100 end
+            local empowered = Mods.has(source, "antimage_empowered_break")
+            if empowered then
+                Mods.remove(source, "antimage_empowered_break")
+                burn = burn + maxMana * A.value(BREAK, "empowered_max_burn_pct", lb, source) / 100
+            end
             burn = math.min(burn, mana)
             if burn > 0 then
                 SetUnitState(target, UNIT_STATE_MANA, mana - burn)
-                info.amount = info.amount + burn * A.value(BREAK, "percent_damage_per_burn", lb) / 100
+                info.amount = info.amount + burn * A.value(BREAK, "percent_damage_per_burn", lb, source) / 100
                 DestroyEffect(AddSpecialEffectTarget(FX.burn, target, "origin"))
             end
+            if empowered then lockMana(target, source, A.value(BREAK, "empowered_mana_break_debuff_duration", lb, source)) end
         end
         if lp > 0 then
             local pct = GetUnitState(target, UNIT_STATE_MANA) / maxMana * 100
             local threshold = math.max(1, A.value(PERSECUTOR, "mana_threshold", 1))
             if pct <= threshold then
                 local extra = math.max(0, GetHeroLevel(source) - 1)
-                local low = A.value(PERSECUTOR, "move_slow_min", 1) + SLOW_MIN_PER_LEVEL * extra
-                local high = A.value(PERSECUTOR, "move_slow_max", 1) + SLOW_MAX_PER_LEVEL * extra
+                local low = A.value(PERSECUTOR, "move_slow_min", 1, source) + SLOW_MIN_PER_LEVEL * extra
+                local high = A.value(PERSECUTOR, "move_slow_max", 1, source) + SLOW_MAX_PER_LEVEL * extra
                 local slow = low + (high - low) * (1 - pct / threshold)
                 Mods.add(target, "antimage_persecutor", {duration = A.value(PERSECUTOR, "slow_duration", 1),
                                                           source = source, props = {move_pct = -slow / 100}, debuff = true})
@@ -117,11 +139,34 @@ define("hero_antimage", function()
         return false
     end
 
+    -- The level 20 talent reaches farther: native Blink's own maximum range
+    -- (Ebl1) gets the talent's extra cast range.
+    local function blinkReach(u)
+        local id = A.id(BLINK)
+        local ab = id and BlzGetUnitAbility(u, id)
+        if not ab then return end
+        for li = 0, math.max(1, BlzGetAbilityIntegerField(ab, ABILITY_IF_LEVELS), GetUnitAbilityLevel(u, id)) - 1 do
+            local reach = A.value(BLINK, "AbilityCastRange", li + 1, u)
+            if math.abs(BlzGetAbilityRealLevelField(ab, ABILITY_RLF_MAXIMUM_RANGE, li) - reach) > 0.5 then
+                BlzSetAbilityRealLevelField(ab, ABILITY_RLF_MAXIMUM_RANGE, li, reach)
+            end
+        end
+    end
+    Events.on("talent", function(u) if M.units[u] then blinkReach(u) end end)
+
     A.define(BLINK, {
         onChannel = function(ctx)
             M.register(ctx.caster)
             if rooted(ctx.caster) then IssueImmediateOrder(ctx.caster, "stop") end
         end,
+        onCast = function(ctx)
+            -- Aghanim's Scepter: the next Mana Break within the duration is empowered
+            local dur = ctx.v("empowered_mana_break_duration")
+            if dur > 0 then
+                Mods.add(ctx.caster, "antimage_empowered_break", {duration = dur, source = ctx.caster, dispel = "none"})
+            end
+        end,
+        onLearn = function(u) blinkReach(u) end,
     })
 
     -- Counterspell ------------------------------------------------------------------
@@ -149,7 +194,51 @@ define("hero_antimage", function()
         else
             RemoveUnit(d)
         end
+        if use("talents").hasShard(am) then M.fragment(am, caster) end
     end
+
+    -- Aghanim's Shard: each reflected spell sends an image of Anti-Mage
+    -- (100 % damage dealt, 200 % taken, duration_illusion seconds) next to
+    -- the caster (https://liquipedia.net/dota2/Anti-Mage, Counterspell). The
+    -- item dummy casts the map's Wand of Illusion copy on him.
+    local fragments = {}      -- dummy -> the caster to appear next to
+    local ILLUSION_ORDER = 852274
+    function M.fragment(am, caster)
+        local ids = use("data.ids")
+        local code, dummy = ids.abilities.items_illusion, ids.units.itemdummy
+        if not code or not dummy then return end
+        local abil = FourCC(code)
+        local lvl = level(am, COUNTER)
+        local d = CreateUnit(GetOwningPlayer(am), FourCC(dummy), GetUnitX(am), GetUnitY(am), 0)
+        UnitAddAbility(d, abil)
+        local ab = BlzGetUnitAbility(d, abil)
+        if ab then
+            local dur = A.value(COUNTER, "duration_illusion", lvl, am)
+            BlzSetAbilityRealLevelField(ab, ABILITY_RLF_DAMAGE_DEALT_PERCENT_OF_NORMAL, 0,
+                                        1 + A.value(COUNTER, "outgoing_damage", lvl, am) / 100)
+            BlzSetAbilityRealLevelField(ab, ABILITY_RLF_DAMAGE_RECEIVED_MULTIPLIER, 0,
+                                        1 + A.value(COUNTER, "incoming_damage", lvl, am) / 100)
+            BlzSetAbilityRealLevelField(ab, ABILITY_RLF_DURATION_NORMAL, 0, dur)
+            BlzSetAbilityRealLevelField(ab, ABILITY_RLF_DURATION_HERO, 0, dur)
+        end
+        fragments[d] = caster
+        IssueTargetOrderById(d, ILLUSION_ORDER, am)
+        Timer.after(1.0, function()
+            fragments[d] = nil
+            RemoveUnit(d)
+        end)
+    end
+
+    Events.on("summon", function(summoner, summoned)
+        local caster = summoner and fragments[summoner]
+        if not caster then return end
+        fragments[summoner] = nil
+        if not U.alive(caster) then return end
+        local a = U.angle(GetUnitX(caster), GetUnitY(caster), GetUnitX(summoned), GetUnitY(summoned))
+        SetUnitPosition(summoned, U.polar(GetUnitX(caster), GetUnitY(caster), 100, a))
+        DestroyEffect(AddSpecialEffectTarget(FX.reflect, summoned, "origin"))
+        IssueTargetOrder(summoned, "attack", caster)
+    end)
 
     Events.on("spell_effect", function(caster, abil, target)
         if not target or not caster or caster == target or not M.units[target] then return end

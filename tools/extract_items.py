@@ -8,7 +8,8 @@ items.json (read by tools/gen_objects.py and by Lua as use("data.items")):
   items[name]  title, cost, shop, stats (summed passive props, fractions for
                percentages), values (raw Dota AbilityValues, "a b c" per
                level), cooldown, mana, range, channel, charges, stack,
-               consumable, stock, recipe {cost, scroll, parts[[...]]}, desc,
+               consumable, stock, available_at (game clock seconds it is sold
+               from), recipe {cost, scroll, parts[[...]]}, desc,
                secret (sold only at a Secret Shop), shareable (allies may use
                it: Dota's ITEM_FULLY_SHAREABLE)
   items["item_recipe_<x>"]  the recipe scroll: title, cost, shop, result
@@ -55,7 +56,7 @@ SHOPS = [
     ("relics", "Relics", [
         "item_ultimate_orb", "item_demon_edge", "item_mystic_staff", "item_reaver", "item_eagle",
         "item_relic", "item_refresher", "item_recipe_refresher", "item_sheepstick",
-        "item_recipe_sheepstick"]),
+        "item_recipe_sheepstick", "item_aghanims_shard"]),
     ("accessories", "Accessories", [
         "item_magic_wand", "item_recipe_magic_wand", "item_bracer", "item_recipe_bracer",
         "item_wraith_band", "item_recipe_wraith_band", "item_null_talisman",
@@ -67,7 +68,7 @@ SHOPS = [
     ("magical", "Magical", [
         "item_force_staff", "item_recipe_force_staff", "item_cyclone", "item_recipe_cyclone",
         "item_aether_lens", "item_recipe_aether_lens", "item_dagon", "item_recipe_dagon",
-        "item_kaya", "item_recipe_kaya"]),
+        "item_kaya", "item_recipe_kaya", "item_ultimate_scepter"]),
     ("armor", "Armor", [
         "item_hand_of_midas", "item_recipe_hand_of_midas", "item_black_king_bar",
         "item_recipe_black_king_bar", "item_heart", "item_recipe_heart", "item_assault",
@@ -197,6 +198,7 @@ STATS = {
     "item_shivas_guard": {"armor": "bonus_armor", "hp_regen": "bonus_hp_regen"},
     "item_radiance": {"damage": "bonus_damage", "evasion": ("evasion", PCT)},
     "item_satanic": {"str": "bonus_strength", "damage": "bonus_damage", "lifesteal": ("lifesteal_percent", PCT)},
+    "item_ultimate_scepter": dict(all3("bonus_all_stats"), max_hp="bonus_health", max_mana="bonus_mana"),
 }
 
 # Our own short descriptions. {key} is the level-1 Dota value, {-key} its
@@ -288,7 +290,16 @@ DESC = {
     "item_radiance": "Burns enemies within {aura_radius} for {aura_damage} magic damage per second (always on).",
     "item_satanic": "Use to raise lifesteal to {unholy_lifesteal_total_tooltip}% for {unholy_duration} seconds and "
                     "drop most debuffs.",
+    "item_ultimate_scepter": "Upgrades your hero's abilities while you carry it in the main inventory (the Aghanim's "
+                             "sign next to the ability row shows how).",
+    "item_aghanims_shard": "Consumed at once: upgrades your hero's abilities for the rest of the game, once per hero "
+                           "(the Aghanim's sign next to the ability row shows how).",
 }
+
+# Dota's ItemInitialStockTime counts from the start of the 90 s before the
+# horn: Aghanim's Shard has 990 there and arrives at 15:00 on the game clock
+# (https://liquipedia.net/dota2/Aghanim%27s_Shard, "availability 900").
+PRE_HORN = 90
 
 NOTES = {
     "patch": "All 78 requested items exist in the installed patch. Recipes follow it: Arcane Boots use Ring of "
@@ -398,7 +409,10 @@ def main(data_dir, out_path):
             e["secret"] = True
         if d.get("ItemShareability") == "ITEM_FULLY_SHAREABLE":
             e["shareable"] = True
-        if d.get("ItemStockMax"):
+        if d.get("ItemInitialStockTime"):
+            # sold from this game time on; its 1 s restock never runs out
+            e["available_at"] = num(float(d["ItemInitialStockTime"]) - PRE_HORN)
+        elif d.get("ItemStockMax"):
             e["stock"] = {"max": int(d["ItemStockMax"]), "initial": int(d.get("ItemStockInitial", d["ItemStockMax"])),
                           "time": num(float(d.get("ItemStockTime", "0")))}
         stats = {}

@@ -1,7 +1,9 @@
 -- Chen: Penitence, Holy Persuasion, Divine Favor, the Zealot innate and Hand
 -- of God. Persuasion takes over lane creeps, neutrals and the commander's
--- non-hero units. The Zealot is a creep that joins Chen and can sacrifice
--- itself with Martyrdom; the innate's active teleports Chen's units to him.
+-- non-hero units (Ancients too with Aghanim's Shard). The Zealot is a creep
+-- that joins Chen and can sacrifice itself with Martyrdom; the innate's
+-- active teleports Chen's units to him. With Aghanim's Scepter Hand of God is
+-- channelled and shields the allies around Chen.
 define("hero_chen", function()
     local A = use("abilities")
     local Mods = use("mods")
@@ -172,7 +174,7 @@ define("hero_chen", function()
     -- Holy Persuasion's bonuses: minimum health, full mana, speed and damage.
     local function empower(chen, u, lvl)
         if lvl <= 0 then return end
-        local minHp = A.value(PERSUASION, "health_min", lvl) + HEALTH_MIN_PER_LEVEL * GetHeroLevel(chen)
+        local minHp = A.value(PERSUASION, "health_min", lvl, chen) + HEALTH_MIN_PER_LEVEL * GetHeroLevel(chen)
         local maxHp = BlzGetUnitMaxHP(u)
         if maxHp < minHp then
             local frac = GetWidgetLife(u) / math.max(1, maxHp)
@@ -181,8 +183,8 @@ define("hero_chen", function()
         end
         SetUnitState(u, UNIT_STATE_MANA, GetUnitState(u, UNIT_STATE_MAX_MANA))
         Mods.add(u, "chen_persuaded", {persist = true, dispel = "none", props = {
-            move_flat = A.value(PERSUASION, "movement_speed_bonus", lvl),
-            damage = math.floor(baseDamage(u) * A.value(PERSUASION, "damage_bonus", lvl) / 100 + 0.5),
+            move_flat = A.value(PERSUASION, "movement_speed_bonus", lvl, chen),
+            damage = math.floor(baseDamage(u) * A.value(PERSUASION, "damage_bonus", lvl, chen) / 100 + 0.5),
         }})
     end
 
@@ -191,7 +193,17 @@ define("hero_chen", function()
         if U.isHero(t) or U.isStructure(t) or IsUnitIllusion(t) or GetUnitAbilityLevel(t, FourCC("Aloc")) > 0 then
             return "Holy Persuasion only works on creeps"
         end
-        if IsUnitType(t, UNIT_TYPE_ANCIENT) then return "Cannot persuade ancient units" end
+        if IsUnitType(t, UNIT_TYPE_ANCIENT) then
+            -- Aghanim's Shard: Ancients too, one per level of Hand of God
+            -- (https://liquipedia.net/dota2/Chen, Holy Persuasion)
+            local cap = A.value(HAND, "ancient_creeps_scepter", math.max(1, level(chen, HAND)), chen)
+            if level(chen, HAND) <= 0 or cap <= 0 then return "Cannot persuade ancient units" end
+            local n = 0
+            for _, c in ipairs(controlled[chen] or {}) do
+                if U.alive(c) and persuaded[c] == chen and IsUnitType(c, UNIT_TYPE_ANCIENT) then n = n + 1 end
+            end
+            if n >= cap then return "No room for another Ancient" end
+        end
         if GetOwningPlayer(t) == owner then return "Already under your control" end
         if IsUnitAlly(t, owner) and GetPlayerId(GetOwningPlayer(t)) ~= SLOT_ANCIENTS then
             return "Cannot take an ally's unit"
@@ -343,22 +355,61 @@ define("hero_chen", function()
     })
 
     ---------------------------------------------------------------- Hand of God
+    -- Aghanim's Scepter: Chen channels Hand of God; while he does, allies
+    -- within debuff_immune_radius shed debuffs, resist magic and heal
+    -- nearby_hot_boost % faster (https://liquipedia.net/dota2/Chen, Hand of God).
+    -- SIMPLIFIED: debuff immunity is a basic dispel every tick.
+    local channels = {}       -- chen -> true while channelling Hand of God
+
+    local function ward(ctx, hps)
+        local c = ctx.caster
+        local radius, resist, boost = ctx.v("debuff_immune_radius"), ctx.v("debuff_immune_resist") / 100,
+            ctx.v("nearby_hot_boost") / 100
+        channels[c] = true
+        local TICK = 0.25
+        Timer.every(TICK, function()
+            if not channels[c] or not U.alive(c) then
+                channels[c] = nil
+                return true
+            end
+            for _, a in ipairs(U.alliesOf(ctx.owner, GetUnitX(c), GetUnitY(c), radius)) do
+                if not U.isStructure(a) then
+                    Mods.dispel(a, {debuffs = true})
+                    local regen = Mods.has(a, "chen_hand_of_god") and hps * boost * healAmp(a) or nil
+                    Mods.add(a, "chen_hand_of_god_ward", {duration = TICK + 0.1, source = c, dispel = "none",
+                        props = {magic_resist = resist, hp_regen = regen}})
+                end
+            end
+            return false
+        end)
+    end
+    C.channelling = function(u) return channels[u] == true end
+
     A.define(HAND, {
         onCast = function(ctx)
             local c = ctx.caster
             local heal, hps, duration = ctx.v("heal_amount"), ctx.v("heal_per_second"), ctx.v("hot_duration")
+            -- talents: a strong dispel, and a full heal for Chen and his own units
+            local purge, full = ctx.v("does_purge") > 0, ctx.v("full_heal_on_chen_and_creeps") > 0
             local list = U.enum(GetUnitX(c), GetUnitY(c), MAP, function(u)
                 if U.isStructure(u) then return false end
                 return GetOwningPlayer(u) == ctx.owner or (U.isHero(u) and IsUnitAlly(u, ctx.owner))
             end)
             for _, u in ipairs(list) do
                 local amp = healAmp(u)
-                Damage.heal(u, heal * amp)
+                if purge then Mods.dispel(u, {debuffs = true, strong = true}) end
+                if full and GetOwningPlayer(u) == ctx.owner then
+                    SetWidgetLife(u, BlzGetUnitMaxHP(u))
+                else
+                    Damage.heal(u, heal * amp)
+                end
                 fxOn("Abilities\\Spells\\Human\\HolyBolt\\HolyBoltSpecialArt.mdl", u, "origin")
                 Mods.add(u, "chen_hand_of_god", {duration = duration, source = c, props = {hp_regen = hps * amp},
                     effect = "Abilities\\Spells\\NightElf\\Rejuvenation\\RejuvenationTarget.mdl", attach = "chest"})
             end
+            if ctx.v("AbilityChannelTime") > 0 then ward(ctx, hps) end
         end,
+        onEndCast = function(ctx) channels[ctx.caster] = nil end,
     })
 
     ---------------------------------------------------------------- Zealot
@@ -372,6 +423,14 @@ define("hero_chen", function()
         local mid = A.id(MARTYRDOM)
         if mid then UnitAddAbility(z, mid) end
         BlzSetUnitBaseDamage(z, BlzGetUnitBaseDamage(z, 0) + ZEALOT_DAMAGE_PER_LEVEL * GetHeroLevel(chen), 0)
+        -- level 10 talent: the Zealot gets bonus_hp % more health and damage
+        local more = A.value(ZEALOT, "bonus_hp", 1, chen) / 100
+        if more > 0 then
+            BlzSetUnitMaxHP(z, math.floor(BlzGetUnitMaxHP(z) * (1 + more) + 0.5))
+            SetWidgetLife(z, BlzGetUnitMaxHP(z))
+            local dmg = BlzGetUnitBaseDamage(z, 0)
+            BlzSetUnitBaseDamage(z, math.floor(A.apply(ZEALOT, "damage", dmg, 1, chen) + 0.5), 0)
+        end
         empower(chen, z, level(chen, PERSUASION))
         fx("Abilities\\Spells\\Human\\Resurrect\\ResurrectTarget.mdl", x, y)
         startLoops()

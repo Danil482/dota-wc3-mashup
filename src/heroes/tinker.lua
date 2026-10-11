@@ -1,6 +1,7 @@
 -- Tinker (npc_dota_hero_tinker): Laser, March of the Machines, Deploy Turrets,
 -- Keen Conveyance (active innate), Rearm and the Eureka! innate, with the Dota 2
--- values from data.heroes. WC3 objects: specs/heroes/tinker.json.
+-- values from data.heroes; Aghanim's Scepter upgrades Laser, March and the
+-- turrets, Aghanim's Shard grants Warp Flare. WC3 objects: specs/heroes/tinker.json.
 define("hero_tinker", function()
     local A = use("abilities")
     local Mods = use("mods")
@@ -91,19 +92,44 @@ define("hero_tinker", function()
         Timer.after(seconds, function() DestroyLightning(l) end)
     end
 
+    -- Aghanim's Scepter: each hit takes scepter_reduction_pct % of the hero's
+    -- maximum (and so current) health while the blind lasts, stacking
+    -- (https://liquipedia.net/dota2/Tinker, Laser).
+    local function shrink(u, t, pct, duration)
+        if pct <= 0 or not U.isHero(t) then return end
+        local m = Mods.get(t, "tinker_laser_shrink")
+        local base = m and m.base or BlzGetUnitMaxHP(t)
+        local stacks = (m and m.stacks or 0) + 1
+        m = Mods.add(t, "tinker_laser_shrink", {duration = duration, source = u, debuff = true, stacks = stacks,
+                                                props = {max_hp = -base * pct / 100, perStack = true}})
+        if m then m.base = base end
+    end
+
+    local function laserHit(ctx, t, share)
+        local u = ctx.caster
+        DestroyEffect(AddSpecialEffectTarget(FX.laserHit, t, "chest"))
+        if U.isMagicImmune(t) then return end
+        Damage.deal(u, t, ctx.v("laser_damage") * share, Damage.PURE)
+        Mods.add(t, "tinker_laser_blind", {
+            duration = ctx.v("duration"), source = u, debuff = true,
+            props = {tinker_blind = ctx.v("miss_rate") / 100},
+            effect = FX.blind, attach = "overhead",
+        })
+        shrink(u, t, ctx.v("scepter_reduction_pct"), ctx.v("duration"))
+    end
+
     A.define(LASER, {
         onCast = function(ctx)
             local u, t = ctx.caster, ctx.target
             if not U.alive(t) then return end
             beam(u, t, 0.3)
-            DestroyEffect(AddSpecialEffectTarget(FX.laserHit, t, "chest"))
-            if U.isMagicImmune(t) then return end
-            Damage.deal(u, t, ctx.v("laser_damage"), Damage.PURE)
-            Mods.add(t, "tinker_laser_blind", {
-                duration = ctx.v("duration"), source = u, debuff = true,
-                props = {tinker_blind = ctx.v("miss_rate") / 100},
-                effect = FX.blind, attach = "overhead",
-            })
+            -- the level 25 talent: every enemy around the target is hit too
+            local radius = ctx.v("radius_explosion")
+            local others = radius > 0 and U.enemiesOf(ctx.owner, GetUnitX(t), GetUnitY(t), radius) or {}
+            laserHit(ctx, t, 1)
+            for _, e in ipairs(others) do
+                if e ~= t and U.alive(e) then laserHit(ctx, e, ctx.v("splash_pct") / 100) end
+            end
         end,
     })
 
@@ -111,6 +137,7 @@ define("hero_tinker", function()
     -- native on-hit procs of WC3 heroes (Bash, Critical Strike) can still fire.
     Damage.onDamaging(function(source, target, info)
         if not info.attack or not source or info.amount <= 0 then return end
+        if Mods.flag(target, "no_evade") then return end           -- true strike against it
         local miss = Mods.max(source, "tinker_blind")
         if miss > 0 and GetRandomReal(0, 1) < miss then
             info.amount = 0
@@ -157,13 +184,24 @@ define("hero_tinker", function()
                     robots[#robots + 1] = {fx = fx, x = x, y = y, t = 0}
                 end
             end
-            local enemies = nil
+            local enemies, friends = nil, nil
             local i = 1
             while i <= #robots do
                 local r = robots[i]
                 r.t = r.t + dt
                 r.x, r.y = r.x + dirX * p.speed * dt, r.y + dirY * p.speed * dt
                 BlzSetSpecialEffectPosition(r.fx, r.x, r.y, groundZ(r.x, r.y))
+                if p.heal > 0 then
+                    -- Aghanim's Scepter: a non-stacking heal for the allied heroes the robots pass
+                    friends = friends or U.alliesOf(owner, cx, cy, reach)
+                    for _, a in ipairs(friends) do
+                        if U.alive(a) and U.isHero(a) and U.dist(r.x, r.y, GetUnitX(a), GetUnitY(a))
+                                <= p.collision + BlzGetUnitCollisionSize(a) then
+                            Mods.add(a, "tinker_march_heal", {duration = p.healFor, source = u,
+                                                              props = {hp_regen = p.heal}})
+                        end
+                    end
+                end
                 enemies = enemies or U.enemiesOf(owner, cx, cy, reach)
                 local hit = false
                 for _, e in ipairs(enemies) do
@@ -201,6 +239,7 @@ define("hero_tinker", function()
                 splash = ctx.v("splash_radius"), duration = ctx.v("duration"),
                 speed = math.max(1, ctx.v("speed")), rate = ctx.v("machines_per_sec"),
                 distance = ctx.v("distance"), damage = ctx.v("damage"),
+                heal = ctx.v("heal_per_second"), healFor = ctx.v("heal_duration"),
             })
         end,
     })
@@ -327,6 +366,64 @@ define("hero_tinker", function()
                     spawnTurret(u, owner, tx, ty, p)
                 end
                 return true
+            end)
+        end,
+    })
+
+    -- Warp Flare (Aghanim's Shard) -------------------------------------------
+    -- A flare flies at an enemy, deals `damage`, roots it for debuff_duration
+    -- and warps it away from Tinker by (cast range - distance) x
+    -- warp_distance_factor: the nearer, the further
+    -- (https://liquipedia.net/dota2/Tinker, Warp Flare: 1900 projectile speed).
+    -- SIMPLIFIED: its cast and attack range reduction (range_reduction %) is
+    -- not modelled.
+    local WARP, FLARE_SPEED = "tinker_warp_grenade", 1900
+    local FLARE = "Abilities\\Weapons\\GyroCopter\\GyroCopterMissile.mdl"
+    local WARPED = "Abilities\\Spells\\NightElf\\Blink\\BlinkTarget.mdl"
+
+    local function warp(ctx, t)
+        if not U.alive(t) or U.isMagicImmune(t) then return end
+        local u = ctx.caster
+        Mods.add(t, "tinker_warp_flare", {duration = ctx.v("debuff_duration"), source = u, debuff = true,
+                                          props = {root = true}})
+        Damage.deal(u, t, ctx.v("damage"), Damage.MAGICAL)
+        if not U.alive(t) then return end
+        local ab = BlzGetUnitAbility(u, ctx.castId)
+        local range = ab and BlzGetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, 0) or 0
+        if range <= 0 then range = ctx.v("AbilityCastRange") end
+        local ux, uy, tx, ty = GetUnitX(u), GetUnitY(u), GetUnitX(t), GetUnitY(t)
+        local away = math.min(ctx.v("max_distance"),
+                              math.max(0, (range - U.dist(ux, uy, tx, ty)) * ctx.v("warp_distance_factor")))
+        if away <= 0 then return end
+        DestroyEffect(AddSpecialEffect(WARPED, tx, ty))
+        local a = U.dist(ux, uy, tx, ty) > 1 and U.angle(ux, uy, tx, ty) or math.rad(GetUnitFacing(u))
+        SetUnitPosition(t, U.polar(tx, ty, away, a))
+        DestroyEffect(AddSpecialEffect(WARPED, GetUnitX(t), GetUnitY(t)))
+    end
+
+    A.define(WARP, {
+        onCast = function(ctx)
+            local u, t = ctx.caster, ctx.target
+            if not U.alive(t) then return end
+            local x, y = GetUnitX(u), GetUnitY(u)
+            local fx = AddSpecialEffect(FLARE, x, y)
+            Timer.onFrame(function(dt)
+                if not U.alive(t) then
+                    DestroyEffect(fx)
+                    return true
+                end
+                local tx, ty = GetUnitX(t), GetUnitY(t)
+                local step = FLARE_SPEED * dt
+                if U.dist(x, y, tx, ty) <= step then
+                    DestroyEffect(fx)
+                    warp(ctx, t)
+                    return true
+                end
+                local a = U.angle(x, y, tx, ty)
+                x, y = x + step * math.cos(a), y + step * math.sin(a)
+                BlzSetSpecialEffectYaw(fx, a)
+                BlzSetSpecialEffectPosition(fx, x, y, groundZ(x, y) + 80)
+                return false
             end)
         end,
     })
@@ -554,6 +651,7 @@ define("hero_tinker", function()
     end
 
     Bots.hint(LASER, {target = "enemyHero"})
+    Bots.hint(WARP, {target = "enemyHero", range = 600})
     Bots.hint(MARCH, {target = "point", range = 300})
     Bots.hint(TURRETS, {target = "point"})
     Bots.hint(REARM, REARM_HINT)

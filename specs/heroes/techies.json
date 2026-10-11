@@ -8,7 +8,6 @@
  "abilities": {
   "techies_sticky_bomb": {
    "target": 2,
-   "order": "acidbomb",
    "desc": "Lobs a bomb at the target area. If an enemy hero is close to where it lands, the bomb chases it, sticks and slows it, then explodes, damaging and slowing everything around."
   },
   "techies_reactive_tazer": {

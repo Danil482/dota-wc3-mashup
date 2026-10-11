@@ -404,4 +404,38 @@ __mockC.list[#__mockC.list + 1] = {name = "tinker", fn = function(C)
     C.check(left > 7 and left < 8.1, "tinker eureka item cooldown " .. left)
     C.check(math.abs(T.itemCdr(tinker) - 0.2) < 1e-6, "tinker eureka percent")
     C.advance(0.5)
+
+    -- Talents, Aghanim's Scepter (Laser, March) and Shard (Warp Flare)
+    local Tal, H = use("talents"), use("heroes")
+    if not Tal.started then Tal.init() end
+    H.keyOf[tinker] = "tinker"
+    Tal.register(tinker)
+    tinker.level = 25
+    C.check(Tal.pick(tinker, "special_bonus_unique_tinker_4"), "tinker aoe laser talent picked")
+    tinker.x, tinker.y = X, Y
+    mk.x, mk.y = X + 450, Y + 60
+    local near = C.unit(7, "Hmkg", X + 550, Y + 60, {hero = true})
+    C.cast(tinker, "tinker_laser", mk)
+    C.check(near.taken > 0 and Mods.has(near, "tinker_laser_blind"), "tinker aoe laser hits around the target")
+    tinker.items[2] = CreateItem(FourCC(ids.items.item_ultimate_scepter), 0, 0)
+    use("items").refresh(tinker)
+    C.check(Tal.hasScepter(tinker), "tinker carries the scepter")
+    C.cast(tinker, "tinker_laser", mk)
+    C.cast(tinker, "tinker_laser", mk)
+    local shrunk = Mods.get(mk, "tinker_laser_shrink")
+    C.check(shrunk ~= nil and shrunk.stacks == 2 and Mods.sum(mk, "max_hp") < 0, "tinker scepter laser shrinks, stacking")
+    local ally = C.unit(1, "Hpal", X + 100, Y, {hero = true})
+    C.cast(tinker, "tinker_march_of_the_machines", nil, X + 200, Y)
+    C.advance(7.0)
+    C.check(Mods.has(ally, "tinker_march_heal") or ally.healed, "tinker scepter march heals allies")
+    Tal.consumeShard(tinker)
+    C.check(GetUnitAbilityLevel(tinker, id("tinker_warp_grenade")) == 1, "tinker shard grants warp flare")
+    local victim = C.unit(7, "hfoo", X + 200, Y)
+    C.cast(tinker, "tinker_warp_grenade", victim)
+    C.advance(0.5)
+    C.check(victim.taken >= 150 * 0.99 and U.dist(X, Y, victim.x, victim.y) > 400, "tinker warp flare warps away "
+        .. U.dist(X, Y, victim.x, victim.y))
+    C.check(Mods.has(victim, "tinker_warp_flare"), "tinker warp flare roots")
+    Tal.forget(tinker)
+    H.keyOf[tinker] = nil
 end}

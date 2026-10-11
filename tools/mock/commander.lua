@@ -29,6 +29,21 @@ do
 
         -- the AI commander's setup in this mock game (slot 7, no human commander)
         check("AI commander", Cmd.player == Player(SLOT_COMMANDER_AI), Cmd.player and GetPlayerId(Cmd.player))
+
+        -- a game started straight from the map: its one computer plays in user
+        -- slot 1, the empty "Commander AI" slot can't run the melee AI
+        local Roles = use("roles")
+        local saved = {Roles.commander, Roles.commanderIsAI, Roles.heroSlots}
+        __mock.computers = {[1] = true}
+        Roles.assign(false)
+        check("AI commander in the playing computer's slot", Roles.commander == 1, Roles.commander)
+        check("the other user slots field heroes", table.concat(Roles.heroSlots, ",") == "0,2,3,4,5",
+            table.concat(Roles.heroSlots, ","))
+        __mock.computers = {[SLOT_COMMANDER] = true, [1] = true}
+        Roles.assign(false)
+        check("a computer in the commander slot comes first", Roles.commander == SLOT_COMMANDER, Roles.commander)
+        __mock.computers = {}
+        Roles.commander, Roles.commanderIsAI, Roles.heroSlots = saved[1], saved[2], saved[3]
         check("melee AI started", (__mock.calls.StartMeleeAI or 0) == 1, __mock.calls.StartMeleeAI)
         check("starter base created", Cmd.starters == B.count(Cmd.raceKey) and Cmd.starters > 0,
             Cmd.starters .. " of " .. B.count(Cmd.raceKey))

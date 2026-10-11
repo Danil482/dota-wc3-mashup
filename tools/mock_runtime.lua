@@ -22,12 +22,14 @@ function Player(i)
 end
 function GetPlayerId(p) return p.id end
 __mock.humans = {[0] = true}
+__mock.computers = {}   -- slot -> true: a computer in the game (e.g. slot 1 of a game started from the map)
 function GetPlayerController(p)
+    if __mock.computers[p.id] then return MAP_CONTROL_COMPUTER end
     if p.id <= 5 then return MAP_CONTROL_USER end
     return MAP_CONTROL_COMPUTER
 end
 function GetPlayerSlotState(p)
-    if __mock.humans[p.id] then return PLAYER_SLOT_STATE_PLAYING end
+    if __mock.humans[p.id] or __mock.computers[p.id] then return PLAYER_SLOT_STATE_PLAYING end
     return PLAYER_SLOT_STATE_EMPTY
 end
 function GetPlayerState(p, s) return p.state[s] or 0 end
@@ -129,6 +131,7 @@ function BlzGetUnitMaxHP(u) return u.maxLife or 100 end
 function GetWidgetLife(u) return u.life or 0 end
 function SetWidgetLife(u, v) u.life = v end
 function GetPlayerController(p)
+    if __mock.computers[p.id] then return MAP_CONTROL_COMPUTER end
     if p.id <= 5 then return MAP_CONTROL_USER end
     return MAP_CONTROL_COMPUTER
 end

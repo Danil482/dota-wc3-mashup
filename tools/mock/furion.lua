@@ -178,7 +178,7 @@ if not __mockB then
         local ctx = {def = def, caster = caster, owner = GetOwningPlayer(caster), level = level, target = target,
                      x = x or (target and GetUnitX(target)) or GetUnitX(caster),
                      y = y or (target and GetUnitY(target)) or GetUnitY(caster)}
-        function ctx.v(key) return A.value(name, key, level) end
+        function ctx.v(key) return A.value(name, key, level, caster) end   -- with the caster's upgrades, as in game
         return ctx
     end
 
@@ -291,6 +291,36 @@ __mockB.list[#__mockB.list + 1] = {name = "furion", fn = function(B)
     B.cast("furion_wrath_of_nature", fur, 3, foeHero)
     B.advance(1)
     B.check(far.life < hp, "wrath reached the far enemy")
+    B.check(not Mods.has(far, "furion_wrath_entangle"), "no roots without the scepter")
+
+    -- Talents (x3 Treants) and Aghanim's Scepter (Wrath roots)
+    local T, H = use("talents"), use("heroes")
+    if not T.started then T.init() end
+    local was = H.bySlot[GetPlayerId(GetOwningPlayer(fur))]
+    H.keyOf[fur], H.bySlot[GetPlayerId(GetOwningPlayer(fur))] = "furion", fur
+    T.register(fur)
+    fur.level = 25
+    B.check(T.pick(fur, "special_bonus_unique_furion"), "furion treant talent")
+    for i = 1, 2 do B.tree(X - 400 + 40 * i, Y - 600) end
+    B.cast("furion_force_of_nature", fur, 4, nil, X - 340, Y - 600)
+    local big = nil
+    for t, info in pairs(F.treants) do
+        if info.owner == fur and info.bonus == 3 * A.value("furion_force_of_nature", "treant_bonus_hero_damage", 4) then
+            big = t
+        end
+    end
+    B.check(big ~= nil, "talent treants hit heroes three times as hard")
+    local code = use("data.ids").items.item_ultimate_scepter
+    if code and UnitAddItem then
+        UnitAddItem(fur, CreateItem(FourCC(code), 0, 0))
+        use("items").refresh(fur)
+        far.life = 500
+        B.cast("furion_wrath_of_nature", fur, 3, foeHero)
+        B.advance(1)
+        B.check(Mods.has(far, "furion_wrath_entangle") and Mods.flag(far, "root"), "scepter wrath roots")
+    end
+    T.forget(fur)
+    H.keyOf[fur], H.bySlot[GetPlayerId(GetOwningPlayer(fur))] = nil, was
 
     F.follow()
     B.advance(1)

@@ -111,6 +111,29 @@ def is_innate(ab):
     return ab.get("Innate") == "1" or "innate" in ab["name"]
 
 
+# Abilities Aghanim's Scepter or Shard grants: never learned, added by
+# src/game/talents.lua. They take Dota's D/F cell of their slot (a passive
+# innate moves aside); a sub-ability shares the cell of the ability it stands
+# in for (MegaMeepo Fling while MegaMeepo is up). An ally-targeted one gets
+# allied targets.
+GRANT_CELLS = {4: (1, 1), 5: (2, 1)}
+GRANT_SHARES = {"meepo_megameepo_fling": "meepo_megameepo"}
+TEAM_TARGETS = {"FRIENDLY": "air,ground,friend,self,vuln,invu"}
+
+
+def is_granted(ab):
+    return ab.get("IsGrantedByScepter") == "1" or ab.get("IsGrantedByShard") == "1"
+
+
+def spec_cell(a):
+    if a.get("cell"):
+        return tuple(a["cell"])
+    fields = a.get("fields") or {}
+    if "abpx" in fields and "abpy" in fields:
+        return fields["abpx"], fields["abpy"]
+    return None
+
+
 def ability_value(ab, key, level):
     raw = (ab.get("values") or {}).get(key, ab.get(key))
     if raw is None:
@@ -168,6 +191,7 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, orders_used=None
     flags = flags_of(ab)
     levels = levels_of(ab)
     innate = is_innate(ab)
+    granted = spec.get("_granted", False)
     kind = spec.get("kind")
     if kind is None:
         if "PASSIVE" in flags:
@@ -195,7 +219,7 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, orders_used=None
     icon = ICON.format(ab["name"])
     f = {
         "anam": title,
-        "aher": 0 if innate else 1,
+        "aher": 0 if innate or granted else 1,
         "alev": levels,
         "aart": icon, "arar": icon,
         "arlv": 6 if ult else 1,
@@ -267,7 +291,9 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, orders_used=None
             "Ncl6": [order] * levels,
             "acdn": cds, "amcs": manas, "aran": ranges, "aare": areas,
             # no hero/nonhero or ancient flags: both kinds stay targetable
-            "atar": [spec.get("targets", "air,ground,enemy,neutral")] * levels,
+            "atar": [spec.get("targets", granted and TEAM_TARGETS.get(
+                (ab.get("AbilityUnitTargetTeam") or "").replace("DOTA_UNIT_TARGET_TEAM_", ""))
+                or "air,ground,enemy,neutral")] * levels,
             "aani": spec.get("anim", "spell"),
             "acat": "", "atat": "", "aeat": "", "asat": "",
         })
@@ -275,7 +301,7 @@ def ability_object(abils, ids, hero, ab, spec, slot_index, ult, orders_used=None
             f["acas"] = [spec["castPoint"]] * levels       # casting time before the effect
         for fid, vals in (spec.get("fields") or {}).items():
             f[fid] = vals
-        if innate and kind == "active":
+        if (innate or granted) and kind == "active":
             f["arlv"], f["alsk"] = 1, 0
     if base == "ANcl":
         if order:
@@ -332,20 +358,40 @@ def heroes(units, abils, buffs, ids, herodata, specs):
             flags = flags_of(ab)
             if aspec.get("skip"):
                 continue
+            if is_granted(ab):
+                plan.append((ab, dict(aspec, _granted=True)))
+                continue
             if ("HIDDEN" in flags or "NOT_LEARNABLE" in flags) and not is_innate(ab) and not aspec.get("include"):
                 continue
             plan.append((ab, aspec))
         # Command card: basics take the bottom row then (1,1),(2,1); the
-        # ultimate sits at (3,2); innates take whatever cells are left.
+        # ultimate sits at (3,2); granted abilities their Dota slot's cell;
+        # innates take whatever cells are left.
         basic_count = sum(1 for ab, a in plan if not is_innate(ab) and not a.get("innateActive")
-                          and "ULTIMATE" not in (ab.get("AbilityType") or ""))
+                          and not a.get("_granted") and "ULTIMATE" not in (ab.get("AbilityType") or ""))
         basic_cells = [(0, 2), (1, 2), (2, 2), (1, 1), (2, 1)][:basic_count]
-        free_cells = [c for c in [(2, 1), (1, 1), (0, 1)] if c not in basic_cells]
+        taken = set(basic_cells) | {spec_cell(a) for _, a in plan if spec_cell(a)}
+        grant_cells = {}
+        for ab, a in plan:
+            if a.get("_granted") and not spec_cell(a) and ab["name"] not in GRANT_SHARES:
+                want = GRANT_CELLS.get(ab["slot"])
+                cell = want if want and want not in taken else next(
+                    (c for c in [(1, 1), (2, 1), (0, 1), (3, 1)] if c not in taken), (0, 1))
+                taken.add(cell)
+                grant_cells[ab["name"]] = cell
+        for name, parent in GRANT_SHARES.items():
+            if parent in grant_cells:
+                grant_cells[name] = grant_cells[parent]
+        free_cells = [c for c in [(2, 1), (1, 1), (0, 1)] if c not in basic_cells and c not in grant_cells.values()]
         for ab, aspec in plan:
-            if (is_innate(ab) or aspec.get("innateActive")) and "_cell" not in aspec and "cell" not in aspec:
+            if ab["name"] in grant_cells:
+                aspec = dict(aspec, _cell=grant_cells[ab["name"]])
+            elif (is_innate(ab) or aspec.get("innateActive")) and "_cell" not in aspec and "cell" not in aspec:
                 aspec = dict(aspec, _cell=free_cells.pop(0) if free_cells else (0, 1))
             ult = "ULTIMATE" in (ab.get("AbilityType") or "")
             acode, innate = ability_object(abils, ids, hero, ab, aspec, slot_index, ult, orders_used)
+            if aspec.get("_granted"):
+                continue                     # added with the Scepter or Shard (src/game/talents.lua)
             if innate or aspec.get("innateActive"):
                 innates.append(acode)
             else:
@@ -423,17 +469,31 @@ def structures(units, ids):
         ids.out["units"][key] = code
         units.add(base, code, apply_model(dict(fields), MODELS, key))
 
+    # Day and night vision from Dota's npc_units (src/data/world.json); the
+    # WC3 night sight takes over between dusk and dawn (DayLength in MISC).
+    world_data = load("world.json") if os.path.exists(os.path.join(DATA, "world.json")) else {}
+
+    def sight(group, key):
+        v = world_data.get(group, {}).get(key)
+        return {"usid": int(v["day"]), "usin": int(v["night"])} if v and "day" in v else {}
+
     tower = {"uabi": "", "uupt": "", "ubui": "", "upgr": "", "ubba": 0, "ubdi": 0, "ubsi": 0,
              "ua1r": 700, "uacq": 700, "ua1c": 0.9, "ua1t": "chaos", "udty": "fort", "usid": 1900, "usin": 800}
-    unit("hgtw", "tower1", dict(tower, unam="Dota Tower (Tier 1)", uhpm=1800, udef=12, ua1b=99, ua1d=1, ua1s=21))
-    unit("hgtw", "tower2", dict(tower, unam="Dota Tower (Tier 2)", uhpm=2500, udef=16, ua1b=149, ua1d=1, ua1s=21))
-    unit("hgtw", "tower3", dict(tower, unam="Dota Tower (Tier 3)", uhpm=2500, udef=16, ua1b=149, ua1d=1, ua1s=21))
-    unit("hgtw", "tower4", dict(tower, unam="Dota Tower (Tier 4)", uhpm=2600, udef=21, ua1b=149, ua1d=1, ua1s=21, usca=1.2))
+    unit("hgtw", "tower1", dict(tower, unam="Dota Tower (Tier 1)", uhpm=1800, udef=12, ua1b=99, ua1d=1, ua1s=21,
+                                **sight("towers", "1")))
+    unit("hgtw", "tower2", dict(tower, unam="Dota Tower (Tier 2)", uhpm=2500, udef=16, ua1b=149, ua1d=1, ua1s=21,
+                                **sight("towers", "2")))
+    unit("hgtw", "tower3", dict(tower, unam="Dota Tower (Tier 3)", uhpm=2500, udef=16, ua1b=149, ua1d=1, ua1s=21,
+                                **sight("towers", "3")))
+    unit("hgtw", "tower4", dict(tower, unam="Dota Tower (Tier 4)", uhpm=2600, udef=21, ua1b=149, ua1d=1, ua1s=21, usca=1.2,
+                                **sight("towers", "4")))
     rax = {"uabi": "", "uupt": "", "utra": "", "ubui": "", "upgr": "", "ubba": 0, "ubdi": 0, "ubsi": 0, "udty": "fort"}
-    unit("hbar", "rax_melee", dict(rax, unam="Melee Barracks", uhpm=2200, udef=15))
-    unit("hbar", "rax_ranged", dict(rax, unam="Ranged Barracks", uhpm=1300, udef=10, usca=0.8))
-    unit("etoe", "ancient", {"unam": "The Ancient", "uhpm": 4500, "udef": 13, "uabi": "", "uupt": "", "utra": "",
-                             "ures": "", "uaen": 0, "ubba": 0, "ubdi": 0, "ubsi": 0, "usca": 1.6})
+    unit("hbar", "rax_melee", dict(rax, unam="Melee Barracks", uhpm=2200, udef=15, **sight("buildings", "rax_melee")))
+    unit("hbar", "rax_ranged", dict(rax, unam="Ranged Barracks", uhpm=1300, udef=10, usca=0.8,
+                                    **sight("buildings", "rax_ranged")))
+    unit("etoe", "ancient", dict({"unam": "The Ancient", "uhpm": 4500, "udef": 13, "uabi": "", "uupt": "", "utra": "",
+                                  "ures": "", "uaen": 0, "ubba": 0, "ubdi": 0, "ubsi": 0, "usca": 1.6},
+                                 **sight("buildings", "fort")))
     unit("nfoh", "fountain", {"unam": "Fountain", "uabi": "Avul", "uaen": 1, "ua1b": 189, "ua1d": 1, "ua1s": 3,
                               "ua1c": 0.15, "ua1r": 1200, "uacq": 1200, "ua1t": "chaos", "ua1w": "missile",
                               "ua1m": "Abilities\\Weapons\\FarseerMissile\\FarseerMissile.mdl", "ua1z": 1600,
@@ -442,9 +502,12 @@ def structures(units, ids):
 
     creep = {"uabi": "", "upgr": "", "ubba": 0, "ubdi": 0, "ubsi": 0, "umvs": 325, "udty": "large",
              "ufoo": 0, "ugol": 0, "ulum": 0, "ubld": 0, "utra": "", "urac": "creeps"}
-    dota_melee = dict(creep, uhpm=550, udef=2, ua1b=18, ua1d=1, ua1s=5, ua1c=1.0, ua1r=100, uacq=500, ua1t="normal")
-    dota_ranged = dict(creep, uhpm=300, udef=0, ua1b=20, ua1d=1, ua1s=6, ua1c=1.0, ua1r=500, uacq=600, ua1t="pierce", ua1z=900)
-    dota_siege = dict(creep, uhpm=935, udef=0, ua1b=34, ua1d=1, ua1s=12, ua1c=3.0, ua1r=690, uacq=800, ua1t="siege")
+    dota_melee = dict(creep, uhpm=550, udef=2, ua1b=18, ua1d=1, ua1s=5, ua1c=1.0, ua1r=100, uacq=500, ua1t="normal",
+                      **sight("lane", "melee"))
+    dota_ranged = dict(creep, uhpm=300, udef=0, ua1b=20, ua1d=1, ua1s=6, ua1c=1.0, ua1r=500, uacq=600, ua1t="pierce", ua1z=900,
+                       **sight("lane", "ranged"))
+    dota_siege = dict(creep, uhpm=935, udef=0, ua1b=34, ua1d=1, ua1s=12, ua1c=3.0, ua1r=690, uacq=800, ua1t="siege",
+                      **sight("lane", "siege"))
     unit("nfrl", "dota_melee", dict(dota_melee, unam="Radiant Melee Creep"))
     unit("nfrs", "dota_ranged", dict(dota_ranged, unam="Radiant Ranged Creep"))
     unit("nsgg", "dota_siege", dict(dota_siege, unam="Radiant Siege Creep", ua1w="artillery",
@@ -688,7 +751,8 @@ def item_active_fields(e, spec, order):
         "atp1": [e["title"]], "aub1": [e.get("desc", e["title"])],
         "acdn": [float(e.get("cooldown") or 0)], "amcs": [int(e.get("mana") or 0)], "aran": [rng], "aare": [0.0],
         "Ncl1": [channel], "Ncl2": [target], "Ncl3": [1 | (8 if spec.get("universal") else 0)],
-        "Ncl4": [0.0], "Ncl5": [1 if channel else 0], "Ncl6": [order],
+        # Ncl5 0: as in Dota, Stop or a move interrupts a channelled item (TP scroll)
+        "Ncl4": [0.0], "Ncl5": [0], "Ncl6": [order],
         "aani": "", "acat": "", "atat": "", "aeat": "", "asat": "",
     }
     if spec["target"] in ("unit", "tree"):
@@ -791,6 +855,62 @@ def items(units, abils, ids):
     print(f"items: {len(out['items'])} items with shop tokens, {len(out['item_abilities'])} item abilities, "
           f"{len(shops)} shops")
     return w3t
+
+
+# ---------------------------------------------------------------- Dota courier
+# One courier per Dota hero player (src/game/courier.lua): a walking unit, and
+# the flying one that replaces it at hero level 4. Both carry Dota's command
+# card as Channels with no target and their own orders (Lua effects, Q W E D F
+# R by cell). Numbers come from src/data/courier.json (tools/extract_courier.py);
+# the stand-in models are WC3's pack horse and flying sheep.
+COURIER_CARD = [  # Dota ability, cell, WC3 icon, title, our own description
+    ("courier_take_stash_items", (0, 2), "BTNChestOfGold", "Retrieve Items",
+     "Fetches the items waiting in your stash, then brings them to your hero."),
+    ("courier_go_to_secretshop", (1, 2), "BTNMerchant", "Go To Secret Shop", "Goes to your side's Secret Shop."),
+    ("courier_return_stash_items", (2, 2), "BTNReturnGoods", "Return Items",
+     "Carries the courier's items back into your stash."),
+    ("courier_burst", (1, 1), "BTNBootsOfSpeed", "Speed Burst",
+     "Moves {movement_speed}% faster for {duration} seconds. Unlocks at hero level 10."),
+    ("courier_transfer_items", (2, 1), "BTNPackBeast", "Transfer Items", "Brings the courier's items to your hero."),
+    ("courier_shield", (3, 2), "BTNDivineIntervention", "Shield",
+     "Invulnerable for {duration} seconds. Unlocks at hero level 20."),
+]
+
+
+def courier(units, abils, ids):
+    path = os.path.join(DATA, "courier.json")
+    if not os.path.exists(path):
+        return
+    data = load("courier.json")
+    out = ids.out.setdefault("courier", {"units": {}, "abilities": {}, "orders": {}})
+    used, codes = set(), []
+    for name, (bx, by), icon, title, desc in COURIER_CARD:
+        a = data["abilities"][name]
+        code = ids.new("A")
+        order = pool_order(0, used)
+        out["abilities"][name], out["orders"][name] = code, order
+        codes.append(code)
+        art = f"ReplaceableTextures\\CommandButtons\\{icon}.blp"
+        key = CELL_KEYS[(bx, by)]
+        abils.add("ANcl", code, {
+            "anam": title, "aher": 0, "alev": 1, "aart": art, "ahky": key, "abpx": bx, "abpy": by,
+            "atp1": [f"{title} (|cffffcc00{key}|r)"], "aub1": [desc.format(**a["values"])],
+            "acdn": [float(a["cooldown"])], "amcs": [0], "aran": [0.0], "aare": [0.0],
+            "Ncl1": [0.0], "Ncl2": [0], "Ncl3": [1], "Ncl4": [0.0], "Ncl5": [0], "Ncl6": [order],
+            "aani": "", "acat": "", "atat": "", "aeat": "", "asat": "",
+        })
+    u = data["unit"]
+    fields = {"unam": "Courier", "uhpm": u["hp"], "uhpr": 0.0, "umvs": u["move_speed"],
+              "usid": u["vision"]["day"], "usin": u["vision"]["night"],
+              # Dota's courier walks through units (phased) and is spell immune
+              "uabi": ",".join(codes + ["Aeth", "ACmi"]), "uaen": 0, "ubba": 0, "ubdi": 0, "ubsi": 0,
+              "ufoo": 0, "ugol": 0, "ulum": 0, "upgr": "", "ubui": "", "utra": "", "ucol": 16.0}
+    for key, base, extra in (("courier", "hrdh", {"umvt": "horse"}),
+                             ("courier_flying", "nshf", {"umvt": "fly", "umvh": 250.0, "unam": "Flying Courier"})):
+        code = ids.new("n")
+        out["units"][key] = code
+        units.add(base, code, apply_model(dict(fields, **extra), MODELS, key))
+    print(f"courier: {len(codes)} abilities, 2 units")
 
 
 # ---------------------------------------------------------------- Dota world
@@ -933,31 +1053,8 @@ def world(units, abils, ids, w3t):
     print(f"world: {len(out['units'])} units, {len(out['items'])} items, {len(out['abilities'])} abilities")
 
 
-# Test builds: src/ui/controls_probe.lua gives footmen these Channels at the
-# start and logs which trigger orders the engine accepts, for every Channel
-# target type and the order of a native spell of each target kind (the
-# Dismember, Meat Hook and Poof orders of the in-game test among them). Inert
-# in other builds; made last, so no other raw code or item order changes.
-PROBE_ORDERS = [("animatedead", "instant"), ("acidbomb", "unit"), ("blink", "point"),
-                ("carrionswarm", "unit or point")]
-
-
-def order_probe(abils, ids):
-    cases = [(target, order, native, 1) for target in range(4) for order, native in PROBE_ORDERS]
-    cases += [(2, order, native, 3) for order, native in PROBE_ORDERS[1:3]]   # with Meat Hook's targeting circle
-    out = ids.out["order_probe"] = []
-    for target, order, native, options in cases:
-        code = ids.new("A")
-        abils.add("ANcl", code, {
-            "anam": f"Order Probe {target} {order}", "aher": 0, "alev": 1,
-            "Ncl1": [0.0], "Ncl2": [target], "Ncl3": [options], "Ncl4": [0.0], "Ncl5": [0], "Ncl6": [order],
-            "acdn": [0.0], "amcs": [0], "aran": [99999.0], "aare": [100.0 if options & 2 else 0.0],
-            "atar": ["air,ground,enemy,neutral,friend,player,self,vuln,invu"],
-            "aani": "", "acat": "", "atat": "", "aeat": "", "asat": "",
-        })
-        out.append({"code": code, "target": target, "order": order, "native": native, "options": options})
-
-
+# DayLength: seconds of a full WC3 day, Dota's 10-minute day and night cycle
+# (src/game/lane.lua sets the clock so dawn comes with the horn).
 MISC = """[Misc]
 StrAttackBonus=1
 StrHitPointBonus=22
@@ -984,6 +1081,7 @@ GrantNormalXPFormulaC=0
 HeroExpRange=0
 MaxUnitSpeed=550
 MinUnitSpeed=100
+DayLength=600
 """
 
 
@@ -1010,7 +1108,7 @@ def main(out_dir=None, standins=False):
     commander_spell_copies(abils, ids)
     item_objects = items(units, abils, ids)
     world(units, abils, ids, item_objects)
-    order_probe(abils, ids)
+    courier(units, abils, ids)
     files = {
         "war3map.w3u": units.save(),
         "war3map.w3t": item_objects.save(),

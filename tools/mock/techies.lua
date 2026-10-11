@@ -178,7 +178,7 @@ if not __mockB then
         local ctx = {def = def, caster = caster, owner = GetOwningPlayer(caster), level = level, target = target,
                      x = x or (target and GetUnitX(target)) or GetUnitX(caster),
                      y = y or (target and GetUnitY(target)) or GetUnitY(caster)}
-        function ctx.v(key) return A.value(name, key, level) end
+        function ctx.v(key) return A.value(name, key, level, caster) end   -- with the caster's upgrades, as in game
         return ctx
     end
 

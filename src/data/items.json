@@ -442,6 +442,13 @@
    ]
   },
   {
+   "key": "item_aghanims_shard",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/aghanims_shard_png.vtex_c"
+   ]
+  },
+  {
    "key": "item_magic_wand",
    "kind": "item",
    "sources": [
@@ -558,6 +565,13 @@
    "kind": "item",
    "sources": [
     "panorama/images/items/kaya_png.vtex_c"
+   ]
+  },
+  {
+   "key": "item_ultimate_scepter",
+   "kind": "item",
+   "sources": [
+    "panorama/images/items/ultimate_scepter_png.vtex_c"
    ]
   },
   {
@@ -741,6 +755,17 @@
     "bonus_mana_regen": "2.5",
     "cast_range_bonus": "225"
    }
+  },
+  "item_aghanims_shard": {
+   "available_at": 900,
+   "charges": 1,
+   "consumable": true,
+   "cost": 1400,
+   "desc": "Consumed at once: upgrades your hero's abilities for the rest of the game, once per hero (the Aghanim's sign next to the ability row shows how).",
+   "shop": "relics",
+   "stack": false,
+   "title": "Aghanim's Shard",
+   "values": {}
   },
   "item_arcane_boots": {
    "cooldown": 55,
@@ -2619,6 +2644,35 @@
     "bonus_all_stats": "15"
    }
   },
+  "item_ultimate_scepter": {
+   "cost": 4200,
+   "desc": "Upgrades your hero's abilities while you carry it in the main inventory (the Aghanim's sign next to the ability row shows how).",
+   "recipe": {
+    "cost": 0,
+    "parts": [
+     [
+      "item_point_booster",
+      "item_staff_of_wizardry",
+      "item_ogre_axe",
+      "item_blade_of_alacrity"
+     ]
+    ]
+   },
+   "shop": "magical",
+   "stats": {
+    "agi": 10,
+    "int": 10,
+    "max_hp": 175,
+    "max_mana": 175,
+    "str": 10
+   },
+   "title": "Aghanim's Scepter",
+   "values": {
+    "bonus_all_stats": "10",
+    "bonus_health": "175",
+    "bonus_mana": "175"
+   }
+  },
   "item_vitality_booster": {
    "cost": 1000,
    "secret": true,
@@ -2871,7 +2925,8 @@
     "item_refresher",
     "item_recipe_refresher",
     "item_sheepstick",
-    "item_recipe_sheepstick"
+    "item_recipe_sheepstick",
+    "item_aghanims_shard"
    ],
    "key": "relics",
    "title": "Relics"
@@ -2920,7 +2975,8 @@
     "item_dagon",
     "item_recipe_dagon",
     "item_kaya",
-    "item_recipe_kaya"
+    "item_recipe_kaya",
+    "item_ultimate_scepter"
    ],
    "key": "magical",
    "title": "Magical"

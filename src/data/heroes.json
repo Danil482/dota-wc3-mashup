@@ -39,6 +39,7 @@
     "SpellImmunityType": "SPELL_IMMUNITY_ENEMIES_YES",
     "AbilityCastPoint": "0.3 0.3 0.3 0.3",
     "AbilityManaCost": "120",
+    "HasShardUpgrade": "1",
     "values": {
      "damage": "150 220 290 360",
      "hook_speed": "1600.0",
@@ -50,6 +51,23 @@
      "AbilityCooldown": "18 16 14 12",
      "vector_target_distance": "0",
      "self_stun_duration_percent": "65"
+    },
+    "bonus": {
+     "damage": {
+      "special_bonus_unique_pudge_7": "+150"
+     },
+     "AbilityCooldown": {
+      "special_bonus_unique_pudge_5": "-4"
+     },
+     "distance_to_damage": {
+      "shard": "20"
+     },
+     "min_distance_damage": {
+      "shard": "10"
+     },
+     "cooldown_reduction_pct_allied_hook": {
+      "shard": "50"
+     }
     }
    },
    {
@@ -60,11 +78,26 @@
     "AbilityUnitDamageType": "DAMAGE_TYPE_MAGICAL",
     "SpellImmunityType": "SPELL_IMMUNITY_ENEMIES_NO",
     "AbilityCastPoint": "0 0 0 0",
+    "HasScepterUpgrade": "1",
     "values": {
      "rot_radius": "250",
      "rot_tick": "0.2",
      "rot_slow": "-14 -20 -26 -32",
      "rot_damage": "30 60 90 120"
+    },
+    "bonus": {
+     "rot_radius": {
+      "scepter": "+200"
+     },
+     "rot_slow": {
+      "special_bonus_unique_pudge_4": "+-10"
+     },
+     "rot_damage": {
+      "scepter": "+90"
+     },
+     "scepter_rot_regen_reduction_pct": {
+      "scepter": "20"
+     }
     }
    },
    {
@@ -77,6 +110,11 @@
     "values": {
      "damage_block": "8 14 20 26",
      "duration": "4 5 6 7"
+    },
+    "bonus": {
+     "damage_block": {
+      "special_bonus_unique_pudge_1": "x1.5"
+     }
     }
    },
    {
@@ -89,6 +127,11 @@
     "values": {
      "flesh_heap_strength_buff_amount": "2.0",
      "flesh_heap_range": "450"
+    },
+    "bonus": {
+     "flesh_heap_strength_buff_amount": {
+      "special_bonus_unique_pudge_1": "x1.5"
+     }
     }
    },
    {
@@ -115,6 +158,29 @@
      "AbilityCooldown": "30 25 20",
      "gluttony_strength_bonus": "0",
      "glutton_strength_stack_duration": "0"
+    },
+    "bonus": {
+     "dismember_damage": {
+      "special_bonus_unique_pudge_3": "x1.5"
+     },
+     "strength_damage": {
+      "special_bonus_unique_pudge_3": "x1.8"
+     },
+     "ticks": {
+      "special_bonus_unique_pudge_6": "+2"
+     },
+     "AbilityChannelTime": {
+      "special_bonus_unique_pudge_6": "+0.75"
+     },
+     "shard_regen_pct": {
+      "shard": "5"
+     },
+     "order_lock_duration": {
+      "shard": "2.75"
+     },
+     "shard_cast_range": {
+      "shard": "300"
+     }
     }
    }
   ],
@@ -194,6 +260,72 @@
     "ProvidesSetup": "2",
     "RequiresSetup": "1"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_armor_5",
+    "tier": 1,
+    "side": "right",
+    "stat": {
+     "armor": 5.0
+    },
+    "label": "+5 Armor"
+   },
+   {
+    "name": "special_bonus_unique_pudge_4",
+    "tier": 1,
+    "side": "left",
+    "label": "+10% Rot Slow"
+   },
+   {
+    "name": "special_bonus_spell_lifesteal_8",
+    "tier": 2,
+    "side": "right",
+    "stat": {
+     "spell_lifesteal": 0.08
+    },
+    "label": "+8% Spell Lifesteal"
+   },
+   {
+    "name": "special_bonus_unique_pudge_7",
+    "tier": 2,
+    "side": "left",
+    "label": "+150 Meat Hook Damage"
+   },
+   {
+    "name": "special_bonus_unique_pudge_6",
+    "tier": 3,
+    "side": "right",
+    "label": "+0.75s Dismember Duration"
+   },
+   {
+    "name": "special_bonus_unique_pudge_5",
+    "tier": 3,
+    "side": "left",
+    "label": "-4s Meat Hook Cooldown"
+   },
+   {
+    "name": "special_bonus_unique_pudge_3",
+    "tier": 4,
+    "side": "right",
+    "label": "1.5x Dismember Damage/Heal"
+   },
+   {
+    "name": "special_bonus_unique_pudge_1",
+    "tier": 4,
+    "side": "left",
+    "label": "1.5x Flesh Heap and Meat Shield bonuses"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Rot: +200 radius, +90 damage per second, and enemies in it get 20% less health restoration.",
+   "shard": "Meat Hook deals extra damage the farther away it catches an enemy. Hooking an ally cuts its cooldown by 50%."
   }
  },
  "meepo": {
@@ -242,6 +374,14 @@
      "speed": "1200",
      "megameepo_net_offset": "160",
      "AbilityCooldown": "16 14 12 10"
+    },
+    "bonus": {
+     "true_strike": {
+      "special_bonus_unique_meepo_4": "1"
+     },
+     "AbilityCooldown": {
+      "special_bonus_unique_meepo_3": "-1.5"
+     }
     }
    },
    {
@@ -257,10 +397,22 @@
     "AbilityCooldown": "12 10 8 6",
     "AbilityManaCost": "80",
     "AbilityChannelTime": "0.0",
+    "HasScepterUpgrade": "1",
     "values": {
      "cast_duration": "1.5",
      "radius": "400",
      "poof_damage": "50 80 110 140"
+    },
+    "bonus": {
+     "cast_duration": {
+      "special_bonus_unique_meepo_poof_cast_point": "-.75"
+     },
+     "poof_damage": {
+      "special_bonus_unique_meepo_2": "+40"
+     },
+     "megameepo_poof_scaling": {
+      "scepter": "50"
+     }
     }
    },
    {
@@ -273,6 +425,11 @@
     "MaxLevel": "4",
     "values": {
      "health_steal_heroes": "7 10 13 16"
+    },
+    "bonus": {
+     "health_steal_heroes": {
+      "special_bonus_unique_meepo_6": "+6"
+     }
     }
    },
    {
@@ -413,6 +570,75 @@
     "ProvidesSetup": "0",
     "RequiresSetup": "2"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_strength_7",
+    "tier": 1,
+    "side": "right",
+    "stat": {
+     "str": 7.0
+    },
+    "label": "+7 Strength"
+   },
+   {
+    "name": "special_bonus_unique_meepo_3",
+    "tier": 1,
+    "side": "left",
+    "label": "-1.5s Earthbind Cooldown"
+   },
+   {
+    "name": "special_bonus_evasion_15",
+    "tier": 2,
+    "side": "right",
+    "stat": {
+     "evasion": 0.15
+    },
+    "label": "+15% Evasion"
+   },
+   {
+    "name": "special_bonus_unique_meepo_2",
+    "tier": 2,
+    "side": "left",
+    "label": "+40 Poof Damage"
+   },
+   {
+    "name": "special_bonus_unique_meepo_4",
+    "tier": 3,
+    "side": "right",
+    "label": "Earthbind grants True Strike on Targets"
+   },
+   {
+    "name": "special_bonus_unique_meepo_6",
+    "tier": 3,
+    "side": "left",
+    "label": "+6 Ransack Health Steal"
+   },
+   {
+    "name": "special_bonus_hp_400",
+    "tier": 4,
+    "side": "right",
+    "stat": {
+     "max_hp": 400.0
+    },
+    "label": "+400 Health"
+   },
+   {
+    "name": "special_bonus_unique_meepo_poof_cast_point",
+    "tier": 4,
+    "side": "left",
+    "label": "-0.75s Poof Cast Duration"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Grants MegaMeepo: Meepo lifts the clones around him onto his shoulders, gains part of their attributes and flings them at enemies.",
+   "shard": "Grants Dig: a Meepo burrows into the ground, invulnerable and out of sight, and heals while it stays there."
   }
  },
  "tinker": {
@@ -459,6 +685,7 @@
     "AbilityCooldown": "19 18 17 16",
     "AbilityManaCost": "95 105 115 125",
     "AbilityCastRange": "600",
+    "HasScepterUpgrade": "1",
     "values": {
      "miss_rate": "100",
      "duration": "3.0 3.5 4.0 4.5",
@@ -466,6 +693,20 @@
      "radius_explosion": "0",
      "splash_pct": "100",
      "scepter_reduction_pierces_debuff_immunity": "0"
+    },
+    "bonus": {
+     "laser_damage": {
+      "special_bonus_unique_tinker": "+50"
+     },
+     "radius_explosion": {
+      "special_bonus_unique_tinker_4": "+250"
+     },
+     "scepter_bonus_cast_range": {
+      "scepter": "0"
+     },
+     "scepter_reduction_pct": {
+      "scepter": "13"
+     }
     }
    },
    {
@@ -479,6 +720,7 @@
     "AbilityCooldown": "35.0 33.0 31.0 29.0",
     "AbilityManaCost": "100 120 140 160",
     "AbilityCastRange": "300",
+    "HasScepterUpgrade": "1",
     "values": {
      "radius": "900",
      "collision_radius": "50",
@@ -488,6 +730,17 @@
      "machines_per_sec": "24",
      "distance": "1800",
      "damage": "13 22 31 40"
+    },
+    "bonus": {
+     "duration": {
+      "special_bonus_unique_tinker_march_duration": "+1.0"
+     },
+     "heal_per_second": {
+      "scepter": "35"
+     },
+     "heal_duration": {
+      "scepter": "4"
+     }
     }
    },
    {
@@ -502,6 +755,7 @@
     "AbilityCastPoint": "0.1",
     "AbilityManaCost": "100 120 140 160",
     "AbilityCastRange": "600",
+    "HasScepterUpgrade": "1",
     "values": {
      "drop_aoe_radius": "250",
      "turret_placement_radius": "70",
@@ -529,6 +783,17 @@
      "radius_explosion": "200",
      "splash_pct": "50",
      "activation_time": "0.0"
+    },
+    "bonus": {
+     "drop_knockback_distance_tinker": {
+      "special_bonus_unique_tinker_deploy_turrets_knockback": "+100"
+     },
+     "missile_damage": {
+      "special_bonus_unique_tinker_deploy_turrets_missile_damage": "+60"
+     },
+     "missile_spawn_interval": {
+      "scepter": "-0.3"
+     }
     }
    },
    {
@@ -578,6 +843,20 @@
      "hero_teleport_level": "3",
      "outpost_channel_time": "4.0",
      "jungle_outpost_channel_time": "4.0"
+    },
+    "bonus": {
+     "AbilityChannelTime": {
+      "special_bonus_unique_tinker_5": "-0.5"
+     },
+     "channel_time_tooltip": {
+      "special_bonus_unique_tinker_5": "-0.5"
+     },
+     "outpost_channel_time": {
+      "special_bonus_unique_tinker_5": "-0.5"
+     },
+     "jungle_outpost_channel_time": {
+      "special_bonus_unique_tinker_5": "-0.5"
+     }
     }
    },
    {
@@ -594,6 +873,11 @@
      "magic_resistance": "0",
      "armor_duration": "0",
      "affects_items": "0"
+    },
+    "bonus": {
+     "AbilityChannelTime": {
+      "special_bonus_unique_tinker_rearm_channel_time": "-0.25"
+     }
     }
    },
    {
@@ -654,6 +938,69 @@
     "ProvidesSetup": "0",
     "RequiresSetup": "1"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_unique_tinker_march_duration",
+    "tier": 1,
+    "side": "right",
+    "label": "+1s March of the Machines Duration"
+   },
+   {
+    "name": "special_bonus_mana_reduction_10",
+    "tier": 1,
+    "side": "left",
+    "stat": {
+     "mana_reduction": 0.1
+    },
+    "label": "+10% Manacost/Manaloss Reduction"
+   },
+   {
+    "name": "special_bonus_unique_tinker_deploy_turrets_knockback",
+    "tier": 2,
+    "side": "right",
+    "label": "+100 Deploy Turrets Tinker Knockback"
+   },
+   {
+    "name": "special_bonus_unique_tinker",
+    "tier": 2,
+    "side": "left",
+    "label": "+50 Laser Damage"
+   },
+   {
+    "name": "special_bonus_unique_tinker_deploy_turrets_missile_damage",
+    "tier": 3,
+    "side": "right",
+    "label": "+60 Deploy Turrets Missile Damage"
+   },
+   {
+    "name": "special_bonus_unique_tinker_5",
+    "tier": 3,
+    "side": "left",
+    "label": "-0.5s Keen Conveyance Channel Time"
+   },
+   {
+    "name": "special_bonus_unique_tinker_4",
+    "tier": 4,
+    "side": "right",
+    "label": "250 AoE Laser"
+   },
+   {
+    "name": "special_bonus_unique_tinker_rearm_channel_time",
+    "tier": 4,
+    "side": "left",
+    "label": "-0.25s Time to Rearm"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Laser also strips 13% of the target's current and maximum health (stacking). March of the Machines heals the allied heroes it passes. Turrets fire 0.3s faster.",
+   "shard": "Grants Warp Flare: a flare that hurts an enemy and warps it away from Tinker."
   }
  },
  "rubick": {
@@ -698,6 +1045,7 @@
     "AbilityCastPoint": "0.1 0.1 0.1 0.1",
     "AbilityManaCost": "110",
     "AbilityCastRange": "550 575 600 625",
+    "HasShardUpgrade": "1",
     "values": {
      "lift_duration": "0.95 1.2 1.45 1.7",
      "stun_duration": "0.9 1.1 1.3 1.5",
@@ -705,6 +1053,26 @@
      "max_land_distance": "375 375 375 375",
      "fall_duration": "0.3 0.3 0.3 0.3",
      "AbilityCooldown": "22 19 16 13"
+    },
+    "bonus": {
+     "max_land_distance": {
+      "shard": "+225"
+     },
+     "shard_max_land_distance_bonus_pct": {
+      "shard": "50"
+     },
+     "shard_cooldown_reduction_pct": {
+      "shard": "0"
+     },
+     "shard_teammate_throw_delay": {
+      "shard": "0.5"
+     },
+     "AbilityCooldown": {
+      "special_bonus_unique_rubick_4": "-2"
+     },
+     "landing_damage": {
+      "special_bonus_unique_rubick_8": "300"
+     }
     }
    },
    {
@@ -728,6 +1096,14 @@
      "jump_delay": "0.25 0.25 0.25 0.25",
      "AbilityCooldown": "16 14 12 10",
      "steals_damage": "0"
+    },
+    "bonus": {
+     "damage_reduction": {
+      "special_bonus_unique_rubick_fade_bolt_spell_reduction": "+12"
+     },
+     "AbilityCooldown": {
+      "special_bonus_unique_rubick_3": "-4"
+     }
     }
    },
    {
@@ -769,6 +1145,8 @@
     "AbilityCooldown": "16 10 4",
     "AbilityManaCost": "25 25 25",
     "AbilityCastRange": "1000 1000 1000",
+    "HasScepterUpgrade": "1",
+    "HasShardUpgrade": "1",
     "values": {
      "projectile_speed": "1500",
      "stolen_debuff_amp": "0",
@@ -776,6 +1154,17 @@
      "stolen_spell_cooldown_percent": "10 20 30",
      "duration": "180 240 300",
      "curiosity_steal_factor": "1"
+    },
+    "bonus": {
+     "cast_range_scepter": {
+      "scepter": "1400"
+     },
+     "stolen_mana_reduction": {
+      "special_bonus_unique_rubick_6": "+40"
+     },
+     "spell_amp_percent": {
+      "special_bonus_unique_rubick_5": "40"
+     }
     }
    },
    {
@@ -849,6 +1238,69 @@
     "ProvidesSetup": "1",
     "RequiresSetup": "1"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_unique_rubick_4",
+    "tier": 1,
+    "side": "right",
+    "label": "-2s Telekinesis Cooldown"
+   },
+   {
+    "name": "special_bonus_hp_200",
+    "tier": 1,
+    "side": "left",
+    "stat": {
+     "max_hp": 200.0
+    },
+    "label": "+200 Health"
+   },
+   {
+    "name": "special_bonus_unique_rubick_6",
+    "tier": 2,
+    "side": "right",
+    "label": "-40% Stolen Spells Mana Cost"
+   },
+   {
+    "name": "special_bonus_unique_rubick_3",
+    "tier": 2,
+    "side": "left",
+    "label": "-4s Fade Bolt Cooldown"
+   },
+   {
+    "name": "special_bonus_unique_rubick_fade_bolt_spell_reduction",
+    "tier": 3,
+    "side": "right",
+    "label": "+12% Fade Bolt Damage Reduction"
+   },
+   {
+    "name": "special_bonus_unique_rubick_8",
+    "tier": 3,
+    "side": "left",
+    "label": "Telekinesis Landing Deals 300 Damage"
+   },
+   {
+    "name": "special_bonus_unique_rubick_curiosity_factor",
+    "tier": 4,
+    "side": "right",
+    "label": "1.5x Curiosity Bonuses"
+   },
+   {
+    "name": "special_bonus_unique_rubick_5",
+    "tier": 4,
+    "side": "left",
+    "label": "+40% Spell Amp For Stolen Spells"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Spell Steal reaches farther, and stolen spells come with their Aghanim's Scepter upgrade.",
+   "shard": "Telekinesis can lift Rubick himself or an ally and throw them farther. Stolen spells come with their Aghanim's Shard upgrade."
   }
  },
  "morphling": {
@@ -898,6 +1350,14 @@
      "AbilityCastRange": "700 775 850 925",
      "AbilityCooldown": "21 18 15 12",
      "process_procs": "0"
+    },
+    "bonus": {
+     "AbilityCastRange": {
+      "special_bonus_unique_morphling_1": "+250"
+     },
+     "AbilityCooldown": {
+      "special_bonus_unique_morphling_waveform_cooldown": "-40%"
+     }
     }
    },
    {
@@ -924,6 +1384,11 @@
      "knockback_duration": "0.5",
      "projectile_speed": "1150",
      "extra_targets": "0"
+    },
+    "bonus": {
+     "AbilityCooldown": {
+      "special_bonus_unique_morphling_7": "-3"
+     }
     }
    },
    {
@@ -933,11 +1398,20 @@
     "AbilityBehavior": "DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_TOGGLE",
     "AbilityCooldown": "0.0",
     "LinkedAbility": "morphling_morph_str",
+    "HasShardUpgrade": "1",
     "values": {
      "points_per_tick": "1",
      "morph_rate": "4 8 12 16",
      "mana_cost": "10",
      "castable_while_stunned": "0"
+    },
+    "bonus": {
+     "mana_cost": {
+      "shard": "-50%"
+     },
+     "castable_while_stunned": {
+      "shard": "+1"
+     }
     }
    },
    {
@@ -947,11 +1421,20 @@
     "AbilityBehavior": "DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_TOGGLE",
     "AbilityCooldown": "0.0",
     "LinkedAbility": "morphling_morph_agi",
+    "HasShardUpgrade": "1",
     "values": {
      "points_per_tick": "1",
      "morph_rate": "4 8 12 16",
      "mana_cost": "10",
      "castable_while_stunned": "0"
+    },
+    "bonus": {
+     "mana_cost": {
+      "shard": "-50%"
+     },
+     "castable_while_stunned": {
+      "shard": "+1"
+     }
     }
    },
    {
@@ -967,8 +1450,35 @@
     "AbilityCooldown": "125 90 55",
     "AbilityManaCost": "50",
     "AbilityCastRange": "700 850 1000",
+    "HasScepterUpgrade": "1",
     "values": {
      "duration": "24"
+    },
+    "bonus": {
+     "duration": {
+      "special_bonus_unique_morphling_8": "+12"
+     },
+     "scepter_stat_steal": {
+      "scepter": "20"
+     },
+     "scepter_spell_amplify": {
+      "scepter": "25"
+     },
+     "scepter_attack_speed": {
+      "scepter": "70"
+     },
+     "scepter_status_resist": {
+      "scepter": "40"
+     },
+     "scepter_additional_stats": {
+      "scepter": "20"
+     },
+     "scepter_illusion_outgoing": {
+      "scepter": "100"
+     },
+     "scepter_illusion_incoming": {
+      "scepter": "200"
+     }
     }
    },
    {
@@ -1049,6 +1559,78 @@
     "ProvidesSetup": "0",
     "RequiresSetup": "1"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_magic_resistance_15",
+    "tier": 1,
+    "side": "right",
+    "stat": {
+     "magic_resist": 0.15
+    },
+    "label": "+15% Magic Resistance"
+   },
+   {
+    "name": "special_bonus_unique_morphling_8",
+    "tier": 1,
+    "side": "left",
+    "label": "+12s Morph Duration"
+   },
+   {
+    "name": "special_bonus_unique_morphling_1",
+    "tier": 2,
+    "side": "right",
+    "label": "+250 Waveform Range"
+   },
+   {
+    "name": "special_bonus_attack_range_75",
+    "tier": 2,
+    "side": "left",
+    "stat": {
+     "attack_range": 75.0
+    },
+    "label": "+75 Attack Range"
+   },
+   {
+    "name": "special_bonus_unique_morphling_7",
+    "tier": 3,
+    "side": "right",
+    "label": "-3s Adaptive Strike Cooldown"
+   },
+   {
+    "name": "special_bonus_agility_15",
+    "tier": 3,
+    "side": "left",
+    "stat": {
+     "agi": 15.0
+    },
+    "label": "+15 Agility"
+   },
+   {
+    "name": "special_bonus_unique_morphling_waveform_cooldown",
+    "tier": 4,
+    "side": "right",
+    "label": "-40% Waveform Cooldown"
+   },
+   {
+    "name": "special_bonus_strength_35",
+    "tier": 4,
+    "side": "left",
+    "stat": {
+     "str": 35.0
+    },
+    "label": "+35 Strength"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Morph creates a strong illusion of the target hero instead, which casts its basic abilities; Morph Replicate swaps Morphling into its place.",
+   "shard": "Attribute Shift costs 50% less mana and can be switched while disabled."
   }
  },
  "furion": {
@@ -1099,6 +1681,11 @@
      "duration": "2.5 3 3.5 4",
      "sprout_damage": "70 130 190 250",
      "sprout_damage_radius": "275"
+    },
+    "bonus": {
+     "sprout_damage": {
+      "special_bonus_unique_furion_4": "+240"
+     }
     }
    },
    {
@@ -1116,6 +1703,14 @@
      "AbilityCooldown": "65 50 35 20",
      "barrier": "70 130 190 250",
      "buff_duration": "15"
+    },
+    "bonus": {
+     "AbilityCooldown": {
+      "special_bonus_unique_furion_3": "-100%"
+     },
+     "barrier": {
+      "special_bonus_unique_furion_teleportation_barrier": "+100"
+     }
     }
    },
    {
@@ -1141,6 +1736,23 @@
      "treant_gold_bounty_max": "24",
      "treant_xp_bounty": "30",
      "treewalking": "1"
+    },
+    "bonus": {
+     "treant_health": {
+      "special_bonus_unique_furion": "x3"
+     },
+     "treant_damage": {
+      "special_bonus_unique_furion": "x3"
+     },
+     "treant_bonus_hero_damage": {
+      "special_bonus_unique_furion": "x3"
+     },
+     "treant_movespeed": {
+      "special_bonus_unique_furion_2": "+50"
+     },
+     "AbilityCooldown": {
+      "special_bonus_unique_furion_6": "-10"
+     }
     }
    },
    {
@@ -1191,6 +1803,7 @@
     "AbilityCastPoint": "0.5 0.5 0.5",
     "AbilityManaCost": "130 160 190",
     "AbilityCastRange": "0",
+    "HasScepterUpgrade": "1",
     "values": {
      "max_targets": "16",
      "damage": "100 140 180",
@@ -1199,6 +1812,20 @@
      "kill_damage": "0",
      "kill_damage_duration": "0",
      "AbilityCooldown": "85"
+    },
+    "bonus": {
+     "damage": {
+      "special_bonus_unique_furion_5": "+25"
+     },
+     "AbilityCooldown": {
+      "special_bonus_unique_furion_7": "-20"
+     },
+     "scepter_min_entangle_duration": {
+      "scepter": "1.5"
+     },
+     "scepter_max_entangle_duration": {
+      "scepter": "3.0"
+     }
     }
    }
   ],
@@ -1246,6 +1873,66 @@
     "ProvidesSetup": "0",
     "RequiresSetup": "2"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_unique_furion_6",
+    "tier": 1,
+    "side": "right",
+    "label": "-10s Nature's Call Cooldown"
+   },
+   {
+    "name": "special_bonus_unique_furion_5",
+    "tier": 1,
+    "side": "left",
+    "label": "+25 Wrath of Nature Base Damage"
+   },
+   {
+    "name": "special_bonus_unique_furion_2",
+    "tier": 2,
+    "side": "right",
+    "label": "+50 Treant Movement Speed"
+   },
+   {
+    "name": "special_bonus_unique_furion_teleportation_barrier",
+    "tier": 2,
+    "side": "left",
+    "label": "+100 Teleportation Barrier"
+   },
+   {
+    "name": "special_bonus_unique_furion_7",
+    "tier": 3,
+    "side": "right",
+    "label": "-20s Wrath of Nature Cooldown"
+   },
+   {
+    "name": "special_bonus_unique_furion_4",
+    "tier": 3,
+    "side": "left",
+    "label": "+240 Sprout Damage"
+   },
+   {
+    "name": "special_bonus_unique_furion_3",
+    "tier": 4,
+    "side": "right",
+    "label": "Removed Teleportation Cooldown"
+   },
+   {
+    "name": "special_bonus_unique_furion",
+    "tier": 4,
+    "side": "left",
+    "label": "3x Treant HP/Damage"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Wrath of Nature roots every enemy it hits, longer the more it has bounced.",
+   "shard": "Grants Curse of the Oldgrowth."
   }
  },
  "chen": {
@@ -1299,6 +1986,14 @@
      "bonus_attack_speed": "20 40 60 80",
      "damage": "50 100 150 200",
      "self_attack_range_bonus": "0"
+    },
+    "bonus": {
+     "bonus_movement_speed": {
+      "special_bonus_unique_chen_8": "-15"
+     },
+     "damage": {
+      "special_bonus_unique_chen_11": "+75"
+     }
     }
    },
    {
@@ -1312,6 +2007,7 @@
     "AbilityCooldown": "15",
     "AbilityManaCost": "110 130 150 170",
     "AbilityCastRange": "600",
+    "HasShardUpgrade": "1",
     "values": {
      "max_units": "1 2 3 4",
      "level_req": "3 4 5 6",
@@ -1324,6 +2020,17 @@
      "creep_ability_level": "0",
      "unsummon_time": "3.0",
      "unsummon_cooldown_reduction": "12.0"
+    },
+    "bonus": {
+     "health_min": {
+      "special_bonus_unique_chen_4": "+1300"
+     },
+     "damage_bonus": {
+      "special_bonus_unique_chen_5": "+12"
+     },
+     "creep_ability_level": {
+      "shard": "=2"
+     }
     }
    },
    {
@@ -1346,6 +2053,11 @@
      "bonus_armor": "5 10 15 20",
      "heal_amp": "5 10 15 20",
      "creep_bonus": "1"
+    },
+    "bonus": {
+     "heal_amp": {
+      "special_bonus_unique_chen_divine_favor_healing": "+15"
+     }
     }
    },
    {
@@ -1367,6 +2079,14 @@
      "zealot_respawn_time": "60",
      "bonus_hp": "0",
      "teleport_delay": "6"
+    },
+    "bonus": {
+     "damage": {
+      "special_bonus_unique_chen_zealot": "+25%"
+     },
+     "bonus_hp": {
+      "special_bonus_unique_chen_zealot": "+25"
+     }
     }
    },
    {
@@ -1378,11 +2098,38 @@
     "SpellImmunityType": "SPELL_IMMUNITY_ALLIES_YES",
     "AbilityCastPoint": "0.3 0.3 0.3",
     "AbilityManaCost": "200 300 400",
+    "HasScepterUpgrade": "1",
     "values": {
      "AbilityCooldown": "150 130 110",
      "heal_amount": "200 300 400",
      "hot_duration": "10",
      "heal_per_second": "20 30 40"
+    },
+    "bonus": {
+     "AbilityCooldown": {
+      "scepter": "-40"
+     },
+     "ancient_creeps_scepter": {
+      "shard": "1 2 3"
+     },
+     "does_purge": {
+      "special_bonus_unique_chen_12": "+1"
+     },
+     "full_heal_on_chen_and_creeps": {
+      "special_bonus_unique_chen_2": "=1"
+     },
+     "AbilityChannelTime": {
+      "scepter": "=6"
+     },
+     "debuff_immune_radius": {
+      "scepter": "=800"
+     },
+     "debuff_immune_resist": {
+      "scepter": "60"
+     },
+     "nearby_hot_boost": {
+      "scepter": "200"
+     }
     }
    }
   ],
@@ -1430,6 +2177,66 @@
     "ProvidesSetup": "0",
     "RequiresSetup": "0"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_unique_chen_11",
+    "tier": 1,
+    "side": "right",
+    "label": "+75 Penitence Damage"
+   },
+   {
+    "name": "special_bonus_unique_chen_zealot",
+    "tier": 1,
+    "side": "left",
+    "label": "+25% Zealot Health/Damage"
+   },
+   {
+    "name": "special_bonus_unique_chen_5",
+    "tier": 2,
+    "side": "right",
+    "label": "+12% Holy Persuasion Damage"
+   },
+   {
+    "name": "special_bonus_unique_chen_8",
+    "tier": 2,
+    "side": "left",
+    "label": "+15% Penitence Slow"
+   },
+   {
+    "name": "special_bonus_unique_chen_divine_favor_healing",
+    "tier": 3,
+    "side": "right",
+    "label": "+15% Divine Favor Heal Amplification"
+   },
+   {
+    "name": "special_bonus_unique_chen_4",
+    "tier": 3,
+    "side": "left",
+    "label": "+1300 Holy Persuasion Minimum Health"
+   },
+   {
+    "name": "special_bonus_unique_chen_12",
+    "tier": 4,
+    "side": "right",
+    "label": "Hand of God applies a Strong Dispel"
+   },
+   {
+    "name": "special_bonus_unique_chen_2",
+    "tier": 4,
+    "side": "left",
+    "label": "Hand of God Fully Heals Chen and His Creeps"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Hand of God: -40s cooldown, and Chen channels it: allies around him shed debuffs, resist magic and heal faster.",
+   "shard": "Holy Persuasion can take Ancient creeps and raises the abilities of the creeps it takes."
   }
  },
  "antimage": {
@@ -1470,6 +2277,7 @@
     "AbilityBehavior": "DOTA_ABILITY_BEHAVIOR_PASSIVE",
     "AbilityUnitDamageType": "DAMAGE_TYPE_PHYSICAL",
     "SpellImmunityType": "SPELL_IMMUNITY_ENEMIES_NO",
+    "HasScepterUpgrade": "1",
     "values": {
      "percent_damage_per_burn": "65",
      "mana_per_hit": "25 30 35 40",
@@ -1477,6 +2285,17 @@
      "illusion_percentage": "25",
      "empowered_max_burn_pct": "0.0",
      "empowered_mana_break_debuff_duration": "0"
+    },
+    "bonus": {
+     "mana_per_hit_pct": {
+      "scepter": "+1.5"
+     },
+     "empowered_max_burn_pct": {
+      "scepter": "+20.0"
+     },
+     "empowered_mana_break_debuff_duration": {
+      "scepter": "+6.0"
+     }
     }
    },
    {
@@ -1486,6 +2305,7 @@
     "AbilityBehavior": "DOTA_ABILITY_BEHAVIOR_POINT | DOTA_ABILITY_BEHAVIOR_ROOT_DISABLES | DOTA_ABILITY_BEHAVIOR_OVERSHOOT",
     "AbilityCastPoint": "0.4 0.4 0.4 0.4",
     "AbilityManaCost": "60 55 50 45",
+    "HasScepterUpgrade": "1",
     "values": {
      "AbilityCooldown": "10.5 9 7.5 6",
      "AbilityCastRange": "875 950 1025 1100",
@@ -1493,6 +2313,23 @@
      "empowered_mana_break_duration": "0",
      "empowered_max_burn_pct_tooltip": "0.0",
      "empowered_mana_break_debuff_duration_tooltip": "0"
+    },
+    "bonus": {
+     "AbilityCooldown": {
+      "special_bonus_unique_antimage": "-1"
+     },
+     "AbilityCastRange": {
+      "special_bonus_unique_antimage_3": "+125"
+     },
+     "empowered_mana_break_duration": {
+      "scepter": "+5.0"
+     },
+     "empowered_max_burn_pct_tooltip": {
+      "scepter": "+20.0"
+     },
+     "empowered_mana_break_debuff_duration_tooltip": {
+      "scepter": "+6.0"
+     }
     }
    },
    {
@@ -1503,6 +2340,7 @@
     "AbilityCastPoint": "0 0 0 0",
     "AbilityManaCost": "50",
     "AbilityCastRange": "0",
+    "HasShardUpgrade": "1",
     "values": {
      "magic_resistance": "14 21 28 35",
      "duration": "1.3",
@@ -1529,6 +2367,14 @@
      "mana_threshold": "60",
      "slow_duration": "0.75",
      "zero_tooltip": "0"
+    },
+    "bonus": {
+     "move_slow_min": {
+      "special_bonus_unique_antimage_5": "+9"
+     },
+     "move_slow_max": {
+      "special_bonus_unique_antimage_5": "+18"
+     }
     }
    },
    {
@@ -1556,6 +2402,20 @@
      "max_bonus_pct": "0",
      "bonus_attack_damage": "0",
      "linger_duration": "0"
+    },
+    "bonus": {
+     "AbilityCooldown": {
+      "special_bonus_unique_antimage_2": "-50"
+     },
+     "mana_void_damage_per_mana": {
+      "special_bonus_unique_antimage_6": "+0.2"
+     },
+     "mana_void_ministun": {
+      "special_bonus_unique_antimage_8": "+0.8"
+     },
+     "mana_void_aoe_radius": {
+      "special_bonus_unique_antimage_manavoid_aoe": "+200"
+     }
     }
    }
   ],
@@ -1603,6 +2463,69 @@
     "ProvidesSetup": "0",
     "RequiresSetup": "1"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_hp_regen_3",
+    "tier": 1,
+    "side": "right",
+    "stat": {
+     "hp_regen": 3.0
+    },
+    "label": "+3 Health Regen"
+   },
+   {
+    "name": "special_bonus_unique_antimage_manavoid_aoe",
+    "tier": 1,
+    "side": "left",
+    "label": "+200 Mana Void Radius"
+   },
+   {
+    "name": "special_bonus_unique_antimage_5",
+    "tier": 2,
+    "side": "right",
+    "label": "+9%/18% Persecutor Min/Max Movement Slow"
+   },
+   {
+    "name": "special_bonus_unique_antimage_6",
+    "tier": 2,
+    "side": "left",
+    "label": "+0.2 Mana Void Damage Multiplier"
+   },
+   {
+    "name": "special_bonus_unique_antimage_3",
+    "tier": 3,
+    "side": "right",
+    "label": "+125 Blink Cast Range"
+   },
+   {
+    "name": "special_bonus_unique_antimage_8",
+    "tier": 3,
+    "side": "left",
+    "label": "+0.8s Mana Void Stun"
+   },
+   {
+    "name": "special_bonus_unique_antimage",
+    "tier": 4,
+    "side": "right",
+    "label": "-1s Blink Cooldown"
+   },
+   {
+    "name": "special_bonus_unique_antimage_2",
+    "tier": 4,
+    "side": "left",
+    "label": "-50s Mana Void Cooldown"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Mana Break burns +1.5% maximum mana. After Blink, the next Mana Break burns +20% more and stops the target's mana gain for 6s.",
+   "shard": "Counterspell sends an image of Anti-Mage at the caster of each spell it reflects."
   }
  },
  "techies": {
@@ -1660,6 +2583,11 @@
      "acceleration": "2000",
      "pre_chase_time": "0.1",
      "max_chase_time": "4"
+    },
+    "bonus": {
+     "damage": {
+      "special_bonus_unique_techies_2": "+160"
+     }
     }
    },
    {
@@ -1681,6 +2609,14 @@
      "bonus_ms": "18 22 26 30",
      "explosion_radius": "400",
      "damage": "60 110 160 210"
+    },
+    "bonus": {
+     "duration": {
+      "special_bonus_unique_techies_tazer_duration": "+25%"
+     },
+     "disarm_duration": {
+      "special_bonus_unique_techies_tazer_duration": "+25%"
+     }
     }
    },
    {
@@ -1702,6 +2638,14 @@
      "hp_cost": "20",
      "hp_dmg": "0",
      "duration": "0.75"
+    },
+    "bonus": {
+     "AbilityCooldown": {
+      "special_bonus_unique_techies_5": "-15"
+     },
+     "damage": {
+      "special_bonus_unique_techies": "+175"
+     }
     }
    },
    {
@@ -1714,6 +2658,7 @@
     "MaxLevel": "1",
     "AbilityCastPoint": "1.0",
     "Innate": "1",
+    "HasShardUpgrade": "1",
     "values": {
      "bonus_mana_as_mana_regen": "0.1",
      "radius": "400",
@@ -1722,6 +2667,17 @@
      "explosion_delay": "1.5",
      "AbilityCooldown": "0",
      "AbilityCastRange": "0"
+    },
+    "bonus": {
+     "max_mana_pct_as_damage": {
+      "shard": "+10"
+     },
+     "AbilityCooldown": {
+      "shard": "+30"
+     },
+     "AbilityCastRange": {
+      "shard": "450"
+     }
     }
    },
    {
@@ -1770,6 +2726,17 @@
      "placement_radius": "350",
      "mres_reduction": "15 20 25",
      "burn_duration": "4"
+    },
+    "bonus": {
+     "activation_delay": {
+      "special_bonus_unique_techies_4": "-0.8"
+     },
+     "cast_range_scepter_bonus": {
+      "scepter": "300"
+     },
+     "AbilityChargeRestoreTime": {
+      "special_bonus_unique_techies_3": "-2"
+     }
     }
    },
    {
@@ -1839,6 +2806,72 @@
     "ProvidesSetup": "1",
     "RequiresSetup": "0"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_magic_resistance_15",
+    "tier": 1,
+    "side": "right",
+    "stat": {
+     "magic_resist": 0.15
+    },
+    "label": "+15% Magic Resistance"
+   },
+   {
+    "name": "special_bonus_unique_techies_3",
+    "tier": 1,
+    "side": "left",
+    "label": "-2s Proximity Mines Cooldown"
+   },
+   {
+    "name": "special_bonus_unique_techies",
+    "tier": 2,
+    "side": "right",
+    "label": "+175 Blast Off! Damage"
+   },
+   {
+    "name": "special_bonus_unique_techies_tazer_duration",
+    "tier": 2,
+    "side": "left",
+    "label": "+25% Reactive Tazer Buff and Disarm Duration"
+   },
+   {
+    "name": "special_bonus_unique_techies_2",
+    "tier": 3,
+    "side": "right",
+    "label": "+160 Sticky Bomb Damage"
+   },
+   {
+    "name": "special_bonus_unique_techies_5",
+    "tier": 3,
+    "side": "left",
+    "label": "-15s Blast Off! Cooldown"
+   },
+   {
+    "name": "special_bonus_attack_damage_253",
+    "tier": 4,
+    "side": "right",
+    "stat": {
+     "damage": 253.0
+    },
+    "label": "+253 Damage"
+   },
+   {
+    "name": "special_bonus_unique_techies_4",
+    "tier": 4,
+    "side": "left",
+    "label": "-0.8s Proximity Mines Activation Delay"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Grants Minefield Sign, which hurts enemies that walk near it. Proximity Mines get +300 cast range.",
+   "shard": "M.A.D. becomes a spell: Techies plants a charge that he sets off by hand, worth +10% more of his maximum mana."
   }
  },
  "ogre_magi": {
@@ -1884,12 +2917,27 @@
     "AbilityCastPoint": "0.45",
     "AbilityManaCost": "70 85 100 115",
     "AbilityCastRange": "525",
+    "HasScepterUpgrade": "1",
     "values": {
      "AbilityCooldown": "11 10 9 8",
      "stun_duration": "1.2",
      "multicast_delay": "0.6",
      "fireblast_damage": "70 130 190 250",
      "bonus_cast_speed": "0"
+    },
+    "bonus": {
+     "AbilityCooldown": {
+      "scepter": "-1"
+     },
+     "fireblast_damage": {
+      "special_bonus_unique_ogre_magi_2": "+175"
+     },
+     "fireblast_proc": {
+      "special_bonus_unique_ogre_magi_3": "17"
+     },
+     "bonus_cast_speed": {
+      "scepter": "+25"
+     }
     }
    },
    {
@@ -1912,6 +2960,11 @@
      "projectile_speed": "1000",
      "multicast_delay": "0.6",
      "ignite_multicast_aoe": "1400"
+    },
+    "bonus": {
+     "burn_damage": {
+      "special_bonus_unique_ogre_magi_4": "+10"
+     }
     }
    },
    {
@@ -1933,6 +2986,14 @@
      "self_bonus": "40 60 80 100",
      "duration": "30",
      "multicast_bloodlust_aoe": "700"
+    },
+    "bonus": {
+     "bonus_attack_speed": {
+      "special_bonus_unique_ogre_magi": "+20"
+     },
+     "self_bonus": {
+      "special_bonus_unique_ogre_magi": "+35"
+     }
     }
    },
    {
@@ -1995,6 +3056,14 @@
      "mana_regen_per_str": "0.02",
      "level_one_ability_points": "1",
      "level_two_ability_points": "1"
+    },
+    "bonus": {
+     "mana_per_str": {
+      "special_bonus_unique_ogre_magi_dumb_luck_mana": "+2"
+     },
+     "mana_regen_per_str": {
+      "special_bonus_unique_ogre_magi_dumb_luck_mana": "+0.01"
+     }
     }
    },
    {
@@ -2009,6 +3078,17 @@
      "multicast_4_times": "0 0 15",
      "strength_for_one_pct": "16",
      "one_tooltip": "1"
+    },
+    "bonus": {
+     "multicast_2_times": {
+      "special_bonus_unique_ogre_magi_multicast_chance": "+10"
+     },
+     "multicast_3_times": {
+      "special_bonus_unique_ogre_magi_multicast_chance": "+10"
+     },
+     "multicast_4_times": {
+      "special_bonus_unique_ogre_magi_multicast_chance": "+10"
+     }
     }
    }
   ],
@@ -2056,6 +3136,72 @@
     "ProvidesSetup": "2",
     "RequiresSetup": "0"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_unique_ogre_magi_4",
+    "tier": 1,
+    "side": "right",
+    "label": "+10 Ignite Burn Damage"
+   },
+   {
+    "name": "special_bonus_unique_ogre_magi_dumb_luck_mana",
+    "tier": 1,
+    "side": "left",
+    "label": "+2/0.01 Dumb Luck Mana/Mana Regen Per Strength"
+   },
+   {
+    "name": "special_bonus_attack_damage_80",
+    "tier": 2,
+    "side": "right",
+    "stat": {
+     "damage": 80.0
+    },
+    "label": "+80 Damage"
+   },
+   {
+    "name": "special_bonus_unique_ogre_magi",
+    "tier": 2,
+    "side": "left",
+    "label": "+20/35 Bloodlust / Self Attack Speed"
+   },
+   {
+    "name": "special_bonus_strength_30",
+    "tier": 3,
+    "side": "right",
+    "stat": {
+     "str": 30.0
+    },
+    "label": "+30 Strength"
+   },
+   {
+    "name": "special_bonus_unique_ogre_magi_2",
+    "tier": 3,
+    "side": "left",
+    "label": "+175 Fireblast Damage"
+   },
+   {
+    "name": "special_bonus_unique_ogre_magi_3",
+    "tier": 4,
+    "side": "right",
+    "label": "17% Fireblast chance on attack"
+   },
+   {
+    "name": "special_bonus_unique_ogre_magi_multicast_chance",
+    "tier": 4,
+    "side": "left",
+    "label": "+10% Multicast Chance"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Grants Unrefined Fireblast, which costs a share of Ogre's current mana. Fireblast cooldown -1s and 25% faster cast.",
+   "shard": "Grants Fire Shield: an ally absorbs most of the damage of the next attacks from enemy heroes, and each absorbed attack throws a fireball back."
   }
  },
  "nevermore": {
@@ -2099,6 +3245,7 @@
     "AbilityCastPoint": "0.55",
     "AbilityManaCost": "75",
     "LinkedAbility": "nevermore_shadowraze2",
+    "HasShardUpgrade": "1",
     "values": {
      "shadowraze_damage": "85 150 215 280",
      "shadowraze_radius": "250",
@@ -2112,6 +3259,20 @@
      "AbilityCooldown": "9",
      "cooldown_reduction_on_hero_hit": "0",
      "damage_per_soul": "2"
+    },
+    "bonus": {
+     "stack_bonus_damage": {
+      "special_bonus_unique_nevermore_7": "+30"
+     },
+     "procs_attack": {
+      "special_bonus_unique_nevermore_raze_procsattacks": "+1"
+     },
+     "movement_speed_debuff": {
+      "shard": "=12"
+     },
+     "cooldown_reduction_on_hero_hit": {
+      "shard": "+2.0"
+     }
     }
    },
    {
@@ -2124,6 +3285,7 @@
     "AbilityCastPoint": "0.55",
     "AbilityManaCost": "75",
     "LinkedAbility": "nevermore_shadowraze3",
+    "HasShardUpgrade": "1",
     "values": {
      "shadowraze_damage": "85 150 215 280",
      "shadowraze_radius": "250",
@@ -2137,6 +3299,20 @@
      "AbilityCooldown": "9",
      "cooldown_reduction_on_hero_hit": "0",
      "damage_per_soul": "2"
+    },
+    "bonus": {
+     "stack_bonus_damage": {
+      "special_bonus_unique_nevermore_7": "+30"
+     },
+     "procs_attack": {
+      "special_bonus_unique_nevermore_raze_procsattacks": "+1"
+     },
+     "movement_speed_debuff": {
+      "shard": "=12"
+     },
+     "cooldown_reduction_on_hero_hit": {
+      "shard": "+2.0"
+     }
     }
    },
    {
@@ -2149,6 +3325,7 @@
     "AbilityCastPoint": "0.55",
     "AbilityManaCost": "75",
     "LinkedAbility": "nevermore_shadowraze1",
+    "HasShardUpgrade": "1",
     "values": {
      "shadowraze_damage": "85 150 215 280",
      "shadowraze_radius": "250",
@@ -2162,6 +3339,20 @@
      "AbilityCooldown": "9",
      "cooldown_reduction_on_hero_hit": "0",
      "damage_per_soul": "2"
+    },
+    "bonus": {
+     "stack_bonus_damage": {
+      "special_bonus_unique_nevermore_7": "+30"
+     },
+     "procs_attack": {
+      "special_bonus_unique_nevermore_raze_procsattacks": "+1"
+     },
+     "movement_speed_debuff": {
+      "shard": "=12"
+     },
+     "cooldown_reduction_on_hero_hit": {
+      "shard": "+2.0"
+     }
     }
    },
    {
@@ -2184,6 +3375,20 @@
      "soul_collection_per_hero": "3",
      "soul_collection_per_creep": "1",
      "linger_duration": "8"
+    },
+    "bonus": {
+     "bonus_attack_speed": {
+      "special_bonus_unique_nevermore_4": "+30"
+     },
+     "cast_speed_pct": {
+      "special_bonus_unique_nevermore_frenzy_castspeed": "+30"
+     },
+     "cast_speed_pct_tooltip": {
+      "special_bonus_unique_nevermore_frenzy_castspeed": "=140"
+     },
+     "soul_collection_per_hero": {
+      "special_bonus_unique_nevermore_frenzy_max_collection_count": "+2"
+     }
     }
    },
    {
@@ -2199,6 +3404,11 @@
      "presence_radius": "1200",
      "bonus_armor_per_stack": "0",
      "kill_buff_duration": "0"
+    },
+    "bonus": {
+     "presence_armor_reduction": {
+      "special_bonus_unique_nevermore_3": "-1.5"
+     }
     }
    },
    {
@@ -2211,6 +3421,7 @@
     "SpellImmunityType": "SPELL_IMMUNITY_ENEMIES_NO",
     "AbilityCastPoint": "1.67 1.67 1.67",
     "AbilityManaCost": "150 175 200",
+    "HasScepterUpgrade": "1",
     "values": {
      "AbilityCooldown": "120 110 100",
      "requiem_radius": "1000",
@@ -2224,6 +3435,23 @@
      "requiem_line_speed": "700 700 700",
      "soul_death_release": "0.5",
      "max_soul_release": "20"
+    },
+    "bonus": {
+     "AbilityCooldown": {
+      "scepter": "-30"
+     },
+     "requiem_slow_duration": {
+      "special_bonus_unique_nevermore_6": "+0.2"
+     },
+     "requiem_slow_duration_max": {
+      "special_bonus_unique_nevermore_6": "+0.45"
+     },
+     "requiem_heal_pct_scepter": {
+      "scepter": "100"
+     },
+     "requiem_damage_pct_scepter": {
+      "scepter": "100"
+     }
     }
    },
    {
@@ -2242,6 +3470,20 @@
      "attack_range_bonus": "0",
      "soul_release_tooltip": "30.0",
      "max_soul_increase_on_hero_kill": "0"
+    },
+    "bonus": {
+     "necromastery_max_souls": {
+      "special_bonus_unique_nevermore_1": "+5"
+     },
+     "shard_souls_per_kill": {
+      "shard": "2"
+     },
+     "shard_crit_pct": {
+      "shard": "190"
+     },
+     "shard_fear_duration": {
+      "shard": "0.4"
+     }
     }
    }
   ],
@@ -2323,6 +3565,66 @@
     "ProvidesSetup": "0",
     "RequiresSetup": "1"
    }
+  },
+  "talents": [
+   {
+    "name": "special_bonus_unique_nevermore_7",
+    "tier": 1,
+    "side": "right",
+    "label": "+30 Shadowraze Stack Damage"
+   },
+   {
+    "name": "special_bonus_unique_nevermore_4",
+    "tier": 1,
+    "side": "left",
+    "label": "+30 Feast of Souls Attack Speed"
+   },
+   {
+    "name": "special_bonus_unique_nevermore_3",
+    "tier": 2,
+    "side": "right",
+    "label": "+1.5 Presence Armor Reduction"
+   },
+   {
+    "name": "special_bonus_unique_nevermore_frenzy_max_collection_count",
+    "tier": 2,
+    "side": "left",
+    "label": "+2 Feast of Souls Souls Collected Per Hero"
+   },
+   {
+    "name": "special_bonus_unique_nevermore_1",
+    "tier": 3,
+    "side": "right",
+    "label": "+5 Necromastery Max Souls"
+   },
+   {
+    "name": "special_bonus_unique_nevermore_6",
+    "tier": 3,
+    "side": "left",
+    "label": "+0.2s Requiem Fear per line"
+   },
+   {
+    "name": "special_bonus_unique_nevermore_frenzy_castspeed",
+    "tier": 4,
+    "side": "right",
+    "label": "Feast of Souls Grants +30% Cast Speed"
+   },
+   {
+    "name": "special_bonus_unique_nevermore_raze_procsattacks",
+    "tier": 4,
+    "side": "left",
+    "label": "Shadowraze Applies Attack Damage"
+   }
+  ],
+  "attribute_bonus": {
+   "value": "2 4 6 8 10 12 14",
+   "max": 7,
+   "required": 2,
+   "between": 2
+  },
+  "upgrades": {
+   "scepter": "Requiem of Souls: -30s cooldown, and its souls fly back to Shadow Fiend, healing him for the damage they dealt.",
+   "shard": "Shadowraze slows (stacking), and every enemy hero it hits cuts its cooldown by 2s."
   }
  }
 }

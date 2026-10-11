@@ -36,13 +36,15 @@ if __mockHud and not __mockSettings then
 
     -- What launcher\dvc_launcher\dota_settings.py writes for a player with quick
     -- cast on Q E R and the swapped D/F, W moved to 2, items on Z X C V, Alt+B
-    -- and Space, TP on B, shop on F5 and hero selection on 1; auto attack
+    -- and Space, TP on B, shop on F5 and hero selection on 1, the courier on
+    -- F2 F3 F7 F8 and Grab All on F9 (tools/mock/inventory.lua); auto attack
     -- Standard with summons on Never, no auto attack while Stop is held,
     -- right-click allies to deny, quick cast on key press.
     T.files = {["DotaVsCommander\\dota_settings.txt"] = "function PreloadFiles takes nothing returns nothing\r\n\r\n"
         .. "\tcall PreloadStart()\r\n"
         .. '\tcall BlzSetAbilityTooltip(1095656547, "v=1;a1=81q;a2=50;a3=69q;a4=70q;a5=68q;a6=82q;i1=90q;i2=88q;'
-        .. 'i3=67q;i4=86q;i5=66-4;i6=32q;tp=66;sh=116;hs=49;aa=1;as=0;ds=1;ta=0;fr=2;dt=1;di=1;to=2;qd=1;'
+        .. 'i3=67q;i4=86q;i5=66-4;i6=32q;tp=66;sh=116;hs=49;cs=113;cv=114;cb=118;ch=119;gs=120;'
+        .. 'aa=1;as=0;ds=1;ta=0;fr=2;dt=1;di=1;to=2;qd=1;'
         .. 'zl=1;rs=0", 0)\r\n'
         .. "\tcall PreloadEnd( 0.0 )\r\n\r\nendfunction\r\n"}
 
@@ -74,10 +76,13 @@ if __mockHud and not __mockSettings then
         end
         syncNow, M.trig = nil, {}
     end
+    -- messages arrive in the order they were sent, as in the game
+    local seq = 0
     function BlzSendSyncData(prefix, data)
         local msg = {player = GetLocalPlayer(), prefix = prefix, data = data}
         T.sync[#T.sync + 1] = msg
-        __mock.timers[{active = true, timeout = 0.05, periodic = false, due = __mock.now + 0.05,
+        seq = seq + 1
+        __mock.timers[{active = true, timeout = 0.05, periodic = false, due = __mock.now + 0.05 + seq * 1e-7,
                        fn = function() deliver(msg) end}] = true
         return #data <= 255
     end
@@ -414,19 +419,44 @@ if __mockHud and not __mockSettings then
         T.hold(p0, 66, 4, 3, true)
         got = itemUses(c, p0)
         check("a held Alt+B acts once, Alt let go first", #got == 1 and got[1] == 4, #got)
+        -- the hero's free first scroll (inventory.lua) leaves the TP slot
+        local Inv = use("inventory")
+        local first = Inv.take(p0, "tp", 0)
+        if first then use("items").remove(nil, first) end
         advance(3)
         c = #T.itemCalls
         T.press(p0, 66)
-        check("B without a TP scroll does nothing", #itemUses(c, p0) == 0)
-        RemoveItem(UnitItemInSlot(hero, 5))
-        local tp = UnitAddItemById(hero, FourCC(ids.items.item_tpscroll))
+        check("B without a TP scroll does nothing", #itemUses(c, p0) == 0 and Items.pending[p0] == nil)
+        local tp = use("items").make("item_tpscroll", 0)
+        check("a scroll fills the TP slot", Inv.put(p0, tp, "tp", 0))
         advance(3)
         c = #T.itemCalls
         T.press(p0, 66)
-        got = itemUses(c, p0)
-        check("B uses the TP scroll's slot", #got == 1 and got[1] == slotOf(tp), got[1])
+        check("B waits for the TP slot's target", #itemUses(c, p0) == 0
+            and Items.pending[p0] ~= nil and Items.pending[p0].tp == true)
+        Items.pending[p0] = nil
+        local orders = #T.orders
+        local saveTp = Inv.teleport
+        local tpTo = nil
+        Inv.teleport = function(p, x, y) tpTo = {x = x, y = y} return true end
+        advance(3)
+        T.press(p0, 66)
+        T.press(p0, 66)
+        check("double B near the fountain just waits for a target", tpTo == nil and Items.pending[p0] ~= nil)
+        Items.pending[p0] = nil
+        local f = use("data.mapdata").dota.fountain
+        local hx0, hy0 = GetUnitX(hero), GetUnitY(hero)
+        SetUnitPosition(hero, f.x + 2000, f.y + 2000)
+        advance(3)
+        T.press(p0, 66)
+        T.press(p0, 66)
+        check("double B from afar teleports to the fountain", tpTo ~= nil and tpTo.x == f.x and tpTo.y == f.y
+            and Items.pending[p0] == nil)
+        SetUnitPosition(hero, hx0, hy0)
+        Inv.teleport = saveTp
         RemoveItem(tp)
         Items.pending[p0] = nil
+        check("no hero orders from the TP key", #since(T.orders, orders, "u", hero) == 0)
         local p3 = Player(3)
         c = #T.itemCalls
         T.press(p3, 90)

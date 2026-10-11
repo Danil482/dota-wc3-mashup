@@ -260,6 +260,52 @@ __heroesA.at(21, function()
 
     H.after(3.4, function()
         H.check("am resist returns", Mods.sum(am, "magic_resist") > 0.34, Mods.sum(am, "magic_resist"))
+    end)
+
+    -- Talents, Aghanim's Scepter (empowered Mana Break) and Shard (Counterspell image)
+    local T = use("talents")
+    H.after(3.6, function()
+        if not T.started then T.init() end
+        use("heroes").keyOf[am] = "antimage"
+        T.register(am)
+        am.level = 25
+        H.check("am persecutor talent", T.pick(am, "special_bonus_unique_antimage_5")
+            and A.value("antimage_persectur", "move_slow_min", 1, am) == A.value("antimage_persectur", "move_slow_min", 1) + 9)
+        local code = ids.items.item_ultimate_scepter
+        if code and UnitAddItem then
+            UnitAddItem(am, CreateItem(FourCC(code), 0, 0))
+            use("items").refresh(am)
+        end
+        H.check("am scepter", T.hasScepter(am))
+        H.cast(am, "antimage_blink", nil, X + 600, Y)
+        H.check("am blink empowers the next mana break", Mods.has(am, "antimage_empowered_break"))
+        foe.mana, foe.maxMana = 500, 500
+        H.hit(am, foe, 40)
+        -- 4.5 % + 1.5 % (scepter) + 20 % (empowered) of 500, plus the flat burn
+        H.check("am empowered mana break", foe.mana < 500 - 130 and not Mods.has(am, "antimage_empowered_break"), foe.mana)
+        H.check("am mana lock", Mods.has(foe, "antimage_mana_lock"))
+        foe.lockedAt = foe.mana
+        foe.mana = foe.mana + 100
+    end)
+    H.after(3.9, function()
+        H.check("am mana lock takes gained mana back", math.abs(foe.mana - foe.lockedAt) < 0.01, foe.mana)
+        T.consumeShard(am)
+        H.cast(am, "antimage_counterspell")
+        local before = 0
+        for _, u in ipairs(__mock.units) do
+            if u.typeId == FourCC(ids.units.itemdummy) then before = before + 1 end
+        end
+        local bolt = FourCC("AHtb")
+        SetUnitAbilityLevel(foe, bolt, 2)
+        foe.order = 852095
+        H.emit("spell_effect", foe, bolt, am, 0, 0)
+        local after = 0
+        for _, u in ipairs(__mock.units) do
+            if u.typeId == FourCC(ids.units.itemdummy) then after = after + 1 end
+        end
+        H.check("am shard sends an image at the caster", after == before + 1, after - before)
+        T.forget(am)
+        use("heroes").keyOf[am] = nil
         use("log").info("heroesA antimage exercise done")
     end)
 end)

@@ -7,9 +7,9 @@
  "missile": "Abilities\\Weapons\\BloodElfMissile\\BloodElfMissile.mdl",
  "abilities": {
   "rubick_telekinesis": {
-   "targets": "air,ground,enemy,neutral",
+   "targets": "air,ground,enemy,neutral,friend,self",
    "order": "polymorph",
-   "desc": "Lifts an enemy into the air, then slams it down. On landing it and enemies near it are stunned. While it is lifted, Telekinesis Land picks where it comes down."
+   "desc": "Lifts an enemy into the air, then slams it down. On landing it and enemies near it are stunned. While it is lifted, Telekinesis Land picks where it comes down. With Aghanim's Shard it also lifts Rubick or an ally."
   },
   "rubick_fade_bolt": {
    "targets": "air,ground,enemy,neutral",

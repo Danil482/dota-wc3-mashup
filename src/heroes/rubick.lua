@@ -126,7 +126,10 @@ define("hero_rubick", function()
         local x, y = GetUnitX(t), GetUnitY(t)
         DestroyEffect(AddSpecialEffect(FX.landing, x, y))
         for _, e in ipairs(U.enemiesOf(s.owner, x, y, s.radius)) do
-            if not U.isMagicImmune(e) then
+            -- level 20 talent: the landing deals landing_damage (physical,
+            -- https://liquipedia.net/dota2/Rubick, Telekinesis Land)
+            if s.landing > 0 then Damage.deal(s.caster, e, s.landing, Damage.PHYSICAL) end
+            if U.alive(e) and not U.isMagicImmune(e) then
                 Mods.add(e, "rubick_telekinesis_stun", {
                     duration = s.stun, source = s.caster, debuff = true, dispel = "strong",
                     props = {stun = true}, effect = FX.stun, attach = "overhead",
@@ -135,16 +138,35 @@ define("hero_rubick", function()
         end
     end
 
+    -- Aghanim's Shard: Rubick may lift himself or an ally (not stunned, thrown
+    -- after shard_teammate_throw_delay, shard_max_land_distance_bonus_pct %
+    -- farther); the landing still stuns enemies around
+    -- (https://liquipedia.net/dota2/Rubick, Telekinesis).
+    local function friendly(ctx)
+        return ctx.target ~= nil and not IsUnitEnemy(ctx.target, ctx.owner)
+    end
+
     A.define(TELE, {
+        onChannel = function(ctx)
+            if friendly(ctx) and ctx.v("shard_teammate_throw_delay") <= 0 then
+                cancelCast(ctx.caster, "Telekinesis lifts allies with Aghanim's Shard")
+            end
+        end,
         onCast = function(ctx)
             local u, t = ctx.caster, ctx.target
             if not U.alive(t) or U.isMagicImmune(t) then return end
+            local ally = friendly(ctx)
+            if ally and ctx.v("shard_teammate_throw_delay") <= 0 then return end
             local s = {
                 caster = u, target = t, owner = ctx.owner, started = Timer.now(),
                 lift = ctx.v("lift_duration"), fall = ctx.v("fall_duration"), stun = ctx.v("stun_duration"),
                 radius = ctx.v("radius"), maxLand = ctx.v("max_land_distance"),
-                x0 = GetUnitX(t), y0 = GetUnitY(t),
+                landing = ctx.v("landing_damage"), x0 = GetUnitX(t), y0 = GetUnitY(t),
             }
+            if ally then
+                s.lift = ctx.v("shard_teammate_throw_delay") + s.fall
+                s.maxLand = s.maxLand * (1 + ctx.v("shard_max_land_distance_bonus_pct") / 100)
+            end
             s.lx, s.ly = s.x0, s.y0
             lifts[u] = s
             if UnitAddAbility(t, CROW) then UnitRemoveAbility(t, CROW) end
@@ -152,8 +174,8 @@ define("hero_rubick", function()
             local rise = math.max(0.1, s.lift - s.fall)
             SetUnitFlyHeight(t, s.baseHeight + 250, 250 / rise)
             Mods.add(t, "rubick_telekinesis", {
-                duration = s.lift, source = u, debuff = true, dispel = "strong",
-                props = {stun = true}, effect = FX.lifted, attach = "origin",
+                duration = s.lift, source = u, debuff = not ally, dispel = "strong",
+                props = {stun = not ally or nil}, effect = FX.lifted, attach = "origin",
                 onRemove = function() land(s) end,
             })
             -- As in Dota, Land takes Telekinesis' button (Q) while the target is up;
@@ -293,8 +315,17 @@ define("hero_rubick", function()
         local bonus = supremacyActive(u) and A.value(SUPREMACY, "cast_range", lvl) or 0
         for _, name in ipairs({TELE, BOLT, STEAL}) do
             local id = A.id(name)
-            local l = id and GetUnitAbilityLevel(u, id) or 0
-            if l > 0 then setRange(u, id, objectRange(u, id, l - 1), bonus, l - 1) end
+            if id and GetUnitAbilityLevel(u, id) > 0 and A.rangeBonus(u, id, "supremacy") ~= bonus then
+                A.setRangeBonus(u, id, "supremacy", bonus)
+            end
+        end
+        -- Aghanim's Scepter: Spell Steal reaches cast_range_scepter
+        local steal = A.id(STEAL)
+        local sl = steal and GetUnitAbilityLevel(u, steal) or 0
+        if sl > 0 then
+            local reach = A.value(STEAL, "cast_range_scepter", sl, u)
+            local extra = reach > 0 and reach - A.value(STEAL, "AbilityCastRange", sl) or 0
+            if A.rangeBonus(u, steal, "scepter") ~= extra then A.setRangeBonus(u, steal, "scepter", extra) end
         end
         local s = stolen[u]
         if s then
@@ -324,8 +355,11 @@ define("hero_rubick", function()
 
     Damage.onDamaging(function(source, target, info)
         if not source or info.attack or info.spell ~= nil or info.amount <= 0 then return end
-        if not supremacyActive(source) then return end
-        local amp = Mods.sum(source, "spell_amp")
+        local amp = supremacyActive(source) and Mods.sum(source, "spell_amp") or 0
+        -- level 25 talent: stolen spells deal spell_amp_percent % more.
+        -- SIMPLIFIED: only stolen native spells; a stolen Lua spell deals
+        -- its damage through Damage.deal, which does not know the spell.
+        if stolen[source] then amp = amp + A.value(STEAL, "spell_amp_percent", level(source, STEAL), source) / 100 end
         if amp ~= 0 then info.amount = info.amount * (1 + amp) end
     end)
 
@@ -435,19 +469,31 @@ define("hero_rubick", function()
         if not U.alive(u) then return end
         local s = {rec = rec}
         local li = rec.level - 1
+        -- level 15 talent: stolen spells cost stolen_mana_reduction % less
+        local manaCut = A.value(STEAL, "stolen_mana_reduction", level(u, STEAL), u) / 100
         if rec.slot then
             local slotId = A.id(rec.slot)
             if not slotId then return end
             UnitAddAbility(u, slotId)
             s.slotId = slotId
+            -- a Dota spell comes without its owner's talents but with Rubick's
+            -- own Scepter and Shard (https://liquipedia.net/dota2/Rubick, Spell Steal)
+            local follow, mana, cooldown = rec.follow or 0, rec.mana or 0, rec.cooldown or 0
+            if rec.name then
+                mana = A.value(rec.name, "AbilityManaCost", rec.level, u)
+                cooldown = A.value(rec.name, "AbilityCooldown", rec.level, u)
+                if follow > 0 and A.value(rec.name, "AbilityChannelTime", rec.level) > 0 then
+                    follow = A.value(rec.name, "AbilityChannelTime", rec.level, u)
+                end
+            end
             local ab = BlzGetUnitAbility(u, slotId)
             if ab then
                 BlzSetAbilityIntegerLevelField(ab, ABILITY_ILF_OPTIONS, 0, rec.options or 1)
-                BlzSetAbilityRealLevelField(ab, ABILITY_RLF_FOLLOW_THROUGH_TIME, 0, rec.follow or 0)
+                BlzSetAbilityRealLevelField(ab, ABILITY_RLF_FOLLOW_THROUGH_TIME, 0, follow)
                 BlzSetAbilityRealLevelField(ab, ABILITY_RLF_AREA_OF_EFFECT, 0, rec.aoe or 0)
             end
-            BlzSetUnitAbilityManaCost(u, slotId, 0, math.floor((rec.mana or 0) + 0.5))
-            BlzSetUnitAbilityCooldown(u, slotId, 0, (rec.cooldown or 0) * (1 - cdPct))
+            BlzSetUnitAbilityManaCost(u, slotId, 0, math.floor(mana * (1 - manaCut) + 0.5))
+            BlzSetUnitAbilityCooldown(u, slotId, 0, cooldown * (1 - cdPct))
             BlzSetAbilityIcon(slotId, BlzGetAbilityIcon(rec.id))
             BlzSetAbilityTooltip(slotId, BlzGetAbilityTooltip(rec.id, li), 0)
             BlzSetAbilityExtendedTooltip(slotId, BlzGetAbilityExtendedTooltip(rec.id, li), 0)
@@ -463,6 +509,9 @@ define("hero_rubick", function()
                 moveButton(u, id, 1, 1)
             end
             BlzSetUnitAbilityCooldown(u, id, li, BlzGetUnitAbilityCooldown(u, id, li) * (1 - cdPct))
+            if manaCut > 0 then
+                BlzSetUnitAbilityManaCost(u, id, li, math.floor(BlzGetUnitAbilityManaCost(u, id, li) * (1 - manaCut) + 0.5))
+            end
             if rec.def and rec.def.onLearn then rec.def.onLearn(u, rec.level, rec.def) end
         end
         stolen[u] = s
@@ -518,7 +567,7 @@ define("hero_rubick", function()
             -- Rearm does not refresh the slot it is cast from.
             local sub = {def = rec.def, caster = ctx.caster, owner = ctx.owner, level = lvl,
                          target = ctx.target, x = ctx.x, y = ctx.y, castId = ctx.def.id}
-            function sub.v(key) return A.value(rec.def.name, key, lvl) end
+            function sub.v(key) return A.value(rec.def.name, key, lvl, ctx.caster) end
             sub.cast = sub.v
             fn(sub)
         end

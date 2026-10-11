@@ -1,5 +1,6 @@
 -- Nature's Prophet: Sprout, Teleportation, Nature's Call, Curse of the
--- Oldgrowth, Wrath of Nature and the Spirit of the Forest innate. The map's
+-- Oldgrowth (granted by Aghanim's Shard), Wrath of Nature (rooting with
+-- Aghanim's Scepter) and the Spirit of the Forest innate. The map's
 -- WC3 trees are real Dota trees here: Sprout grows tree destructables,
 -- Nature's Call turns trees in an area into Treants.
 define("hero_furion", function()
@@ -202,17 +203,18 @@ define("hero_furion", function()
         local code = use("data.ids").units.furion_treant
         if not code then return nil end
         local u = CreateUnit(GetOwningPlayer(furion), FourCC(code), x, y, GetUnitFacing(furion))
-        local hp = math.floor(A.value(CALL, "treant_health", lvl))
+        -- the talents (x3 health and damage, movement speed) count through furion
+        local hp = math.floor(A.value(CALL, "treant_health", lvl, furion))
         BlzSetUnitMaxHP(u, hp)
         SetWidgetLife(u, hp)
         -- object data has 1 die of 1 side: base + 1 = Dota damage
-        BlzSetUnitBaseDamage(u, math.floor(A.value(CALL, "treant_damage", lvl)) - 1, 0)
+        BlzSetUnitBaseDamage(u, math.floor(A.value(CALL, "treant_damage", lvl, furion)) - 1, 0)
         Mods.add(u, "furion_treant", {persist = true, dispel = "none", props = {
             magic_resist = TREANT_MAGIC_RESIST,
-            move_flat = A.value(CALL, "treant_movespeed", lvl) - GetUnitDefaultMoveSpeed(u),
+            move_flat = A.value(CALL, "treant_movespeed", lvl, furion) - GetUnitDefaultMoveSpeed(u),
         }})
-        UnitApplyTimedLife(u, FourCC("BTLF"), A.value(CALL, "treant_duration", lvl))
-        treants[u] = {owner = furion, bonus = A.value(CALL, "treant_bonus_hero_damage", lvl)}
+        UnitApplyTimedLife(u, FourCC("BTLF"), A.value(CALL, "treant_duration", lvl, furion))
+        treants[u] = {owner = furion, bonus = A.value(CALL, "treant_bonus_hero_damage", lvl, furion)}
         fx("Abilities\\Spells\\NightElf\\TreeofLifeUpgrade\\TreeofLifeUpgradeTargetArt.mdl", x, y)
         return u
     end
@@ -293,6 +295,9 @@ define("hero_furion", function()
             local owner = ctx.owner
             local base, add = ctx.v("damage"), ctx.v("damage_percent_add") / 100
             local maxTargets, delay = math.floor(ctx.v("max_targets")), ctx.v("jump_delay")
+            -- Aghanim's Scepter: every enemy hit is rooted, from the min to the
+            -- max duration over the bounces (https://liquipedia.net/dota2/Nature%27s_Prophet)
+            local rootMin, rootMax = ctx.v("scepter_min_entangle_duration"), ctx.v("scepter_max_entangle_duration")
             local ok = wrathTargets(owner)
             local hit, count = {}, 0
             local function nextFrom(x, y)
@@ -312,6 +317,12 @@ define("hero_furion", function()
                 fxOn("Abilities\\Spells\\NightElf\\Starfall\\StarfallTarget.mdl", u, "origin")
                 -- each enemy hit after the first adds damage_percent_add of the base
                 Damage.deal(c, u, base * (1 + add * (count - 1)), "magical")
+                if rootMax > 0 and U.alive(u) then
+                    local share = maxTargets > 1 and (count - 1) / (maxTargets - 1) or 1
+                    Mods.add(u, "furion_wrath_entangle", {duration = rootMin + (rootMax - rootMin) * share, source = c,
+                        debuff = true, props = {root = true}, attach = "origin",
+                        effect = "Abilities\\Spells\\NightElf\\EntanglingRoots\\EntanglingRootsTarget.mdl"})
+                end
                 if count >= maxTargets then return end
                 local x, y = GetUnitX(u), GetUnitY(u)
                 Timer.after(delay, function()

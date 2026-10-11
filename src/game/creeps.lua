@@ -2,14 +2,15 @@
 -- lane from the Dota base to the Commander's town hall; the Commander's
 -- uncontrollable race creeps (Horde slot) walk the same lanes the other way to
 -- the Ancient. Every fifth wave adds a siege creep. Walkers attack-move from
--- waypoint to waypoint and are nudged when idle.
+-- waypoint to waypoint and are nudged when idle. Creep aggro (lane.lua) turns
+-- a walker on a hero for a moment; it then takes up its lane again.
 define("creeps", function()
     local Log = use("log")
     local Timer = use("timer")
     local U = use("util")
-    local C = {waves = 0, interval = 30, first = 30, raceKey = "human"}
+    local C = {waves = 0, interval = 30, first = 30, raceKey = "human", firstAt = nil}
 
-    local walkers = {}     -- unit -> {path, index}
+    local walkers = {}     -- unit -> {path, index, lane, slot, aggroUntil, aggroGen}
     local ARRIVE = 400
 
     local function ids() return use("data.ids").units end
@@ -91,9 +92,51 @@ define("creeps", function()
         return n
     end
 
+    function C.isLaneCreep(u) return walkers[u] ~= nil end
+
+    -- A side's living lane creeps within r of (x, y) (all of them without x),
+    -- in the engine's enumeration order, the same on every client.
+    function C.near(slot, x, y, r)
+        if not x then
+            local out = {}
+            for _, u in ipairs(U.enum(0, 0, 1e6)) do
+                local w = walkers[u]
+                if w and w.slot == slot then out[#out + 1] = u end
+            end
+            return out
+        end
+        return U.enum(x, y, r, function(u)
+            local w = walkers[u]
+            return w ~= nil and w.slot == slot and GetPlayerId(GetOwningPlayer(u)) == slot
+        end)
+    end
+
+    -- Creep aggro: the creep attacks `target` for `seconds`, then resumes its
+    -- lane. Returns false for units that are not lane creeps.
+    function C.aggro(u, target, seconds)
+        local w = walkers[u]
+        if not w or not U.alive(u) then return false end
+        w.aggroGen = (w.aggroGen or 0) + 1
+        w.aggroUntil = Timer.now() + seconds
+        local gen = w.aggroGen
+        IssueTargetOrder(u, "attack", target)
+        Timer.after(seconds, function()
+            if walkers[u] ~= w or w.aggroGen ~= gen then return end
+            w.aggroUntil = nil
+            if U.alive(u) then order(u, w) end
+        end)
+        return true
+    end
+
+    function C.aggroed(u)
+        local w = walkers[u]
+        return w ~= nil and w.aggroUntil ~= nil
+    end
+
     function C.start(raceKey)
         C.raceKey = raceKey or C.raceKey
         C.paths = paths()
+        C.firstAt = Timer.now() + C.first
         Timer.after(C.first, function()
             C.wave()
             Timer.every(C.interval, function() C.wave() end)
@@ -103,7 +146,7 @@ define("creeps", function()
                 -- dead, or taken over (e.g. Chen's Holy Persuasion): stop driving it
                 if not U.alive(u) or GetPlayerId(GetOwningPlayer(u)) ~= w.slot then
                     walkers[u] = nil
-                else
+                elseif not w.aggroUntil then
                     local p = w.path[w.index]
                     if w.index < #w.path and U.dist(GetUnitX(u), GetUnitY(u), p.x, p.y) < ARRIVE then
                         w.index = w.index + 1

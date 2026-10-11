@@ -25,10 +25,13 @@ define("hero_bot", function()
         local ids = use("data.ids")
         local innate = {}
         for _, code in ipairs(ids.heroes[heroKey .. "_innates"] or {}) do innate[code] = true end
-        local basics, ults = {}, {}
+        local basics, ults, granted = {}, {}, {}
         for _, ab in ipairs(use("data.heroes")[heroKey].abilities) do
             local code = ids.abilities[ab.name]
-            if code and not innate[code] then
+            if code and (ab.IsGrantedByScepter == "1" or ab.IsGrantedByShard == "1") then
+                -- Aghanim's abilities are never learned, only cast once owned
+                granted[#granted + 1] = {name = ab.name, id = FourCC(code)}
+            elseif code and not innate[code] then
                 local entry = {name = ab.name, id = FourCC(code)}
                 if string.find(ab.AbilityType or "", "ULTIMATE") then
                     ults[#ults + 1] = entry
@@ -37,7 +40,7 @@ define("hero_bot", function()
                 end
             end
         end
-        return basics, ults
+        return basics, ults, granted
     end
 
     local function learnable(u, ab, level, ult)
@@ -76,6 +79,7 @@ define("hero_bot", function()
             if not picked then break end
             SelectHeroSkill(u, picked.id)
         end
+        if defined("talents") and use("talents").started then use("talents").botPick(u, s.build) end
     end
 
     local function hpFrac(u)
@@ -109,7 +113,7 @@ define("hero_bot", function()
         if Mods.flag(u, "stun") or Mods.flag(u, "silence") then return false end
         local orders = use("data.ids").orders
         local hints = use("bots").hints
-        for _, list in ipairs({s.ults, s.basics}) do
+        for _, list in ipairs({s.ults, s.basics, s.granted or {}}) do
             for _, ab in ipairs(list) do
                 local hint = hints[ab.name]
                 local level = GetUnitAbilityLevel(u, ab.id)
@@ -227,10 +231,16 @@ define("hero_bot", function()
         local u = s.unit
         if not U.alive(u) then return end
         learn(s)
-        -- shop while at the fountain (one purchase per think), use items
+        -- shop while at the fountain (one purchase per think), take the
+        -- stash and keep the best items out of the backpack, use items
         local f0 = fountain()
         if U.dist(GetUnitX(u), GetUnitY(u), f0.x, f0.y) < 900 and defined("item_builds") then
             use("item_builds").shop(u, s.hero)
+            if defined("inventory") then
+                local Inv = use("inventory")
+                Inv.grabAll(GetOwningPlayer(u))
+                Inv.arrange(GetOwningPlayer(u))
+            end
         end
         if defined("items") and use("items").autoUse then use("items").autoUse(u) end
         if s.castUntil and Timer.now() < s.castUntil then return end
@@ -266,6 +276,13 @@ define("hero_bot", function()
         end)
         for _, c in ipairs(creeps) do
             if GetWidgetLife(c) <= dmg * 1.1 then
+                return IssueTargetOrder(u, "attack", c)
+            end
+        end
+        -- 2b. deny: an allied lane creep that may be denied and this hit would kill
+        local Lane, C = use("lane"), use("creeps")
+        for _, c in ipairs(C.near(SLOT_ANCIENTS, GetUnitX(u), GetUnitY(u), reach)) do
+            if GetWidgetLife(c) <= dmg * 1.1 and not Lane.denyError(c) then
                 return IssueTargetOrder(u, "attack", c)
             end
         end
@@ -309,10 +326,10 @@ define("hero_bot", function()
 
     function Bot.add(unit, heroKey)
         local lane = pickLane(heroKey)
-        local basics, ults = skillsOf(heroKey)
+        local basics, ults, granted = skillsOf(heroKey)
         local build = (use("data.heroes")[heroKey].bot or {}).build or {}
         bots[unit] = {unit = unit, hero = heroKey, lane = lane, path = lanePath(lane), index = 1,
-                      basics = basics, ults = ults, build = build, toggled = {}}
+                      basics = basics, ults = ults, granted = granted, build = build, toggled = {}}
         Log.info("bot " .. heroKey .. " takes " .. lane)
     end
 

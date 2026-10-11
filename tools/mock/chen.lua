@@ -178,7 +178,7 @@ if not __mockB then
         local ctx = {def = def, caster = caster, owner = GetOwningPlayer(caster), level = level, target = target,
                      x = x or (target and GetUnitX(target)) or GetUnitX(caster),
                      y = y or (target and GetUnitY(target)) or GetUnitY(caster)}
-        function ctx.v(key) return A.value(name, key, level) end
+        function ctx.v(key) return A.value(name, key, level, caster) end   -- with the caster's upgrades, as in game
         return ctx
     end
 
@@ -311,4 +311,45 @@ __mockB.list[#__mockB.list + 1] = {name = "chen", fn = function(B)
     C.follow()
     C.favorAura()
     B.advance(1)
+
+    -- Talents, Aghanim's Scepter (channelled Hand of God) and Shard (Ancients)
+    local T, H = use("talents"), use("heroes")
+    if not T.started then T.init() end
+    local was = H.bySlot[2]
+    H.keyOf[chen], H.bySlot[2] = "chen", chen
+    T.register(chen)
+    B.check(T.pick(chen, "special_bonus_unique_chen_2"), "chen full heal talent")
+    B.check(T.pick(chen, "special_bonus_unique_chen_4"), "chen persuasion health talent")
+    z2.life = 10
+    B.cast("chen_hand_of_god", chen, 3)
+    B.check(z2.life == BlzGetUnitMaxHP(z2), "talent: hand of god fully heals chen's units")
+    local code = ids.items.item_ultimate_scepter
+    if code and UnitAddItem then
+        UnitAddItem(chen, CreateItem(FourCC(code), 0, 0))
+        use("items").refresh(chen)
+        B.check(A.value("chen_hand_of_god", "AbilityCooldown", 3, chen) == 70, "scepter hand of god cooldown")
+        SetUnitPosition(ally, X + 100, Y)
+        local ctx = B.cast("chen_hand_of_god", chen, 3)
+        Mods.add(ally, "test_curse", {duration = 5, debuff = true, props = {move_pct = -0.5}})
+        B.advance(0.3)
+        B.check(C.channelling(chen) and not Mods.has(ally, "test_curse") and Mods.has(ally, "chen_hand_of_god_ward"),
+            "scepter channel shields allies")
+        ctx.def.onEndCast(ctx)
+        B.advance(0.5)
+        B.check(not C.channelling(chen), "channel ends")
+    end
+    local ancient = B.unit(Player(PLAYER_NEUTRAL_AGGRESSIVE), "nfrl", X - 100, Y + 100, {unitLevel = 2})
+    local isAncient = IsUnitType
+    IsUnitType = function(u, t)
+        if u == ancient and t == UNIT_TYPE_ANCIENT then return true end
+        return isAncient(u, t)
+    end
+    B.cast("chen_holy_persuasion", chen, 1, ancient)
+    B.check(C.persuaded[ancient] == nil, "no ancients without the shard")
+    T.consumeShard(chen)
+    B.cast("chen_holy_persuasion", chen, 1, ancient)
+    B.check(C.persuaded[ancient] == chen, "shard persuades an ancient")
+    IsUnitType = isAncient
+    T.forget(chen)
+    H.keyOf[chen], H.bySlot[2] = nil, was
 end}

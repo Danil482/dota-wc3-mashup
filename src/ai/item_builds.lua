@@ -33,8 +33,10 @@ define("item_builds", function()
 
     -- Hero-specific lists win over the role list.
     B.byHero = {
+        -- Aghanim's Scepter: in Valve's bot loadout for Pudge (data.heroes bot.loadout)
         pudge = {"item_tango", "item_flask", "item_boots", "item_magic_stick", "item_magic_wand", "item_phase_boots",
-                 "item_blink", "item_black_king_bar", "item_heart", "item_shivas_guard", "item_refresher"},
+                 "item_blink", "item_black_king_bar", "item_heart", "item_shivas_guard", "item_refresher",
+                 "item_ultimate_scepter"},
         antimage = {"item_tango", "item_flask", "item_quelling_blade", "item_branches", "item_power_treads",
                     "item_bfury", "item_manta", "item_basher", "item_butterfly", "item_black_king_bar",
                     "item_satanic"},
@@ -108,7 +110,7 @@ define("item_builds", function()
             local finished = inList[c.name] and not e.consumable
             local score = e.cost + (finished and 100000 or 0)
             if not needed and not (e.stats and e.stats.boots_ms) and not (finished and e.cost >= KEEP_COST)
-                and score < cost then
+                and score < cost and I.ownedBy(c.item, GetPlayerId(GetOwningPlayer(u))) then
                 worst, cost = c, score
             end
         end

@@ -430,4 +430,33 @@ __mockC.list[#__mockC.list + 1] = {name = "rubick", fn = function(C)
     Events.emit("death", rubick, nil)
     C.check(R.stolen(rubick) == nil and GetUnitAbilityLevel(rubick, slot) == 0, "rubick loses the stolen spell on death")
     C.advance(0.5)
+
+    -- Talents, Aghanim's Shard (Telekinesis on allies) and Scepter (Spell Steal reach)
+    local Tal, H = use("talents"), use("heroes")
+    if not Tal.started then Tal.init() end
+    H.keyOf[rubick] = "rubick"
+    Tal.register(rubick)
+    rubick.level = 20
+    C.check(Tal.pick(rubick, "special_bonus_unique_rubick_8"), "rubick landing damage talent picked")
+    local lifted = C.unit(7, "Hpal", X + 300, Y, {hero = true})
+    local beside = C.unit(7, "hfoo", X + 400, Y)
+    C.cast(rubick, "rubick_telekinesis", lifted)
+    C.advance(2.0)
+    C.check(beside.taken >= 299 and Mods.has(beside, "rubick_telekinesis_stun"), "rubick telekinesis landing damage "
+        .. beside.taken)
+    rubick.orders = {}
+    Events.emit("spell_channel", rubick, id("rubick_telekinesis"), ally, GetUnitX(ally), GetUnitY(ally))
+    C.check(rubick.orders[1] == "stop", "rubick telekinesis refuses allies without the shard")
+    Tal.consumeShard(rubick)
+    C.cast(rubick, "rubick_telekinesis", ally)
+    C.advance(0.05)
+    C.check(Mods.has(ally, "rubick_telekinesis") and not Mods.flag(ally, "stun"), "rubick shard lifts an ally unstunned")
+    C.advance(1.0)
+    C.check(not Mods.has(ally, "rubick_telekinesis"), "rubick shard throws the ally sooner")
+    rubick.items[2] = CreateItem(FourCC(ids.items.item_ultimate_scepter), 0, 0)
+    use("items").refresh(rubick)
+    R.applyRanges(rubick)
+    C.check(A.rangeBonus(rubick, id("rubick_spell_steal"), "scepter") == 400, "rubick scepter spell steal reach")
+    Tal.forget(rubick)
+    H.keyOf[rubick] = nil
 end}

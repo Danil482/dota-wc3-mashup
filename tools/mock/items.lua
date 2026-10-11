@@ -1,10 +1,13 @@
 -- Offline exercise for the Dota items (src/game/items.lua, item_actives.lua,
 -- item_passives.lua, src/ai/item_builds.lua). Adds an inventory model to the
--- mock WC3 API, then at 6 s of game time buys, combines, stacks, refunds and
+-- mock WC3 API, then at 6 s of game time (before the draft) makes test heroes
+-- the bot players' main heroes at the home shop (never a human's: the music
+-- director binds a human's hero once) and buys, combines, stacks and
 -- sells items, runs every active handler once, fires the attack procs and the
--- periodic loops, and lets a bot shop. Failed checks and Lua errors become
--- ERROR log lines, which fail the mock run. Test units stand in the empty
--- bottom-right corner so nothing else in the run notices them.
+-- periodic loops, and lets a bot shop. The storage rules (backpack, stash,
+-- TP slot, courier) are tools/mock/inventory.lua's. Failed checks and Lua
+-- errors become ERROR log lines, which fail the mock run. Test units stand at
+-- the home shop and are removed afterwards; the main heroes are restored.
 
 -- ------------------------------------------------------------ inventory model
 do
@@ -40,6 +43,8 @@ do
     function GetItemX(it) return it and it.x or 0 end
     function GetItemY(it) return it and it.y or 0 end
     function SetItemPosition(it, x, y) detach(it) it.x, it.y = x, y end
+    function SetItemVisible(it, on) if it then it.hidden = not on end end
+    function IsItemVisible(it) return it ~= nil and not it.hidden end
     function UnitInventorySize(u) return 6 end
     function UnitItemInSlot(u, i) return slots(u)[i] end
     function UnitHasItem(u, it) return it ~= nil and it.holder == u and it.typeId ~= 0 end
@@ -47,6 +52,7 @@ do
         local s = slots(u)
         for i = 0, 5 do
             if s[i] == nil then
+                detach(it)
                 s[i], it.holder = it, u
                 return true
             end
@@ -59,6 +65,28 @@ do
         return it
     end
     function UnitRemoveItem(u, it) SetItemPosition(it, u.x, u.y) end
+    function UnitDropItemSlot(u, it, slot)
+        local s = slots(u)
+        for i = 0, 5 do
+            if s[i] == it then
+                s[i], s[slot] = s[slot], it
+                return true
+            end
+        end
+        return false
+    end
+    -- orders in the game (walk, then drop or give); the mock records them
+    __mock.dropOrders = {}
+    function UnitDropItemPoint(u, it, x, y)
+        if not UnitHasItem(u, it) then return false end
+        __mock.dropOrders[#__mock.dropOrders + 1] = {u = u, it = it, x = x, y = y}
+        return true
+    end
+    function UnitDropItemTarget(u, it, target)
+        if not UnitHasItem(u, it) then return false end
+        __mock.dropOrders[#__mock.dropOrders + 1] = {u = u, it = it, target = target}
+        return true
+    end
     function UnitUseItem(u, it) return it ~= nil and it.holder == u end
     function UnitUseItemTarget(u, it, t) return it ~= nil and it.holder == u end
     function UnitUseItemPoint(u, it, x, y) return it ~= nil and it.holder == u end
@@ -68,9 +96,11 @@ end
 do
     local function exercise()
         local Items = use("items")
+        local Inv = use("inventory")
         local Actives = use("item_actives")
         local Passives = use("item_passives")
         local Builds = use("item_builds")
+        local H = use("heroes")
         local Mods = use("mods")
         local Log = use("log")
         local Timer = use("timer")
@@ -78,6 +108,7 @@ do
         local catalog = use("data.items")
         local data = catalog.items
         Items.init()
+        Inv.init()
 
         local failures = 0
         local function check(name, ok, detail)
@@ -93,7 +124,12 @@ do
         for _, shop in ipairs(catalog.shops) do
             for _, name in ipairs(shop.items) do check("token for " .. name, ids.item_tokens[name] ~= nil) end
         end
-        check("shops placed", #Items.shops == #catalog.shops, #Items.shops)
+        local spots = #(use("data.mapdata").side_shops or {})
+        check("home shops placed", #Items.shops == #catalog.shops - (spots > 0 and 1 or 0), #Items.shops)
+        check("a Secret Shop at each of the map's spots", #Items.secretShops == spots, #Items.secretShops)
+        for _, s in ipairs(Items.secretShops) do
+            check("Secret Shops away from the fountain", not Items.nearHome(s))
+        end
         -- item orders are unique and never answer a hero ability's order
         local heroOrders, seen = {}, {}
         for name, order in pairs(ids.orders) do
@@ -105,22 +141,33 @@ do
             if order then seen[order] = true end
         end
 
+        -- test heroes are the players' main heroes for now, at the home shop
         local heroType = FourCC(ids.heroes.pudge)
         local creepType = FourCC(ids.units.human_melee)
-        local p0 = Player(0)
-        local function gold(p) return GetPlayerState(p or p0, PLAYER_STATE_RESOURCE_GOLD) end
-        local function newHero(slot, x, y)
+        local s1 = Items.shops[1]
+        local hx, hy = GetUnitX(s1) + 150, GetUnitY(s1)
+        local mains, testUnits = {}, {}
+        local function newHero(slot, x, y, main)
             local u = CreateUnit(Player(slot), heroType, x, y, 0)
             u.hero, u.maxLife, u.life = true, 1000, 500
+            testUnits[#testUnits + 1] = u
+            if main then
+                if mains[slot] == nil then mains[slot] = {was = H.bySlot[slot]} end
+                H.bySlot[slot] = u
+            end
             return u
         end
-        local hero = newHero(0, 8000, -8000)
-        local ally = newHero(1, 8100, -8000)
-        local foeHero = newHero(SLOT_COMMANDER_AI, 8200, -7900)
-        local foe = CreateUnit(Player(SLOT_HORDE), creepType, 8200, -8000, 0)
-        local fodder = CreateUnit(Player(SLOT_HORDE), creepType, 8250, -8050, 0)
-        local testUnits = {hero, ally, foeHero, foe, fodder}
+        local p0 = Player(1)
+        local function gold(p) return GetPlayerState(p or p0, PLAYER_STATE_RESOURCE_GOLD) end
+        local hero = newHero(1, hx, hy, true)
+        local ally = newHero(2, hx + 100, hy)
+        local foeHero = newHero(SLOT_COMMANDER_AI, hx + 200, hy + 100)
+        local foe = CreateUnit(Player(SLOT_HORDE), creepType, hx + 200, hy, 0)
+        local fodder = CreateUnit(Player(SLOT_HORDE), creepType, hx + 250, hy - 50, 0)
+        testUnits[#testUnits + 1] = foe
+        testUnits[#testUnits + 1] = fodder
         SetPlayerState(p0, PLAYER_STATE_RESOURCE_GOLD, 200000)
+        check("the test hero is at the home shop", Inv.atHome(p0))
 
         -- a shop sale: WC3 takes the token's price, then the hero picks it up
         local function shop(u, name)
@@ -130,14 +177,33 @@ do
             Items.pickup(u, token)
             check("token " .. name .. " consumed", GetItemTypeId(token) == 0)
         end
-        local function clear(u)
-            for _, c in ipairs(Items.carried(u)) do Items.remove(u, c.item) end
-            Items.refresh(u)
+        local function wipe(p)
+            for _, where in ipairs({"main", "bag", "stash", "tp", "cour"}) do
+                for i = 0, Inv.size(where) - 1 do
+                    local it = Inv.take(p, where, i)
+                    if it then Items.remove(nil, it) end
+                end
+            end
+            local u = H.bySlot[GetPlayerId(p)]
+            if u then Items.refresh(u) end
         end
         local function has(u, name) return Items.find(u, name) ~= nil end
         local function count(u) return #Items.carried(u) end
+        -- an item made for unit u's player, straight into its main inventory
+        -- (a WC3 inventory for units that are not a player's main hero)
+        local function hand(u, name)
+            local p = GetOwningPlayer(u)
+            local it = Items.make(name, GetPlayerId(p))
+            if H.bySlot[GetPlayerId(p)] == u then
+                check("room for " .. name, Inv.put(p, it, "main"))
+            else
+                SetItemVisible(it, true)
+                check("room for " .. name, UnitAddItem(u, it))
+            end
+            return it
+        end
 
-        -- recipe from parts plus scroll
+        -- recipe from parts plus scroll, all at the home shop
         local g = gold()
         shop(hero, "item_mithril_hammer")
         shop(hero, "item_ogre_axe")
@@ -146,17 +212,18 @@ do
         check("BKB cost", g - gold() == data.item_black_king_bar.cost, g - gold())
         local props = (Mods.get(hero, "dota_items") or {props = {}}).props
         check("BKB stats", props.str == 10 and props.damage == 24, tostring(props.str) .. "/" .. tostring(props.damage))
+        check("BKB belongs to its buyer", Items.ownerOf(Items.find(hero, "item_black_king_bar")) == 1)
 
-        -- upgrade bought outright reuses a carried part and refunds it
-        clear(hero)
+        -- an upgrade bought outright reuses an owned part and refunds it
+        wipe(p0)
         g = gold()
-        shop(hero, "item_claymore")
-        shop(hero, "item_greater_crit")
-        check("Daedalus bought", has(hero, "item_greater_crit") and not has(hero, "item_claymore"))
-        check("Daedalus price", g - gold() == data.item_greater_crit.cost, g - gold())
+        shop(hero, "item_boots")
+        shop(hero, "item_phase_boots")
+        check("Phase Boots bought", has(hero, "item_phase_boots") and not has(hero, "item_boots"))
+        check("Phase Boots price", g - gold() == data.item_phase_boots.cost, g - gold())
 
         -- Power Treads keep the attribute of the variant used
-        clear(hero)
+        wipe(p0)
         shop(hero, "item_robe")
         shop(hero, "item_power_treads")
         local treads = Items.find(hero, "item_power_treads")
@@ -166,7 +233,7 @@ do
             tostring(props.int) .. "/" .. tostring(props.move_flat))
 
         -- boots do not stack: Phase Boots' 50 beat Boots of Speed's 45
-        clear(hero)
+        wipe(p0)
         shop(hero, "item_boots")
         shop(hero, "item_boots")
         shop(hero, "item_chainmail")
@@ -176,41 +243,56 @@ do
             Mods.get(hero, "dota_items").props.move_flat)
 
         -- consumables stack into one slot
-        clear(hero)
+        wipe(p0)
         shop(hero, "item_tango")
         shop(hero, "item_tango")
         local tango = Items.find(hero, "item_tango")
         check("Tango stack", count(hero) == 1 and GetItemCharges(tango) == 6, GetItemCharges(tango))
 
-        -- full inventory: a basic item is refunded, a finishing scroll still works
-        clear(hero)
+        -- a full main inventory: the scroll completes the Wand from the backpack
+        wipe(p0)
         for _ = 1, 3 do shop(hero, "item_gauntlets") end
         shop(hero, "item_magic_stick")
         shop(hero, "item_branches")
         shop(hero, "item_branches")
         check("six slots", count(hero) == 6, count(hero))
-        g = gold()
-        shop(hero, "item_platemail")
-        check("full inventory refund", gold() == g and not has(hero, "item_platemail"), g - gold())
         Items.setCharges(Items.find(hero, "item_magic_stick"), 7)
         shop(hero, "item_recipe_magic_wand")
         local wand = Items.find(hero, "item_magic_wand")
-        check("Wand from scroll with full inventory", wand ~= nil and count(hero) == 4, count(hero))
+        check("Wand from scroll with a full inventory", wand ~= nil and count(hero) == 4
+            and #Inv.list(p0, "bag") == 0, count(hero))
         check("Stick charges kept", wand and Items.charges(wand) == 7, wand and Items.charges(wand))
-
-        -- a basic part that completes an upgrade needs no free slot
+        -- a basic part that completes an upgrade with a full inventory
         shop(hero, "item_boots")
         shop(hero, "item_gloves")
         check("full again", count(hero) == 6, count(hero))
         shop(hero, "item_belt_of_strength")
         local belted = Items.find(hero, "item_power_treads")
-        check("Treads completed with full inventory", belted ~= nil and count(hero) == 5
-            and Items.istate(belted).attr == "str", count(hero))
+        check("Treads completed with a full inventory", belted ~= nil and count(hero) == 5
+            and #Inv.list(p0, "bag") == 0 and Items.istate(belted).attr == "str", count(hero))
 
-        -- selling back gives half
+        -- selling: the full cost within 10 s of the purchase, half later
         g = gold()
-        Items.sell(hero, Items.find(hero, "item_gauntlets"))
-        check("sell at 50 %", gold() - g == data.item_gauntlets.cost // 2, gold() - g)
+        local gauntlets = Items.find(hero, "item_gauntlets")
+        Items.sell(hero, gauntlets)
+        check("sell right after buying gives it all back", gold() - g == data.item_gauntlets.cost, gold() - g)
+        g = gold()
+        local old = Items.find(hero, "item_gauntlets")
+        Items.istate(old).boughtAt = Timer.now() - Items.SELLBACK - 1
+        Items.sell(hero, old)
+        check("sell later at 50 %", gold() - g == math.floor(data.item_gauntlets.cost * 0.5 + 0.5), gold() - g)
+
+        -- an item another player bought gives no stats (Dota: it is muted)
+        wipe(p0)
+        local foreign = Items.make("item_black_king_bar", 2)
+        Inv.put(p0, foreign, "main")
+        Items.refresh(hero)
+        check("another player's BKB gives no stats", Mods.get(hero, "dota_items") == nil)
+        check("another player's BKB cannot be activated",
+            Actives.run("onChannel", hero, FourCC(ids.item_abilities.item_black_king_bar), nil, 0, 0) == false)
+        Items.istate(foreign).owner = 1
+        Items.refresh(hero)
+        check("an own BKB does", (Mods.get(hero, "dota_items") or {props = {}}).props.str == 10)
 
         -- every active handler once
         local function ctxFor(name, target, x, y)
@@ -222,11 +304,9 @@ do
         for name in pairs(Actives.handlers) do names[#names + 1] = name end
         table.sort(names)
         for _, name in ipairs(names) do
-            clear(hero)
+            wipe(p0)
             hero.life = 500
-            shop(hero, name)
-            local it = Items.find(hero, name)
-            check("carry " .. name, it ~= nil)
+            local it = name ~= "item_tpscroll" and hand(hero, name) or nil
             if it and (name == "item_magic_stick" or name == "item_magic_wand" or name == "item_hand_of_midas") then
                 Items.setCharges(it, 2)
             end
@@ -249,34 +329,29 @@ do
                 check("BKB immunity", Mods.has(hero, "item_black_king_bar") and Items.istate(it).bkb == 2)
             end
         end
-        -- the Town Portal channel on its own unit: spent after the channel
-        local traveler = newHero(1, 7900, -8300)
-        testUnits[#testUnits + 1] = traveler
-        SetPlayerState(Player(1), PLAYER_STATE_RESOURCE_GOLD, 1000)
+        wipe(p0)
+
+        -- the Town Portal: bought into the TP slot, cast by the hero's own
+        -- TP ability, spent after the channel
+        local p1 = Player(3)
+        local traveler = newHero(3, hx - 100, hy - 100, true)
+        SetPlayerState(p1, PLAYER_STATE_RESOURCE_GOLD, 1000)
         shop(traveler, "item_tpscroll")
+        local tpItem = Inv.get(p1, "tp", 0)
+        check("the scroll fills the TP slot", tpItem ~= nil and count(traveler) == 0)
         local tpCtx = Actives.context(traveler, FourCC(ids.item_abilities.item_tpscroll), nil, -7000, -7000)
+        check("the TP ability finds the TP slot's scroll", tpCtx ~= nil and tpCtx.item == tpItem)
         local tp = Actives.handlers.item_tpscroll
         tp.onChannel(tpCtx)
         tp.onCast(tpCtx)
-        Timer.after(3.2, function()
-            use("safe").call(function()
-                tp.onEndCast(tpCtx)
-                check("TP moved", math.abs(traveler.x + 7000) < 900 and math.abs(traveler.y + 7000) < 900,
-                    traveler.x .. "," .. traveler.y)
-                check("TP spent", Items.find(traveler, "item_tpscroll") == nil)
-                for _, u in ipairs(testUnits) do RemoveUnit(u) end
-                Log.info("items exercise: teleport done, " .. failures .. " failed checks in total")
-            end)
-        end)
 
         -- passive procs, auras and loops with a full kit
-        local carrier = newHero(2, 7800, -8100)
-        testUnits[#testUnits + 1] = carrier
-        SetPlayerState(Player(2), PLAYER_STATE_RESOURCE_GOLD, 100000)
+        local carrier = newHero(2, hx + 50, hy + 150)
         for _, name in ipairs({"item_bfury", "item_greater_crit", "item_basher", "item_monkey_king_bar",
                                "item_desolator", "item_assault"}) do
-            shop(carrier, name)
+            hand(carrier, name)
         end
+        Items.refresh(carrier)
         check("kit carried", count(carrier) == 6, count(carrier))
         local st = Items.state[carrier]
         check("proc state", st and st.cleave and st.bash and st.pierce and st.corruption and #st.crits == 1)
@@ -286,13 +361,12 @@ do
             Passives.damaged(carrier, foe, info.amount, info)
         end
         Passives.damaged(foeHero, carrier, 50, {attack = true})
-        local holder = newHero(3, 7700, -8200)
-        testUnits[#testUnits + 1] = holder
-        SetPlayerState(Player(3), PLAYER_STATE_RESOURCE_GOLD, 100000)
+        local holder = newHero(4, hx - 50, hy + 150)
         for _, name in ipairs({"item_radiance", "item_heart", "item_shivas_guard", "item_mekansm", "item_buckler",
                                "item_magic_wand"}) do
-            shop(holder, name)
+            hand(holder, name)
         end
+        Items.refresh(holder)
         Passives.auras()
         Passives.burn()
         Passives.regen()
@@ -306,23 +380,40 @@ do
         Passives.castRange(holder, 225)
         Passives.castRange(holder, 0)
 
-        -- a bot shops along its build next to the first shop
-        local s1 = Items.shops[1]
-        local bot = newHero(4, GetUnitX(s1) + 150, GetUnitY(s1))
-        testUnits[#testUnits + 1] = bot
+        -- a bot shops along its build at the home shop; Secret Shop parts
+        -- reach a bot there (Dota's bots send their courier for them)
+        local bot = newHero(4, hx, hy - 150, true)
         SetPlayerState(Player(4), PLAYER_STATE_RESOURCE_GOLD, 30000)
         local bought, sticks = {}, 0
         for _ = 1, 60 do
             local name = Builds.shop(bot, "pudge")
             if name then bought[#bought + 1] = name end
             if name == "item_magic_stick" then sticks = sticks + 1 end
+            Inv.arrange(Player(4))
         end
         local kit = {}
-        for _, c in ipairs(Items.carried(bot)) do kit[#kit + 1] = c.name end
+        for _, c in ipairs(Items.owned(bot)) do kit[#kit + 1] = c.name end
         check("bot shopping", Items.covers(bot, "item_blink") and Items.covers(bot, "item_black_king_bar")
             and Items.covers(bot, "item_phase_boots") and Items.covers(bot, "item_refresher") and sticks == 1,
             table.concat(bought, ",") .. " | " .. table.concat(kit, ","))
+        check("bot keeps its stash empty", #Inv.list(Player(4), "stash") == 0, #Inv.list(Player(4), "stash"))
         Items.autoUse(bot)
+
+        local function finish()
+            for slot in pairs(mains) do wipe(Player(slot)) end
+            for _, u in ipairs(testUnits) do RemoveUnit(u) end
+            for slot, m in pairs(mains) do H.bySlot[slot] = m.was end
+        end
+        Timer.after(3.2, function()
+            use("safe").call(function()
+                tp.onEndCast(tpCtx)
+                check("TP moved", math.abs(traveler.x + 7000) < 900 and math.abs(traveler.y + 7000) < 900,
+                    traveler.x .. "," .. traveler.y)
+                check("TP spent", Inv.get(p1, "tp", 0) == nil)
+                finish()
+                Log.info("items exercise: teleport done, " .. failures .. " failed checks in total")
+            end)
+        end)
 
         Log.info("items exercise: " .. #names .. " handlers, bot bought " .. #bought .. " parts, "
             .. failures .. " failed checks")

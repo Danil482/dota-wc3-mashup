@@ -24,5 +24,16 @@
   {"target": "war3mapImported\\Hud\\icon_moon.blp", "kind": "hud", "size": [64, 64], "sources": ["panorama/images/hud/reborn/icon_moon_psd.vtex_c", "panorama/images/hud/facets/icons/moon_png.vtex_c"]},
   {"target": "war3mapImported\\Hud\\shop_bg.blp", "kind": "hud", "size": [256, 128], "sources": ["panorama/images/hud/reborn/main_shop_bg_psd.vtex_c", "panorama/images/hud/reborn/common_items_bg_psd.vtex_c"]},
   {"target": "war3mapImported\\Hud\\shop_border.blp", "kind": "hud", "size": [128, 64], "sources": ["panorama/images/hud/shopborder_canpurchase_psd.vtex_c"]},
-  {"target": "war3mapImported\\Hud\\tooltip_bg.blp", "kind": "hud", "size": [256, 256], "sources": ["panorama/images/hud/reborn/bg_tooltip_psd.vtex_c", "panorama/images/hud/reborn/bg_tooltip_no_bevel_psd.vtex_c"]}
+  {"target": "war3mapImported\\Hud\\tooltip_bg.blp", "kind": "hud", "size": [256, 256], "sources": ["panorama/images/hud/reborn/bg_tooltip_psd.vtex_c", "panorama/images/hud/reborn/bg_tooltip_no_bevel_psd.vtex_c"]},
+  {"target": "war3mapImported\\Hud\\talent_button.blp", "kind": "hud", "size": [64, 64], "sources": ["panorama/images/hud/reborn/statbranch_button_bg_all_off_psd.vtex_c", "panorama/images/hud/reborn/statbranch_button_bg_psd.vtex_c"], "note": "talent tree button (src/ui/dota_talents.lua)"},
+  {"target": "war3mapImported\\Hud\\talent_glow.blp", "kind": "hud", "size": [64, 64], "sources": ["panorama/images/hud/reborn/statbranch_button_lvlup_psd.vtex_c"]},
+  {"target": "war3mapImported\\Hud\\talent_bg.blp", "kind": "hud", "size": [256, 256], "sources": ["panorama/images/hud/reborn/statbranch_background_psd.vtex_c", "panorama/images/hud/reborn/statbranch_background_tooltip_psd.vtex_c"]},
+  {"target": "war3mapImported\\Hud\\talent_left.blp", "kind": "hud", "size": [256, 64], "sources": ["panorama/images/hud/reborn/statbranch_left_select_bg_psd.vtex_c", "panorama/images/hud/reborn/statbranch_select_bg_psd.vtex_c"]},
+  {"target": "war3mapImported\\Hud\\talent_right.blp", "kind": "hud", "size": [256, 64], "sources": ["panorama/images/hud/reborn/statbranch_right_select_bg_psd.vtex_c", "panorama/images/hud/reborn/statbranch_select_bg_psd.vtex_c"]},
+  {"target": "war3mapImported\\Hud\\talent_attr.blp", "kind": "hud", "size": [256, 64], "sources": ["panorama/images/hud/reborn/statbranch_stat_background_psd.vtex_c", "panorama/images/hud/reborn/statbranch_stat_select_bg_psd.vtex_c"]},
+  {"target": "war3mapImported\\Hud\\aghs_scepter_off.blp", "kind": "hud", "size": [64, 64], "sources": ["panorama/images/hud/reborn/aghsstatus_scepter_psd.vtex_c"], "note": "Aghanim's sign right of the ability row"},
+  {"target": "war3mapImported\\Hud\\aghs_scepter_on.blp", "kind": "hud", "size": [64, 64], "sources": ["panorama/images/hud/reborn/aghsstatus_scepter_on_psd.vtex_c"]},
+  {"target": "war3mapImported\\Hud\\aghs_shard_off.blp", "kind": "hud", "size": [64, 32], "sources": ["panorama/images/hud/reborn/aghsstatus_shard_psd.vtex_c"]},
+  {"target": "war3mapImported\\Hud\\aghs_shard_on.blp", "kind": "hud", "size": [64, 32], "sources": ["panorama/images/hud/reborn/aghsstatus_shard_on_psd.vtex_c"]},
+  {"target": "war3mapImported\\Hud\\aghs_tooltip_bg.blp", "kind": "hud", "size": [256, 256], "sources": ["panorama/images/hud/aghs_tooltip_bg_psd.vtex_c", "panorama/images/hud/reborn/bg_tooltip_psd.vtex_c"]}
 ]

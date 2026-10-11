@@ -17,6 +17,8 @@ define("game", function()
         Cmd.setup(raceKey)
         use("structures").create()
         use("items").init()
+        use("inventory").init()             -- backpack, stash, TP slot; purchases go to the hero, the stash or the fountain
+        use("talents").init()               -- talents, Attribute Bonus, Aghanim's Scepter and Shard
         use("economy").init()
         use("victory").init()
         use("heroes").init()
@@ -26,13 +28,17 @@ define("game", function()
         use("hero_bot").init()
         use("cheats").init()
         use("dummy").init()
+        use("safe").call(function() use("courier").init() end)   -- one courier per human Dota player
         use("heroes").pickAll(function()
             Log.info("all heroes picked")
         end)
         use("creeps").start(Cmd.raceKey)
         use("safe").call(function() use("announcer").init() end)    -- right after creeps.start: the horn sounds with the first wave
+        use("lane").init()                  -- denies, aggro, day and night from the horn, Glyph, Scan, buyback
         use("world").init()                 -- world clock 0:00; first lane wave at 0:30
         use("safe").call(function() use("dota_hud").init() end)   -- Dota HUD and shop for hero players
+        use("safe").call(function() use("dota_talents").init() end)   -- talent tree and Aghanim's sign by the ability row
+        use("safe").call(function() use("dota_glyph").init() end)   -- Glyph, Scan and buyback buttons by the minimap
         use("safe").call(function() use("dota_settings").init() end)   -- Dota players' own keys and settings
         use("safe").call(function() use("controls_probe").run() end)   -- test builds: which trigger orders the engine takes (controls_probe.txt)
         if BUILD_TEST_MODE then

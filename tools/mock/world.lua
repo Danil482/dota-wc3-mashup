@@ -55,7 +55,7 @@ do
 
     local function side(p)
         local id = GetPlayerId(p)
-        if id <= SLOT_DOTA_MAX or id == SLOT_ANCIENTS then return "dota" end
+        if id <= SLOT_DOTA_MAX or id == SLOT_ANCIENTS or id == SLOT_BUILDINGS then return "dota" end
         if id == PLAYER_NEUTRAL_AGGRESSIVE then return "neutral" end
         return "commander"
     end

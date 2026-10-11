@@ -468,4 +468,39 @@ __mockC.list[#__mockC.list + 1] = {name = "morphling", fn = function(C)
         and GetUnitAbilityLevel(m2, id("morphling_morph_str")) == 1, "morphling banked skill linked on swap back")
     M.endMorph(m2)
     C.advance(0.5)
+
+    -- Talents (Waveform reach) and Aghanim's Shard (Attribute Shift at half the mana)
+    local Tal, H = use("talents"), use("heroes")
+    if not Tal.started then Tal.init() end
+    local m3 = C.unit(0, ids.heroes.morphling, X, Y - 600, {hero = true, mana = 3000})
+    H.keyOf[m3] = "morphling"
+    Tal.register(m3)
+    M.register(m3)
+    C.learn(m3, "morphling_waveform", 4)
+    C.learn(m3, "morphling_morph_agi", 4)
+    m3.level = 25
+    C.cast(m3, "morphling_waveform", nil, X + 3000, Y - 600)
+    C.advance(1.5)
+    local reach = m3.x - X
+    m3.x = X
+    C.check(Tal.pick(m3, "special_bonus_unique_morphling_1"), "morphling waveform talent picked")
+    C.cast(m3, "morphling_waveform", nil, X + 3000, Y - 600)
+    C.advance(1.5)
+    C.check(math.abs((m3.x - X) - (reach + 250)) < 5, "morphling waveform reaches 250 farther " .. (m3.x - X))
+    m3.mana = 3000
+    Events.emit("order", m3, 852177)
+    C.advance(1.0)
+    local drain = 3000 - m3.mana
+    Events.emit("order", m3, 852178)
+    C.advance(0.1)
+    Tal.consumeShard(m3)
+    m3.mana, m3.str, m3.agi = 3000, 20, 20
+    Events.emit("order", m3, 852177)
+    C.advance(1.0)
+    C.check(drain > 0 and math.abs((3000 - m3.mana) - drain / 2) < drain * 0.1,
+        "morphling shard halves the shift's mana " .. drain .. " -> " .. (3000 - m3.mana))
+    Events.emit("order", m3, 852178)
+    C.advance(0.1)
+    Tal.forget(m3)
+    H.keyOf[m3] = nil
 end}

@@ -180,7 +180,7 @@ if not __mockB then
         local ctx = {def = def, caster = caster, owner = GetOwningPlayer(caster), level = level, target = target,
                      x = x or (target and GetUnitX(target)) or GetUnitX(caster),
                      y = y or (target and GetUnitY(target)) or GetUnitY(caster)}
-        function ctx.v(key) return A.value(name, key, level) end
+        function ctx.v(key) return A.value(name, key, level, caster) end   -- with the caster's upgrades, as in game
         return ctx
     end
 
@@ -288,4 +288,64 @@ __mockB.list[#__mockB.list + 1] = {name = "meepo", fn = function(B)
     Events.emit("hero_respawned", meepo, "meepo", 1)
     B.check(not g.clones[1].dead and not g.clones[2].dead, "clones respawn")
     B.advance(2)
+
+    -- Talents, Dig (Aghanim's Shard) and MegaMeepo (Aghanim's Scepter)
+    local T, H, Mods = use("talents"), use("heroes"), use("mods")
+    if not T.started then T.init() end
+    local was = H.bySlot[1]
+    H.keyOf[meepo], H.bySlot[1] = "meepo", meepo
+    T.register(meepo)
+    for _, c in ipairs(g.clones) do T.addMember(meepo, c) end
+    meepo.level = 25
+    meepo.x, meepo.y = X, Y
+    for _, c in ipairs(g.clones) do c.x, c.y = X + 50, Y end
+    foeHero.life, foeHero.dead = 500, false
+    B.check(T.pick(meepo, "special_bonus_unique_meepo_4"), "meepo true strike talent")
+    B.check(T.pick(meepo, "special_bonus_unique_meepo_poof_cast_point"), "meepo poof cast talent")
+    B.check(T.pick(meepo, "special_bonus_unique_meepo_2"), "meepo poof damage talent")
+    B.check(A.value("meepo_poof", "poof_damage", 4, g.clones[1]) == 180, "clone poof damage with the talent")
+    B.cast("meepo_earthbind", g.clones[1], 4, nil, X + 150, Y + 60)
+    B.advance(1.5)
+    local net = Mods.get(foeHero, "meepo_earthbind")
+    B.check(net ~= nil and net.props.no_evade == true, "earthbind true strike")
+    -- Poof completes after the shorter cast (0.75 - 0.3 s)
+    local hp = foeHero.life
+    ctx = B.cast("meepo_poof", g.clones[1], 4, meepo)
+    B.advance(0.5)
+    ctx.def.onEndCast(ctx)
+    B.check(foeHero.life < hp, "poof lands after the talent's shorter cast")
+
+    T.consumeShard(meepo)
+    local dig = A.id("meepo_petrify")
+    B.check(GetUnitAbilityLevel(meepo, dig) == 1 and GetUnitAbilityLevel(g.clones[1], dig) == 1, "dig for every meepo")
+    g.clones[2].life = 100
+    B.cast("meepo_petrify", g.clones[2], 1)
+    B.check(Mods.flag(g.clones[2], "invulnerable") and Mods.flag(g.clones[2], "stun"), "dig hides the meepo")
+    B.advance(3.2)
+    B.check(not Mods.flag(g.clones[2], "invulnerable"), "dig ends")
+
+    local code = ids.items.item_ultimate_scepter
+    if code and UnitAddItem then
+        UnitAddItem(meepo, CreateItem(FourCC(code), 0, 0))
+        use("items").refresh(meepo)
+        local megaId, fling = A.id("meepo_megameepo"), A.id("meepo_megameepo_fling")
+        B.check(GetUnitAbilityLevel(meepo, megaId) == 1 and GetUnitAbilityLevel(g.clones[1], megaId) == 0,
+            "megameepo for the main meepo only")
+        for _, c in ipairs(g.clones) do c.x, c.y = X + 50, Y end
+        meepo.x, meepo.y = X, Y
+        B.cast("meepo_megameepo", meepo, 1)
+        B.advance(0.2)
+        local s = M.mega(meepo)
+        B.check(s ~= nil and #s.stack == 2 and GetUnitAbilityLevel(meepo, fling) == 1, "megameepo lifts both clones")
+        B.check(Mods.sum(meepo, "str") > 0, "megameepo shares stats")
+        hp = foeHero.life
+        B.cast("meepo_megameepo_fling", meepo, 1, foeHero)
+        B.advance(1.0)
+        B.check(foeHero.life < hp and Mods.has(foeHero, "meepo_fling_slow"), "fling hits and slows")
+        B.cast("meepo_megameepo_fling", meepo, 1, foeHero)
+        B.advance(1.0)
+        B.check(M.mega(meepo) == nil and GetUnitAbilityLevel(meepo, fling) == 0, "megameepo ends with the last fling")
+    end
+    T.forget(meepo)
+    H.keyOf[meepo], H.bySlot[1] = nil, was
 end}

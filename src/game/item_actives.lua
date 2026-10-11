@@ -462,7 +462,7 @@ define("item_actives", function()
         local name = I().abilityItem(abil)
         if not name or not caster then return nil end
         return {caster = caster, owner = GetOwningPlayer(caster), name = name, target = target, x = x, y = y,
-                item = I().find(caster, name)}
+                item = I().held(caster, name)}
     end
 
     function A.run(phase, caster, abil, target, x, y)
@@ -473,6 +473,8 @@ define("item_actives", function()
             if Mods.flag(caster, "hex") then return cancel(c, "Muted") end
             -- a lock WC3 may not have taken (backpack swap, Blink's damage lock)
             if c.item and I().locked(c.item) > 0.05 then return cancel(c, "Item is on cooldown") end
+            -- Dota: another player's item works for an ally only if it is shareable
+            if c.item and not I().usableBy(c.item, caster) then return cancel(c, "That item is not yours to use") end
         end
         local result = nil
         if h and h[phase] then result = h[phase](c) end

@@ -1,7 +1,10 @@
--- Meepo: Earthbind, Poof, Ransack, Divided We Stand and the Geomancy innate.
+-- Meepo: Earthbind, Poof, Ransack, Divided We Stand and the Geomancy innate;
+-- Aghanim's Shard grants Dig to every Meepo, Aghanim's Scepter MegaMeepo
+-- (with its MegaMeepo Fling) to the main one.
 -- Clones are real extra heroes of Meepo's unit type. They hand every point of
 -- experience they earn to the main Meepo, copy his level and learned skills,
--- respawn with him, and all Meepos die together.
+-- respawn with him, and all Meepos die together. They take his talents but
+-- not his attribute bonuses (talents.lua addMember).
 define("hero_meepo", function()
     local A = use("abilities")
     local Mods = use("mods")
@@ -16,7 +19,10 @@ define("hero_meepo", function()
 
     local EARTHBIND, POOF, RANSACK = "meepo_earthbind", "meepo_poof", "meepo_ransack"
     local DWS, GEOMANCY = "meepo_divided_we_stand", "meepo_geomancy"
+    local DIG, MEGA, FLING = "meepo_petrify", "meepo_megameepo", "meepo_megameepo_fling"
     local LEARNED = {EARTHBIND, POOF, RANSACK, DWS}
+    -- Fling stands in for MegaMeepo while it is up; this module adds it
+    use("talents").manual(FLING)
     local UNIT_CAST_POINT = 0.3       -- "ucpt" of every hero, see gen_objects.py
     local CREEP_STEAL = 0.6           -- Ransack against non-heroes (Dota tooltip: 60 %)
     local TREE_TYPES = {"ATtr", "BTtw", "CTtr", "FTtw", "LTlt", "NTtw", "WTtw", "WTst", "YTct", "YTwt",
@@ -109,6 +115,22 @@ define("hero_meepo", function()
         return A.level(u, name)
     end
 
+    -- Dota's 1.5 s cast point is a Channel follow-through (minus the unit's
+    -- own cast point); the level 25 talent shortens it, so each Meepo's Poof
+    -- object follows its own value.
+    local function poofTime(lvl, u)
+        return A.value(POOF, "cast_duration", lvl, u) - UNIT_CAST_POINT
+    end
+
+    local function syncPoof(u)
+        local id = A.id(POOF)
+        local ab = id and BlzGetUnitAbility(u, id)
+        if not ab then return end
+        for li = 0, math.max(1, BlzGetAbilityIntegerField(ab, ABILITY_IF_LEVELS), GetUnitAbilityLevel(u, id)) - 1 do
+            BlzSetAbilityRealLevelField(ab, ABILITY_RLF_FOLLOW_THROUGH_TIME, li, math.max(0.05, poofTime(li + 1, u)))
+        end
+    end
+
     ---------------------------------------------------------------- Meepo groups
     -- main Meepo -> {main, clones = {}, xp = {clone -> last synced xp}, water, geo}
     local groups, cloneOf = {}, {}
@@ -182,6 +204,8 @@ define("hero_meepo", function()
             local id = A.id(name)
             if id then learnLike(g, c, id) end
         end
+        use("talents").addMember(m, c)
+        syncPoof(c)
         SetWidgetLife(c, BlzGetUnitMaxHP(c))
         SetUnitState(c, UNIT_STATE_MANA, GetUnitState(c, UNIT_STATE_MAX_MANA))
         use("sound").register(c, "meepo")
@@ -247,33 +271,44 @@ define("hero_meepo", function()
     end
 
     ---------------------------------------------------------------- Earthbind
+    local mega = {}             -- main Meepo -> MegaMeepo state (below)
+
+    local function stacked(u)
+        local s = mega[u]
+        return s and #s.stack or 0
+    end
+
     A.define(EARTHBIND, {
         onCast = function(ctx)
             local c = ctx.caster
             local radius, duration = ctx.v("radius"), ctx.v("duration")
-            missile({model = "Abilities\\Spells\\Orc\\Ensnare\\EnsnareMissile.mdl",
-                x = GetUnitX(c), y = GetUnitY(c), tx = ctx.x, ty = ctx.y, speed = ctx.v("speed"),
-                onHit = function(x, y)
-                    fx("Abilities\\Spells\\Orc\\Ensnare\\ensnareTarget.mdl", x, y)
-                    for _, t in ipairs(U.enemiesOf(ctx.owner, x, y, radius)) do
-                        if not U.isMagicImmune(t) then
-                            Mods.add(t, "meepo_earthbind", {duration = duration, source = c, debuff = true,
-                                props = {root = true},
-                                effect = "Abilities\\Spells\\Orc\\Ensnare\\ensnareTarget.mdl", attach = "origin"})
+            -- talent: attacks on the netted always hit (true strike)
+            local sure = ctx.v("true_strike") > 0 or nil
+            -- MegaMeepo throws one more net per stacked Meepo, side by side
+            local nets = 1 + stacked(c)
+            local a = U.angle(GetUnitX(c), GetUnitY(c), ctx.x, ctx.y)
+            for i = 1, nets do
+                local off = (i - (nets + 1) / 2) * ctx.v("megameepo_net_offset")
+                local tx, ty = U.polar(ctx.x, ctx.y, off, a + math.pi / 2)
+                missile({model = "Abilities\\Spells\\Orc\\Ensnare\\EnsnareMissile.mdl",
+                    x = GetUnitX(c), y = GetUnitY(c), tx = tx, ty = ty, speed = ctx.v("speed"),
+                    onHit = function(x, y)
+                        fx("Abilities\\Spells\\Orc\\Ensnare\\ensnareTarget.mdl", x, y)
+                        for _, t in ipairs(U.enemiesOf(ctx.owner, x, y, radius)) do
+                            if not U.isMagicImmune(t) then
+                                Mods.add(t, "meepo_earthbind", {duration = duration, source = c, debuff = true,
+                                    props = {root = true, no_evade = sure},
+                                    effect = "Abilities\\Spells\\Orc\\Ensnare\\ensnareTarget.mdl", attach = "origin"})
+                            end
                         end
-                    end
-                end})
+                    end})
+            end
         end,
     })
 
     ---------------------------------------------------------------- Poof
-    -- Dota's 1.5 s cast point is a Channel follow-through (minus the unit's own
-    -- cast point); the teleport happens only if it completes.
+    -- The teleport happens only if the cast point (poofTime) completes.
     local poofing = {}          -- caster -> {start, target, x, y, fx}
-
-    local function poofTime(lvl)
-        return A.value(POOF, "cast_duration", lvl) - UNIT_CAST_POINT
-    end
 
     -- The Meepo to arrive at: the targeted Meepo, else the one nearest the point.
     local function destination(caster, target, x, y)
@@ -292,8 +327,10 @@ define("hero_meepo", function()
 
     local function poofBlast(caster, lvl, x, y)
         fx("Abilities\\Spells\\Orc\\WarStomp\\WarStompCaster.mdl", x, y)
-        local dmg = A.value(POOF, "poof_damage", lvl)
-        for _, t in ipairs(U.enemiesOf(GetOwningPlayer(caster), x, y, A.value(POOF, "radius", lvl))) do
+        -- MegaMeepo: + megameepo_poof_scaling % per stacked Meepo
+        local dmg = A.value(POOF, "poof_damage", lvl, caster)
+            * (1 + stacked(caster) * A.value(POOF, "megameepo_poof_scaling", lvl, caster) / 100)
+        for _, t in ipairs(U.enemiesOf(GetOwningPlayer(caster), x, y, A.value(POOF, "radius", lvl, caster))) do
             Damage.deal(caster, t, dmg, "magical")
         end
     end
@@ -315,7 +352,7 @@ define("hero_meepo", function()
             if not p then return end
             poofing[c] = nil
             DestroyEffect(p.fx)
-            if Timer.now() - p.start < poofTime(ctx.level) - 0.1 then
+            if Timer.now() - p.start < poofTime(ctx.level, c) - 0.1 then
                 refund(ctx)
                 return
             end
@@ -346,7 +383,7 @@ define("hero_meepo", function()
         local broken = Mods.flag(source, "break")
         local lvl = level(source, RANSACK)
         if lvl > 0 and not broken then
-            local steal = A.value(RANSACK, "health_steal_heroes", lvl)
+            local steal = A.value(RANSACK, "health_steal_heroes", lvl, source)
             if not U.isHero(target) then steal = steal * CREEP_STEAL end
             local dealt = Damage.deal(source, target, steal, "pure", {noAmp = true, tag = "meepo_ransack"})
             if dealt > 0 then
@@ -361,6 +398,175 @@ define("hero_meepo", function()
                 duration = A.value(GEOMANCY, "water_slow_duration", 1), source = source, debuff = true,
                 props = {move_pct = -g.water * A.value(GEOMANCY, "water_move_slow", 1) / 100}})
         end
+    end)
+
+    ---------------------------------------------------------------- Dig (Aghanim's Shard)
+    -- A basic dispel, then for `duration` the Meepo is stunned, invulnerable
+    -- and out of sight underground, regaining hp_restore % of its maximum
+    -- health over it (https://liquipedia.net/dota2/Meepo, Dig).
+    local DUST = "Objects\\Spawnmodels\\Undead\\ImpaleTargetDust\\ImpaleTargetDust.mdl"
+    A.define(DIG, {
+        onChannel = function(ctx)
+            if Mods.flag(ctx.caster, "root") then cancel(ctx.caster, "Rooted") end
+        end,
+        onCast = function(ctx)
+            local u = ctx.caster
+            local dur = math.max(0.1, ctx.v("duration"))
+            Mods.dispel(u, {debuffs = true})
+            SetUnitVertexColor(u, 255, 255, 255, 0)
+            fx(DUST, GetUnitX(u), GetUnitY(u))
+            Mods.add(u, "meepo_dig", {duration = dur, source = u, dispel = "none",
+                props = {stun = true, invulnerable = true,
+                         hp_regen = BlzGetUnitMaxHP(u) * ctx.v("hp_restore") / 100 / dur},
+                onRemove = function()
+                    SetUnitVertexColor(u, 255, 255, 255, 255)
+                    if U.alive(u) then fx(DUST, GetUnitX(u), GetUnitY(u)) end
+                end})
+        end,
+    })
+
+    ---------------------------------------------------------------- MegaMeepo (Aghanim's Scepter)
+    -- The main Meepo lifts the clones within `radius` onto his shoulders for
+    -- `duration`: they ride hidden and invulnerable, he gains stats_pct % of
+    -- his best base attribute per rider to every attribute, and MegaMeepo
+    -- Fling takes the button to throw them one by one at enemies. It ends
+    -- when the time is up, the last one is thrown or he dies; the riders left
+    -- jump off around him (https://liquipedia.net/dota2/Meepo, MegaMeepo).
+    local function megaStats(s)
+        local u = s.main
+        local best = math.max(GetHeroStr(u, false), GetHeroAgi(u, false), GetHeroInt(u, false))
+        local b = math.floor(best * s.pct) * #s.stack
+        Mods.add(u, "meepo_megameepo", {source = u, persist = true, dispel = "none", props = {str = b, agi = b, int = b}})
+    end
+
+    local function dropOff(c, x, y)
+        Mods.remove(c, "meepo_megameepo_ride")
+        ShowUnit(c, true)
+        SetUnitPathing(c, true)
+        if U.alive(c) then SetUnitPosition(c, x, y) end
+    end
+
+    local function endMega(u)
+        local s = mega[u]
+        if not s then return end
+        mega[u] = nil
+        Mods.remove(u, "meepo_megameepo")
+        for i, c in ipairs(s.stack) do
+            dropOff(c, U.polar(GetUnitX(u), GetUnitY(u), s.knock, 2 * math.pi * i / #s.stack))
+        end
+        s.stack = {}
+        local fling, megaId = A.id(FLING), A.id(MEGA)
+        if fling then UnitRemoveAbility(u, fling) end
+        if megaId then BlzUnitHideAbility(u, megaId, false) end
+    end
+    M.endMega = endMega
+
+    local function riders(u, radius)
+        local g = groupOf(u)
+        local out = {}
+        for _, c in ipairs(g and g.clones or {}) do
+            if U.alive(c) and U.unitDist(c, u) <= radius then out[#out + 1] = c end
+        end
+        return out
+    end
+
+    A.define(MEGA, {
+        onChannel = function(ctx)
+            if #riders(ctx.caster, ctx.v("radius")) == 0 then cancel(ctx.caster, "No Meepo nearby") end
+        end,
+        onCast = function(ctx)
+            local u = ctx.caster
+            if cloneOf[u] or mega[u] then return end
+            local s = {main = u, stack = riders(u, ctx.v("radius")), pct = ctx.v("stats_pct") / 100,
+                       knock = ctx.v("end_knockback_distance")}
+            if #s.stack == 0 then return end
+            mega[u] = s
+            for _, c in ipairs(s.stack) do
+                Mods.add(c, "meepo_megameepo_ride", {source = u, dispel = "none", props = {stun = true, invulnerable = true}})
+                SetUnitPathing(c, false)
+                ShowUnit(c, false)
+            end
+            megaStats(s)
+            fxOn("Abilities\\Spells\\Orc\\FeralSpirit\\feralspirittarget.mdl", u, "origin")
+            -- Fling takes MegaMeepo's button; not inside its own cast event
+            local megaId = ctx.def.id
+            Timer.after(0, function()
+                if mega[u] ~= s then return end
+                local fling = A.id(FLING)
+                if fling then
+                    UnitAddAbility(u, fling)
+                    UnitMakeAbilityPermanent(u, true, fling)
+                end
+                BlzUnitHideAbility(u, megaId, true)
+            end)
+            local ends = Timer.now() + ctx.v("duration")
+            Timer.every(0.1, function()
+                if mega[u] ~= s then return true end
+                if not U.alive(u) or Timer.now() >= ends then
+                    endMega(u)
+                    return true
+                end
+                for _, c in ipairs(s.stack) do
+                    SetUnitX(c, GetUnitX(u))
+                    SetUnitY(c, GetUnitY(u))
+                end
+                return false
+            end)
+        end,
+    })
+
+    A.define(FLING, {
+        onCast = function(ctx)
+            local u, t = ctx.caster, ctx.target
+            local s = mega[u]
+            if not s or #s.stack == 0 or not U.alive(t) then return end
+            local c = table.remove(s.stack)
+            dropOff(c, GetUnitX(u), GetUnitY(u))
+            Mods.add(c, "meepo_fling_flight", {duration = 5, source = u, dispel = "none",
+                                               props = {stun = true, invulnerable = true}})
+            local speed = math.max(100, ctx.v("fling_movespeed"))
+            local dmg, radius = ctx.v("fling_damage"), ctx.v("fling_radius")
+            local slow, slowFor = ctx.v("movement_slow") / 100, ctx.v("fling_slow_duration")
+            Timer.onFrame(function(dt)
+                if not U.alive(c) then return true end
+                local step = speed * dt
+                if not U.alive(t) or U.unitDist(c, t) <= step + 50 then
+                    Mods.remove(c, "meepo_fling_flight")
+                    local x, y = GetUnitX(c), GetUnitY(c)
+                    fx("Abilities\\Spells\\Orc\\WarStomp\\WarStompCaster.mdl", x, y)
+                    for _, e in ipairs(U.enemiesOf(GetOwningPlayer(u), x, y, radius)) do
+                        Damage.deal(u, e, dmg, "magical")
+                        if U.alive(e) and not U.isMagicImmune(e) then
+                            Mods.add(e, "meepo_fling_slow", {duration = slowFor, source = u, debuff = true,
+                                                             props = {move_pct = slow}})
+                        end
+                    end
+                    return true
+                end
+                local a = U.angle(GetUnitX(c), GetUnitY(c), GetUnitX(t), GetUnitY(t))
+                SetUnitX(c, GetUnitX(c) + step * math.cos(a))
+                SetUnitY(c, GetUnitY(c) + step * math.sin(a))
+                return false
+            end)
+            if #s.stack == 0 then
+                Timer.after(0, function() endMega(u) end)     -- not inside Fling's own cast event
+            else
+                megaStats(s)
+            end
+        end,
+    })
+
+    function M.mega(u) return mega[u] end
+
+    Events.on("death", function(dying)
+        if mega[dying] then endMega(dying) end
+    end)
+
+    -- the level 25 talent shortens Poof's cast for every Meepo
+    Events.on("talent", function(hero)
+        local g = groups[hero]
+        if not g then return end
+        for _, u in ipairs(members(g)) do syncPoof(u) end
     end)
 
     ---------------------------------------------------------------- Divided We Stand
@@ -383,6 +589,9 @@ define("hero_meepo", function()
         local g = groups[hero]
         if not g then return end
         for _, c in ipairs(g.clones) do learnLike(g, c, abil) end
+        if abil == A.id(POOF) then
+            for _, u in ipairs(members(g)) do syncPoof(u) end
+        end
     end)
 
     -- Clones never keep skill points of their own.
@@ -420,6 +629,9 @@ define("hero_meepo", function()
     ---------------------------------------------------------------- bots
     Bots.hint(EARTHBIND, {target = "enemyHero", point = true})
     Bots.hint(POOF, {target = "self", radius = 375, minEnemies = 2})
+    Bots.hint(DIG, {target = "none", radius = 700, hpBelow = 0.3})
+    Bots.hint(MEGA, {target = "none", radius = 600, check = function(u) return #riders(u, 600) > 0 end})
+    Bots.hint(FLING, {target = "enemyHero", range = 900})
 
     -- exposed for tests and other modules
     M.groupOf, M.members, M.spawnClone, M.syncAll, M.geomancyAll = groupOf, members, spawnClone, syncAll, geomancyAll

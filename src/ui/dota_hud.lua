@@ -5,7 +5,10 @@
 --   bottom-centre  stats | portrait + level/XP | ability row with gold "+"
 --                  learn buttons, ability level pips, mana costs, cooldown
 --                  seconds; HP and mana bars with current/max and regen
---   bottom-right   3 x 2 items (WC3 inventory buttons), gold, SHOP button
+--   bottom-right   3 x 2 items, the 3-slot backpack under them, the TP
+--                  slot, courier buttons, gold and the SHOP button; the
+--                  stash row above it while the stash holds items or the
+--                  hero is at the home shop
 --   top            five Dota heroes with HP/mana and respawn timers, game
 --                  clock with day/night, the commander on the right
 --
@@ -40,7 +43,9 @@ define("dota_hud", function()
         TICK = 0.1,             -- the one update loop (seconds)
         -- bottom-centre panel, left to right: stats | portrait | abilities | items
         ABIL_CX = 0.40,         -- centre of the ability area (pushed right if the minimap is in the way)
-        ABIL_W = 0.262,         -- ability area width (7 slots max)
+        ABIL_W = 0.300,         -- ability area width (7 slots max, the talent tree and Aghanim's sign)
+        TREE_W = 0.024,         -- talent tree left of the row (dota_talents.lua)
+        AGHS_W = 0.016,         -- Aghanim's Scepter and Shard sign right of the row
         PORT_W = 0.076,         -- portrait column width
         STATS_W = 0.074,        -- damage/armor/speed + str/agi/int column width
         PANEL_H = 0.106,        -- panel height from the screen bottom
@@ -53,8 +58,11 @@ define("dota_hud", function()
         HP_Y = 0.025, HP_H = 0.015,  -- health bar
         MP_Y = 0.008, MP_H = 0.013,  -- mana bar
         GRID = 0.031,           -- command card cell in grid mode (shop/creep selected)
-        ITEMS_W = 0.122,        -- right block: 3 x 2 items, gold and SHOP button
+        ITEMS_W = 0.170,        -- right block: 3 x 2 items, backpack, TP slot, courier, gold, SHOP
         ITEM_W = 0.035, ITEM_H = 0.029, ITEM_GAP = 0.003,
+        BAG_H = 0.020,          -- backpack slots under the items
+        COL_X = 0.121,          -- the block's right column (TP slot, courier, gold, SHOP)
+        STASH_W = 0.026, STASH_H = 0.022, STASH_GAP = 0.002, GRAB_W = 0.034,   -- stash row above the block
         -- minimap
         MAP = 0.148,            -- minimap size
         MAP_X = 0.020,          -- left edge inside 4:3 (buttons column to its left)
@@ -135,7 +143,9 @@ define("dota_hud", function()
                 local e = {name = ab.name, id = FourCC(code), innate = innate[code] == true,
                            ult = string.find(ab.AbilityType or "", "ULTIMATE") ~= nil,
                            rl = tonumber(v.required_level), lb = tonumber(v.levels_between_upgrades)}
-                if e.innate then
+                -- Aghanim's abilities show only while the unit has them (visibleRow)
+                e.granted = ab.IsGrantedByScepter == "1" or ab.IsGrantedByShard == "1"
+                if e.innate or e.granted then
                     e.max = 1
                 else
                     e.max = tonumber(ab.MaxLevel) or tonumber(v.max_level) or (e.ult and 3 or 4)
@@ -147,10 +157,41 @@ define("dota_hud", function()
         local room = ROW_MAX - math.min(#ults, ROW_MAX)
         for i = 1, math.min(#others, room) do row[#row + 1] = others[i] end
         for i = 1, math.min(#ults, ROW_MAX - #row) do row[#row + 1] = ults[i] end
+        -- learn buttons go by this index: the same for every unit of the hero
+        for i, e in ipairs(row) do e.index = i end
         rows[key] = row
         return row
     end
     Hud.rowOf = rowOf
+
+    -- The row of unit u: Aghanim's abilities it does not have are left out.
+    local shownRows = {}                             -- key -> {mask -> row}
+    local function visibleRow(key, u)
+        local row = rowOf(key)
+        if not row then return nil end
+        local mask, any = "", false
+        for _, e in ipairs(row) do
+            if e.granted then
+                any = true
+                mask = mask .. ((u and GetUnitAbilityLevel(u, e.id) > 0) and "1" or "0")
+            end
+        end
+        if not any then return row end
+        local cache = shownRows[key]
+        if not cache then cache = {}; shownRows[key] = cache end
+        local out = cache[mask]
+        if not out then
+            out = {}
+            local i = 0
+            for _, e in ipairs(row) do
+                if e.granted then i = i + 1 end
+                if not e.granted or string.sub(mask, i, i) == "1" then out[#out + 1] = e end
+            end
+            cache[mask] = out
+        end
+        return out
+    end
+    Hud.visibleRow = visibleRow
 
     -- Hero level needed for the next level of `e` (Dota rules: basic level n
     -- at hero level 2n-1, ultimates at 6/12/18, data overrides such as
@@ -162,7 +203,7 @@ define("dota_hud", function()
     end
 
     local function canLearn(hero, e)
-        if not e or e.innate or e.empty then return false end
+        if not e or e.innate or e.empty or e.granted then return false end
         local cur = GetUnitAbilityLevel(hero, e.id)
         return cur < e.max and GetHeroLevel(hero) >= required(e, cur)
     end
@@ -323,11 +364,38 @@ define("dota_hud", function()
         return x0, y1 - L.ITEM_H, x0 + L.ITEM_W, y1
     end
 
+    -- the backpack: a lower row under the six main slots
+    local function bagRect(i)
+        local x0 = G.itemsL + 0.0055 + i * (L.ITEM_W + L.ITEM_GAP)
+        local y1 = L.PANEL_H - 0.005 - 2 * (L.ITEM_H + L.ITEM_GAP)
+        return x0, y1 - L.BAG_H, x0 + L.ITEM_W, y1
+    end
+
+    -- the TP slot: right of the top item row
+    local function tpRect()
+        local cx = G.itemsL + L.COL_X + (L.ITEMS_W - L.COL_X) / 2
+        local y1 = L.PANEL_H - 0.004
+        return cx - L.ITEM_H / 2, y1 - L.ITEM_H, cx + L.ITEM_H / 2, y1
+    end
+
+    -- the stash row above the block: STASH and Grab All, then six slots
+    local function stashLeft()
+        return G.itemsR - 0.003 - 6 * L.STASH_W - 5 * L.STASH_GAP
+    end
+
+    local function stashRect(i)
+        local x0 = stashLeft() + i * (L.STASH_W + L.STASH_GAP)
+        local y0 = L.PANEL_H + 0.006
+        return x0, y0, x0 + L.STASH_W, y0 + L.STASH_H
+    end
+
+    -- The row between the talent tree (left) and the Aghanim's sign (right).
     local function rowRects(n)
-        local inner = L.ABIL_W - 0.012
+        local left, right = 0.009 + L.TREE_W, 0.009 + L.AGHS_W
+        local inner = L.ABIL_W - left - right
         local size = math.min(L.BTN, (inner - (n - 1) * L.BTN_GAP) / math.max(1, n))
         local total = n * size + (n - 1) * L.BTN_GAP
-        local x0 = G.abilL + (L.ABIL_W - total) / 2
+        local x0 = G.abilL + left + (inner - total) / 2
         local out = {}
         for k = 1, n do
             local x = x0 + (k - 1) * (size + L.BTN_GAP)
@@ -390,6 +458,12 @@ define("dota_hud", function()
             for i = 1, 12 do F.wells[i] = Kit.backdrop(F.bgBottom, Kit.tex("ability_bevel", C.dark), Kit.dota and 255 or 170) end
             F.itemWells = {}
             for i = 0, 5 do F.itemWells[i] = Kit.backdrop(F.bgBottom, Kit.tex("item_well", C.dark), Kit.dota and 255 or 170) end
+            F.bagWells = {}
+            for i = 0, 2 do F.bagWells[i] = Kit.backdrop(F.bgBottom, Kit.tex("item_well", C.dark), Kit.dota and 150 or 120) end
+            F.tpWell = Kit.backdrop(F.bgBottom, Kit.tex("item_well", C.dark), Kit.dota and 255 or 170)
+            F.stashBg = Kit.backdrop(F.bgBottom, Kit.tex("inventory_bg", C.dark), Kit.dota and 235 or 210)
+            F.stashWells = {}
+            for i = 0, 5 do F.stashWells[i] = Kit.backdrop(F.bgBottom, Kit.tex("item_well", C.dark), Kit.dota and 255 or 170) end
         end
         F.hpBg = Kit.backdrop(F.bgBottom, C.dark, 220)
         F.mpBg = Kit.backdrop(F.bgBottom, C.dark, 220)
@@ -436,9 +510,30 @@ define("dota_hud", function()
         F.shopBtn, F.shopImg = Kit.button(F.fgBottom, Kit.tex("shop_button", C.gold))
         F.shopText = Kit.label(F.shopBtn, 0.85)
         Kit.setText(F.shopText, Kit.dota and "|cffffe6a0SHOP|r" or "|cff202020SHOP|r")
-        -- our own item buttons over the slots (dota_items uses them)
-        F.slots = {}
+        -- our own item buttons over the slots (dota_items uses them): the
+        -- main inventory, the backpack, the TP slot and the stash; F.allSlots
+        -- lists every one for the cooldown sweeps
+        F.slots, F.bag, F.stash, F.allSlots = {}, {}, {}, {}
         for i = 0, 5 do F.slots[i] = newSlot(F.fgBottom) end
+        for i = 0, 2 do F.bag[i] = newSlot(F.fgBottom, 0.65) end
+        F.tp = newSlot(F.fgBottom)
+        -- the stash row sits above the panel: its own click blocker holds it
+        F.blockStash = Kit.blocker(F.fgRoot)
+        for i = 0, 5 do F.stash[i] = newSlot(F.blockStash, 0.65) end
+        F.stashLabel = Kit.text(F.blockStash, 0.62)
+        Kit.setText(F.stashLabel, Kit.color(GRAY, "STASH"))
+        F.grab, F.grabImg = Kit.button(F.blockStash, Kit.tex("shop_button", C.gray))
+        Kit.setText(Kit.label(F.grab, 0.55), "Grab All")
+        for _, s in pairs(F.slots) do F.allSlots[#F.allSlots + 1] = s end
+        for _, s in pairs(F.bag) do F.allSlots[#F.allSlots + 1] = s end
+        for _, s in pairs(F.stash) do F.allSlots[#F.allSlots + 1] = s end
+        F.allSlots[#F.allSlots + 1] = F.tp
+        -- the courier: select it (respawn seconds while dead), Deliver Items
+        F.courBtn, F.courImg = Kit.button(F.fgBottom, Kit.btn("BTNPackBeast"))
+        F.courText = Kit.label(F.courBtn, 0.8)
+        F.deliverBtn, F.deliverImg = Kit.button(F.fgBottom, Kit.btn("BTNChestOfGold"))
+        Kit.show(F.courBtn, false)
+        Kit.show(F.deliverBtn, false)
         -- selected-units bar (see updateSelection)
         F.sel = {}
         for i = 1, SEL_MAX do
@@ -484,12 +579,25 @@ define("dota_hud", function()
             Kit.place(F.panelBg, G.statsL, 0, G.abilR, P)
             Kit.place(F.itemsBg, G.itemsL - 0.002, 0, G.itemsR, P + 0.004)
             Kit.place(F.mapBg, G.mapX - 0.006, 0, G.mapR + 0.006, L.MAP_Y + L.MAP + 0.006)
-            for i = 0, 5 do
-                local x0, y0, x1, y1 = itemRect(i)
-                Kit.place(F.itemWells[i], x0 - 0.001, y0 - 0.001, x1 + 0.001, y1 + 0.001)
-            end
+            local function well(f, x0, y0, x1, y1) Kit.place(f, x0 - 0.001, y0 - 0.001, x1 + 0.001, y1 + 0.001) end
+            for i = 0, 5 do well(F.itemWells[i], itemRect(i)) end
+            for i = 0, 2 do well(F.bagWells[i], bagRect(i)) end
+            well(F.tpWell, tpRect())
+            for i = 0, 5 do well(F.stashWells[i], stashRect(i)) end
+            local sx0, sy0 = stashLeft() - 0.006 - L.GRAB_W, L.PANEL_H + 0.003
+            Kit.place(F.stashBg, sx0, sy0, G.itemsR, sy0 + L.STASH_H + 0.006)
         end
         for i = 0, 5 do placeSlot(F.slots[i], itemRect(i)) end
+        for i = 0, 2 do placeSlot(F.bag[i], bagRect(i)) end
+        placeSlot(F.tp, tpRect())
+        for i = 0, 5 do placeSlot(F.stash[i], stashRect(i)) end
+        -- stash row: its blocker, STASH over Grab All left of the slots
+        local gx1 = stashLeft() - 0.004
+        local gx0 = gx1 - L.GRAB_W
+        local sy0, sy1 = L.PANEL_H + 0.003, L.PANEL_H + 0.009 + L.STASH_H
+        Kit.place(F.blockStash, gx0 - 0.002, sy0, G.itemsR, sy1)
+        Kit.placeText(F.stashLabel, gx0, sy1 - 0.013, gx1, sy1 - 0.002)
+        Kit.place(F.grab, gx0, sy0 + 0.003, gx1, sy0 + 0.015)
         -- portrait column
         local pl, pr = G.portL + 0.004, G.portL + L.PORT_W - 0.004
         Kit.place(F.xpBg, pl, 0.005, pr, 0.012)
@@ -506,10 +614,15 @@ define("dota_hud", function()
             Kit.place(F.statIcons[i], G.statsL + 0.006, y0, G.statsL + 0.0185, y1)
             Kit.placeText(F.statTexts[i], G.statsL + 0.021, y0, G.portL - 0.002, y1)
         end
-        -- gold and shop button under the items
-        Kit.place(F.goldIcon, G.itemsL + 0.006, 0.010, G.itemsL + 0.024, 0.030)
-        Kit.placeText(F.gold, G.itemsL + 0.026, 0.010, G.itemsL + 0.068, 0.030)
-        Kit.place(F.shopBtn, G.itemsR - 0.054, 0.009, G.itemsR - 0.005, 0.032)
+        -- the right column under the TP slot: the courier's two buttons,
+        -- gold, then the SHOP button
+        local cx0, cx1 = G.itemsL + L.COL_X, G.itemsR - 0.003
+        local bw = (cx1 - cx0 - 0.002) / 2
+        Kit.place(F.courBtn, cx0, 0.045, cx0 + bw, 0.045 + bw)
+        Kit.place(F.deliverBtn, cx1 - bw, 0.045, cx1, 0.045 + bw)
+        Kit.place(F.goldIcon, cx0 + 0.001, 0.025, cx0 + 0.013, 0.039)
+        Kit.placeText(F.gold, cx0 + 0.014, 0.024, cx1, 0.040)
+        Kit.place(F.shopBtn, cx0, 0.003, cx1, 0.022)
     end
 
     -- HP/mana bars span the ability area (row mode) or its left part (grid).
@@ -536,7 +649,7 @@ define("dota_hud", function()
         S.mode, S.key = mode, key
         local used = {}
         if mode == "row" then
-            local row = rowOf(key)
+            local row = visibleRow(key, S.unit)
             local rects = rowRects(#row)
             S.n, S.rects = #row, rects
             -- the cell of each slot: an ability's own cell (local: Rubick moves
@@ -571,7 +684,8 @@ define("dota_hud", function()
                     Kit.show(F.wells[k], true)
                 end
                 local w = r[3] - r[1]
-                Kit.place(F.learn[k], r[1] + w * 0.08, r[4] + 0.002, r[3] - w * 0.08, r[4] + 0.002 + L.LEARN_H)
+                Kit.place(F.learn[row[k].index or k], r[1] + w * 0.08, r[4] + 0.002, r[3] - w * 0.08,
+                          r[4] + 0.002 + L.LEARN_H)
                 Kit.placeText(F.mana[k], r[1], r[2] + 0.001, r[3] - 0.002, r[2] + 0.010)
                 Kit.placeText(F.cd[k], r[1], r[2], r[3], r[4])
                 local pw = (w - 0.002 * (PIPS - 1)) / PIPS
@@ -864,14 +978,16 @@ define("dota_hud", function()
     end
 
     local function updateRow(u, key, lp)
-        local row = rowOf(key) or {}
+        local row = visibleRow(key, u) or {}
+        local full = rowOf(key) or {}
         local H = heroes()
         local main = H.bySlot[GetPlayerId(lp)]
         local own = GetOwningPlayer(u) == lp and main ~= nil and heroKeyOf(main) == key
         local points = own and GetHeroSkillPoints(main) or 0
         for k = 1, ROW_MAX do
             local e = row[k]
-            Kit.show(F.learn[k], e ~= nil and points > 0 and canLearn(main, e))
+            -- learn buttons by full-row index (Aghanim's entries never learn)
+            Kit.show(F.learn[k], full[k] ~= nil and points > 0 and canLearn(main, full[k]))
             local id = e and e.id
             local level = id and GetUnitAbilityLevel(u, id) or 0
             for j = 1, PIPS do
@@ -918,8 +1034,10 @@ define("dota_hud", function()
         return left, total
     end
 
-    -- Shows `it` in slot `s` (nil hides the slot); `holder` is the unit whose
-    -- main inventory holds it. The sweep itself runs in updateSweeps.
+    -- Shows `it` in slot `s` (nil: an empty slot); `holder` is the unit
+    -- whose main inventory holds it. An empty slot keeps its button, without
+    -- an icon, so items can be dragged into it. The sweep itself runs in
+    -- updateSweeps.
     local function showSlot(s, it, holder)
         local path = ""
         if it then
@@ -928,24 +1046,67 @@ define("dota_hud", function()
             path = (Kit.dota or not name) and BlzGetItemIconPath(it) or use("dota_shop").iconOf(name)
         end
         if path == "" then it = nil end
+        if s.item and not it then Kit.setSweep(s.cd, 0, 0) end
         s.item, s.holder = it, holder
-        Kit.show(s.b, it ~= nil)
-        if not it then return end
+        Kit.show(s.b, true)
+        Kit.show(s.img, it ~= nil)
+        if not it then
+            Kit.setText(s.charges, "")
+            return
+        end
         Kit.setTex(s.img, path)
         local n = GetItemCharges(it)
         Kit.setText(s.charges, n > 0 and tostring(n) or "")
     end
 
-    -- Item buttons drawn from the unit's items: the native item buttons show
-    -- no icons and take no clicks or hotkeys once the console bars are hidden
-    -- (2026-10-10); using items goes through dota_items.
-    local function updateItems(u)
-        for i = 0, 5 do showSlot(F.slots[i], u and UnitItemInSlot(u, i) or nil, u) end
+    -- Item buttons drawn from the focused unit's items: the native item
+    -- buttons show no icons and take no clicks or hotkeys once the console
+    -- bars are hidden (2026-10-10); using items goes through dota_items. A
+    -- player's main hero also shows its backpack (dimmed: inactive) and TP
+    -- slot; a courier shows its nine slots in the main and backpack rows.
+    -- The stash row is the local player's, shown while it holds items or the
+    -- hero stands at the home shop.
+    local function updateItems(u, lp)
+        local Inv = use("inventory")
+        local p = u and GetOwningPlayer(u)
+        local main = p ~= nil and Inv.hero(p) == u
+        local courier = p ~= nil and defined("courier") and use("courier").of(p) == u
+        if courier then
+            for i = 0, 5 do showSlot(F.slots[i], Inv.get(p, "cour", i), nil) end
+            for i = 0, 2 do showSlot(F.bag[i], Inv.get(p, "cour", 6 + i), nil) end
+            showSlot(F.tp, nil, nil)
+        else
+            for i = 0, 5 do showSlot(F.slots[i], u and UnitItemInSlot(u, i) or nil, u) end
+            for i = 0, 2 do showSlot(F.bag[i], main and Inv.get(p, "bag", i) or nil, nil) end
+            showSlot(F.tp, main and Inv.get(p, "tp", 0) or nil, main and u or nil)
+        end
+        for i = 0, 2 do Kit.setAlpha(F.bag[i].img, 150) end
+        -- every client learns which items this player's rows show (dota_items):
+        -- the own hero's, the own courier's, or anything else
+        local own = p == lp
+        use("dota_items").setView((own and courier) and "cour" or ((own and main) and "hero" or "other"))
+        local hero = Inv.hero(lp)
+        local stashOn = #Inv.list(lp, "stash") > 0 or (hero ~= nil and alive(hero) and use("items").nearHome(hero))
+        Kit.show(F.blockStash, stashOn)
+        Kit.show(F.stashBg, stashOn)
+        for i = 0, 5 do
+            Kit.show(F.stashWells and F.stashWells[i], stashOn)
+            showSlot(F.stash[i], stashOn and Inv.get(lp, "stash", i) or nil, nil)
+        end
+        -- the courier's buttons, while the local player has a courier
+        local cr = defined("courier") and use("courier").record(lp) or nil
+        Kit.show(F.courBtn, cr ~= nil)
+        Kit.show(F.deliverBtn, cr ~= nil)
+        if cr then
+            local wait = cr.dead and cr.respawnAt and math.max(0, math.ceil(cr.respawnAt - Timer.now())) or nil
+            Kit.setText(F.courText, wait and Kit.color("ff7070", tostring(wait)) or "")
+            Kit.setAlpha(F.courImg, cr.dead and 110 or 255)
+        end
     end
 
     -- Every frame (1/32 s): the cooldown sweeps of the shown items.
     local function updateSweeps()
-        for _, s in pairs(F.slots) do
+        for _, s in ipairs(F.allSlots) do
             if s.item then Kit.setSweep(s.cd, itemCooldown(s.item, s.holder)) end
         end
     end
@@ -1010,7 +1171,10 @@ define("dota_hud", function()
         local key = heroKeyOf(u)
         local mode = key and "row" or "grid"
         S.ticks = S.ticks + 1
-        if mode ~= S.mode or key ~= S.key or S.dirty or S.ticks % 30 == 0 then
+        local unitChanged = u ~= S.unit
+        S.unit = u
+        if mode ~= S.mode or key ~= S.key or S.dirty or S.ticks % 30 == 0
+            or (mode == "row" and (unitChanged or #visibleRow(key, u) ~= S.n)) then
             applyCommands(mode, key)
             placeInventory()
             S.dirty = false
@@ -1047,7 +1211,7 @@ define("dota_hud", function()
         end
         if mode == "row" and has then updateRow(u, key, lp) else hideRowExtras() end
         Kit.setText(F.gold, Kit.color(GOLD, tostring(GetPlayerState(lp, PLAYER_STATE_RESOURCE_GOLD))))
-        updateItems(has and u or nil)
+        updateItems(has and u or nil, lp)
         updateSelection(lp, u)
     end
 
@@ -1176,17 +1340,53 @@ define("dota_hud", function()
         end
         Kit.probe(F.shopBtn, "hud shop button")
         for k in pairs(F.learn) do Kit.probe(F.learn[k], "hud learn " .. k) end
-        -- items: click a slot or press Z X C V B N (dota_items)
+        -- items: click a slot or press Z X C V B N; drag a slot onto another
+        -- slot or out onto the world (dota_items). Hovers are synced frame
+        -- events, so every client knows the slot under each player's mouse.
         local Use = use("dota_items")
-        for i = 0, 5 do
-            local hit = Kit.hit(F.slots[i].b)
-            Kit.probe(F.slots[i].b, "item slot " .. i)
+        local function slotEvents(s, row, i, label)
+            local hit = Kit.hit(s.b)
+            Kit.probe(s.b, label)
+            local click, hover = CreateTrigger(), CreateTrigger()
+            BlzTriggerRegisterFrameEvent(click, hit, FRAMEEVENT_CONTROL_CLICK)
+            BlzTriggerRegisterFrameEvent(hover, hit, FRAMEEVENT_MOUSE_ENTER)
+            BlzTriggerRegisterFrameEvent(hover, hit, FRAMEEVENT_MOUSE_LEAVE)
+            TriggerAddAction(click, function()
+                Safe.call(function()
+                    local p = GetTriggerPlayer()
+                    Use.click(p, row, i)
+                    if p == GetLocalPlayer() then
+                        BlzFrameSetEnable(hit, false)
+                        BlzFrameSetEnable(hit, true)
+                    end
+                end)
+            end)
+            TriggerAddAction(hover, function()
+                Safe.call(function()
+                    if GetHandleId(BlzGetTriggerFrameEvent()) == GetHandleId(FRAMEEVENT_MOUSE_ENTER) then
+                        Use.enter(GetTriggerPlayer(), row, i)
+                    else
+                        Use.leave(GetTriggerPlayer(), row, i)
+                    end
+                end)
+            end)
+        end
+        for i = 0, 5 do slotEvents(F.slots[i], "main", i, "item slot " .. i) end
+        for i = 0, 2 do slotEvents(F.bag[i], "bag", i, "backpack slot " .. i) end
+        slotEvents(F.tp, "tp", 0, "tp slot")
+        for i = 0, 5 do slotEvents(F.stash[i], "stash", i, "stash slot " .. i) end
+        -- courier: a click selects it (a double click also centres the
+        -- camera on it), Deliver Items sends it to the hero
+        local courClicks = {}
+        local function button(f, label, fn)
+            local hit = Kit.hit(f)
+            Kit.probe(f, label)
             local trig = CreateTrigger()
             BlzTriggerRegisterFrameEvent(trig, hit, FRAMEEVENT_CONTROL_CLICK)
             TriggerAddAction(trig, function()
                 Safe.call(function()
                     local p = GetTriggerPlayer()
-                    Use.use(p, i)
+                    fn(p)
                     if p == GetLocalPlayer() then
                         BlzFrameSetEnable(hit, false)
                         BlzFrameSetEnable(hit, true)
@@ -1194,6 +1394,29 @@ define("dota_hud", function()
                 end)
             end)
         end
+        button(F.courBtn, "courier", function(p)
+            local now = Timer.now()
+            local double = courClicks[p] ~= nil and now - courClicks[p] <= 0.4
+            courClicks[p] = now
+            if defined("courier") then use("courier").select(p, double) end
+        end)
+        button(F.deliverBtn, "deliver", function(p)
+            if defined("courier") then use("courier").deliver(p) end
+        end)
+        local grabHit = Kit.hit(F.grab)
+        Kit.probe(F.grab, "grab all")
+        local grabTrig = CreateTrigger()
+        BlzTriggerRegisterFrameEvent(grabTrig, grabHit, FRAMEEVENT_CONTROL_CLICK)
+        TriggerAddAction(grabTrig, function()
+            Safe.call(function()
+                local p = GetTriggerPlayer()
+                Use.grab(p)
+                if p == GetLocalPlayer() then
+                    BlzFrameSetEnable(grabHit, false)
+                    BlzFrameSetEnable(grabHit, true)
+                end
+            end)
+        end)
         local dotaSlots = {}
         for slot = 0, SLOT_DOTA_MAX do dotaSlots[#dotaSlots + 1] = slot end
         Use.init(dotaSlots)
@@ -1255,7 +1478,8 @@ define("dota_hud", function()
         end)
         local H = heroes()
         Events.on("death", function(dying)
-            if H.keyOf[dying] then respawnAt[dying] = Timer.now() + H.respawnTime(GetHeroLevel(dying)) end
+            -- heroes.lua's own time (it adds the respawn penalty after a buyback)
+            if H.keyOf[dying] then respawnAt[dying] = H.respawnAt[dying] or (Timer.now() + H.respawnTime(GetHeroLevel(dying))) end
         end)
         Events.on("hero_respawned", function(u) respawnAt[u] = nil end)
         Events.on("hero_level", function() S.dirty = true end)
@@ -1346,7 +1570,7 @@ define("dota_hud", function()
             #moved > 0 and table.concat(moved, " ") or "none", D.keepBars and " (bars kept)" or ""))
     end
 
-    Hud.D, Hud.F, Hud.S = D, F, S
+    Hud.D, Hud.F, Hud.S, Hud.G = D, F, S, G
     function Hud.view() return view end
     return Hud
 end)

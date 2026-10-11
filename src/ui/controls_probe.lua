@@ -1,17 +1,15 @@
 -- Test builds only: one in-game run answers what the offline mock cannot,
 -- like the UI probe (Kit.probe). At the start it gives footmen of the neutral
 -- passive player, at the Dota fountain, Channel abilities and orders them:
---   A: the probe Channels of tools/gen_objects.py (ids.order_probe): every
---      Channel target type with the order of a native spell of each target
---      kind, ordered as an instant, a unit and a point order;
 --   B: every hero Channel with its build order (ids.orders): a point order
 --      for point and unit-or-point Channels, an instant order for those
 --      without a target;
 --   C: what SetUnitAcquireRange and the acquisition range field read back
 --      at once and a second later, and whether the worker type (the auto
 --      attack mechanism of dota_settings.lua) can be added and removed.
+-- (A, synthetic probe Channels on footmen, answered on 2026-10-11 and is gone.)
 -- Every order goes by string, then by order id, and the footman stops right
--- after each, so a taken order never starts a cast; the A and B footmen are
+-- after each, so a taken order never starts a cast; the B footmen are
 -- removed in the same call, before the next frame, and the C footman is
 -- hidden. The table goes to log.txt (not on screen) and to
 -- DotaVsCommander\controls_probe.txt, which survives the log rolling over.
@@ -26,8 +24,6 @@ define("controls_probe", function()
     local FILE = "DotaVsCommander\\controls_probe.txt"
     local STOP = 851972
     local FOOTMAN = FourCC("hfoo")
-    local KIND = {[0] = "none", "unit", "point", "unit or point"}
-    local ALL = {instant = true, unit = true, point = true}
 
     local function sign(ok) return ok and "+" or "-" end
 
@@ -45,28 +41,6 @@ define("controls_probe", function()
         if which.unit then out[#out + 1] = "unit " .. both(u, IssueTargetOrder, IssueTargetOrderById, order, target) end
         if which.point then out[#out + 1] = "point " .. both(u, IssuePointOrder, IssuePointOrderById, order, x, y) end
         return table.concat(out, ", ")
-    end
-
-    -- A footman per Channel target type and options: the orders on each differ.
-    local function synthetic(lines, p, x, y)
-        local probe = use("data.ids").order_probe or {}
-        local casters, target = {}, CreateUnit(p, FOOTMAN, x + 150, y, 0)
-        for _, c in ipairs(probe) do
-            local key = c.target .. "/" .. c.options
-            casters[key] = casters[key] or CreateUnit(p, FOOTMAN, x, y, 0)
-            UnitAddAbility(casters[key], FourCC(c.code))
-        end
-        for _, c in ipairs(probe) do
-            lines[#lines + 1] = string.format("A: Channel target %d (%s), options %d, order %s (native spell: %s): %s",
-                c.target, KIND[c.target], c.options, c.order, c.native,
-                forms(casters[c.target .. "/" .. c.options], c.order, target, x + 300, y, ALL))
-        end
-        local control = CreateUnit(p, FOOTMAN, x, y, 0)
-        lines[#lines + 1] = "A: control, an order no ability of the footman has (blizzard): "
-            .. forms(control, "blizzard", target, x + 300, y, ALL)
-        RemoveUnit(control)
-        for _, u in pairs(casters) do RemoveUnit(u) end
-        RemoveUnit(target)
     end
 
     -- One footman per ability: orders repeat across heroes.
@@ -138,7 +112,6 @@ define("controls_probe", function()
         local f = use("data.mapdata").dota.fountain
         local p = Player(PLAYER_NEUTRAL_PASSIVE)
         local lines = {"controls probe: order by string and by id, + taken, - refused"}
-        synthetic(lines, p, f.x, f.y)
         heroChannels(lines, p, f.x, f.y)
         acquisition(p, f.x, f.y, function(line)
             lines[#lines + 1] = line

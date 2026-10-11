@@ -191,19 +191,9 @@ define("announcer", function()
     -- Dota team building, or nil.
     local function building(u)
         local S = defined("structures") and use("structures") or nil
-        if not S or not u then return nil end
-        if u == S.ancient then return "ancient", nil end
-        for lane, list in pairs(S.towers or {}) do
-            for _, t in ipairs(list) do
-                if t == u then return "tower", lane end
-            end
-        end
-        for lane, list in pairs(S.barracks or {}) do
-            for _, b in ipairs(list) do
-                if b == u then return "rax", lane end
-            end
-        end
-        return nil
+        local kind = S and u and S.kindOf(u)
+        if not kind then return nil end
+        return kind, S.laneOf(u)
     end
 
     local function buildingDied(dying, killer)
@@ -227,10 +217,8 @@ define("announcer", function()
     -- "Your top tower is under attack.": the commander's own units or heroes
     -- start hitting one of our buildings (his creep waves only for the Ancient).
     local function buildingHit(source, target)
-        if GetOwningPlayer(target) ~= Player(SLOT_ANCIENTS) or not IsUnitType(target, UNIT_TYPE_STRUCTURE) then return end
-        if sideOf(source) ~= "commander" then return end
         local kind, lane = building(target)
-        if not kind then return end
+        if not kind or sideOf(source) ~= "commander" then return end
         if kind ~= "ancient" and GetPlayerId(GetOwningPlayer(source)) == SLOT_HORDE then return end
         local t = now()
         local quiet = t - (hits[target] or -1000) >= A.ALERT_QUIET

@@ -1,16 +1,18 @@
 -- Dota 2 style shop panel for the hero players: BASICS / UPGRADES tabs with
 -- the item categories of data.items (one column each), item icons with
 -- prices (dimmed while unaffordable), a details pane for the hovered item
--- (cost, what you pay with the parts you carry, description, stats, recipe
--- parts with the carried ones dimmed) and a sell row for the hero's
--- inventory. Click an icon to buy. Open with the SHOP button or F4, close
--- with F4, Esc or X.
+-- (cost, what you pay with the parts you own, description, stats, recipe
+-- parts with the owned ones dimmed) and a sell row for the hero's main
+-- inventory and backpack. Click an icon to buy. Open with the SHOP button or
+-- F4, close with F4, Esc or X.
 --
--- Rules are those of items.lua: buying and selling need the hero alive and
--- within Items.SHOP_RANGE of a shop (the fountain shops, secret shop
--- included); Items.purchase pays only for missing parts and refuses a full
--- inventory; selling is Items.sell (50 %). Items with a Dota stock (wards,
--- smoke, ...) keep a shared team stock here.
+-- Rules are those of items.lua: as in Dota a purchase works anywhere, even
+-- while the hero is dead; Items.purchase pays only for missing parts and
+-- sends them to the hero at the home shop, else to the stash; Secret Shop
+-- items need the hero or the courier at a Secret Shop. Selling needs the
+-- hero alive within range of a shop and gives half the cost back (all of it
+-- within 10 s of the purchase). Items with a Dota stock (wards, smoke, ...)
+-- keep a shared team stock here.
 --
 -- Multiplayer: clicks are synced frame events and keys synced key events;
 -- purchases run in that synced code for the clicking player's hero. Opening,
@@ -22,9 +24,9 @@ define("dota_shop", function()
     local Shop = {}
 
     -- Panel geometry (4:3 screen units, see dota_hud.lua). The panel sits on
-    -- the right, above the item block.
+    -- the right, above the item block and its stash row.
     local L = {
-        RIGHT = 0.798, BOTTOM = 0.116,   -- bottom-right corner of the panel
+        RIGHT = 0.798, BOTTOM = 0.150,   -- bottom-right corner of the panel
         W = 0.372, H = 0.356,            -- panel size
         HEADER_H = 0.026,                -- title, tabs, range hint, close
         COL_TITLE_H = 0.013,             -- category name above each column
@@ -34,6 +36,7 @@ define("dota_shop", function()
         SELL_H = 0.034,                  -- sell row
         COLUMNS = 6,                     -- categories per tab
         PARTS = 6,                       -- recipe part icons in the details
+        SELLS = 9,                       -- sell buttons: main inventory, then backpack
         KEY = OSKEY_F4,                  -- toggle key (Dota default)
     }
     Shop.L = L
@@ -125,50 +128,64 @@ define("dota_shop", function()
 
     local function msg(p, s) Items().msg(p, s) end
 
+    local function sound(key, p)
+        if defined("gamesounds") then use("gamesounds")[key](p) end
+    end
+
+    local function fail(p, text)
+        msg(p, "|cffff6060" .. text .. "|r")
+        sound("error", p)
+    end
+
     function Shop.buy(p, name)
         local e = data(name)
         local hero = heroOf(p)
         if BUILD_TEST_MODE then
-            use("log").info(string.format("shop buy %s by %d: data %s, hero %s, near %s", tostring(name),
+            use("log").info(string.format("shop buy %s by %d: data %s, hero %s, home %s", tostring(name),
                 GetPlayerId(p), tostring(e ~= nil), tostring(hero ~= nil),
-                tostring(hero ~= nil and Items().nearShop(hero))))
+                tostring(hero ~= nil and alive(hero) and Items().nearHome(hero))))
             use("log").flush()
         end
         if not e or not hero then return false end
-        if not alive(hero) then msg(p, "|cffff6060Your hero is dead.|r") return false end
-        if not Items().nearShop(hero) then
-            msg(p, "|cffff6060Too far from a shop|r - buy at the fountain.")
-            return false
-        end
         if e.stock and (available(name, Timer.now()) or 0) < 1 then
-            msg(p, "|cffff6060" .. e.title .. " is out of stock.|r")
+            fail(p, e.title .. " is out of stock.")
             return false
         end
         local ok, why = Items().purchase(hero, name)
         if ok then
             takeStock(name, Timer.now())
+            sound("buy", p)
         elseif why == "gold" then
-            msg(p, "|cffff6060Not enough gold|r for " .. e.title .. " (" .. Items().price(hero, name) .. ").")
-        elseif why == "full" then
-            msg(p, "|cffff6060Inventory full.|r")
+            fail(p, "Not enough gold for " .. e.title .. " (" .. Items().price(hero, name) .. ").")
+        else
+            fail(p, (Items().WHY[why] or tostring(why)) .. ".")
         end
         return ok
     end
 
+    -- Sells the item in a slot of the hero (0-5 main inventory, 6-8
+    -- backpack): the hero alive within range of a shop, the item its own.
     function Shop.sell(p, slot)
         local hero = heroOf(p)
         if not hero or not alive(hero) then return 0 end
         if not Items().nearShop(hero) then
-            msg(p, "|cffff6060Too far from a shop|r to sell.")
+            fail(p, "Selling needs a shop in range.")
             return 0
         end
-        local it = UnitItemInSlot(hero, slot)
-        if not it or not Items().nameOf(it) then return 0 end
-        local title = data(Items().nameOf(it)).title
-        local before = GetPlayerState(p, PLAYER_STATE_RESOURCE_GOLD)
-        Items().sell(hero, it)
-        local gold = GetPlayerState(p, PLAYER_STATE_RESOURCE_GOLD) - before
-        msg(p, "Sold " .. title .. " for |cffffcc00" .. gold .. "|r gold.")
+        local it = use("inventory").item(p, slot)
+        local name = it and Items().nameOf(it)
+        if not name or slot > 8 then return 0 end
+        if not Items().ownedBy(it, GetPlayerId(p)) then
+            fail(p, "Only the player who bought it can sell it.")
+            return 0
+        end
+        if Items().unsellable(it) then
+            fail(p, "This item cannot be sold.")
+            return 0
+        end
+        local gold = Items().sell(hero, it)
+        sound("sell", p)
+        msg(p, "Sold " .. data(name).title .. " for |cffffcc00" .. gold .. "|r gold.")
         return gold
     end
 
@@ -209,15 +226,6 @@ define("dota_shop", function()
         if v == "dota" then setTab(1) end
     end
 
-    local function sellValue(it)
-        local name = Items().nameOf(it)
-        local e = name and data(name)
-        if not e then return 0 end
-        local value = e.cost * 0.5
-        if e.consumable then value = value * GetItemCharges(it) / math.max(1, e.charges or 1) end
-        return math.floor(value + 0.5)     -- rounded like items.lua pays it
-    end
-
     local function statLines(e)
         local out = {}
         local keys = {}
@@ -253,7 +261,15 @@ define("dota_shop", function()
         local n = available(name, Timer.now())
         if n then cost = cost .. "   stock " .. Kit.color(n > 0 and "ffffff" or RED, tostring(n)) end
         Kit.setText(F.dCost, cost)
-        Kit.setText(F.dDesc, (e.desc or "") .. ((e.stats and next(e.stats)) and ("|n" .. statLines(e)) or ""))
+        -- Aghanim's items describe this hero's own upgrade (talents.lua)
+        local desc = e.desc or ""
+        local kind = (name == "item_ultimate_scepter" and "scepter") or (name == "item_aghanims_shard" and "shard")
+        local key = kind and hero and use("heroes").keyOf[hero]
+        if key then desc = use("talents").upgradeText(key, kind) end
+        if e.available_at and use("world").clock() < e.available_at then
+            desc = desc .. "|n" .. Kit.color(RED, "In the shop from " .. Kit.clock(e.available_at) .. ".")
+        end
+        Kit.setText(F.dDesc, desc .. ((e.stats and next(e.stats)) and ("|n" .. statLines(e)) or ""))
         -- recipe parts (first variant) and scroll; the ones carried are dimmed
         local parts = {}
         local r = e.recipe
@@ -263,7 +279,7 @@ define("dota_shop", function()
         if r and r.scroll then parts[#parts + 1] = r.scroll end
         local carried = {}
         if hero then
-            for _, c in ipairs(Items().carried(hero)) do carried[c.name] = (carried[c.name] or 0) + 1 end
+            for _, c in ipairs(Items().owned(hero)) do carried[c.name] = (carried[c.name] or 0) + 1 end
         end
         for i = 1, L.PARTS do
             local part = parts[i]
@@ -320,21 +336,32 @@ define("dota_shop", function()
                 Kit.setText(c.text, Kit.color(n > 0 and "ffffff" or RED, tostring(n)) .. "|n" .. c.priceText)
             end
         end
-        -- range hint
-        local near = hero ~= nil and alive(hero) and Items().nearShop(hero)
-        Kit.setText(F.range, near and Kit.color(GREEN, "shop in range")
-            or Kit.color(RED, hero and alive(hero) and "go to the fountain to buy" or "hero is dead"))
-        -- sell row
-        for i = 0, 5 do
+        -- where purchases go right now
+        local up = hero ~= nil and alive(hero)
+        local hint
+        if up and Items().nearHome(hero) then
+            hint = Kit.color(GREEN, "home shop")
+        elseif up and Items().nearSecret(hero) then
+            hint = Kit.color(GREEN, "Secret Shop")
+        else
+            hint = Kit.color(GRAY, "purchases go to the stash")
+        end
+        Kit.setText(F.range, hint)
+        -- sell row: main inventory and backpack
+        local sellable = up and Items().nearShop(hero)
+        for i = 0, L.SELLS - 1 do
             local s = sells[i]
-            local it = hero and UnitItemInSlot(hero, i)
-            local name = it and Items().nameOf(it)
+            local it = sellable and use("inventory").item(lp, i) or nil
+            local name = nil
+            if it and Items().ownedBy(it, GetPlayerId(lp)) and not Items().unsellable(it) then
+                name = Items().nameOf(it)
+            end
             Kit.show(s.b, name ~= nil)
             if name then
                 -- the item's own icon follows Power Treads' attribute
                 local path = Kit.dota and BlzGetItemIconPath(it) or ""
                 Kit.setTex(s.img, path ~= "" and path or iconOf(name))
-                Kit.setText(s.text, Kit.color(GOLD, tostring(sellValue(it))))
+                Kit.setText(s.text, Kit.color(GOLD, tostring(Items().sellValue(it))))
             end
         end
     end
@@ -468,19 +495,18 @@ define("dota_shop", function()
         Kit.placeText(F.dParts, x0 + 0.008, dy0 + 0.004, x1 - 0.008, dy0 + 0.022)
         Kit.show(F.detail, false)
 
-        -- sell row
+        -- sell row: the six main slots, then the backpack's three
         local sl = Kit.text(F.root, 0.7, TEXT_JUSTIFY_LEFT)
-        Kit.placeText(sl, x0 + 0.008, y0 + 0.004, x0 + 0.07, y0 + L.SELL_H - 0.004)
-        Kit.setText(sl, Kit.color(GRAY, "Sell (50%):"))
-        for i = 0, 5 do
-            local sx0 = x0 + 0.072 + i * 0.048
+        Kit.placeText(sl, x0 + 0.008, y0 + 0.004, x0 + 0.040, y0 + L.SELL_H - 0.004)
+        Kit.setText(sl, Kit.color(GRAY, "Sell:"))
+        for i = 0, L.SELLS - 1 do
+            local sx0 = x0 + 0.042 + i * 0.0365 + (i >= 6 and 0.004 or 0)
             local b, img = Kit.button(F.root, C.dark)
             Kit.place(b, sx0, y0 + 0.005, sx0 + 0.026, y0 + L.SELL_H - 0.005)
-            -- sale price right of the icon (child of the button: hides with it)
-            local text = Kit.text(b, 0.65, TEXT_JUSTIFY_LEFT)
-            Kit.placeText(text, sx0 + 0.028, y0 + 0.005, sx0 + 0.047, y0 + L.SELL_H - 0.005)
+            -- the sale price on the icon (a label: the button keeps the mouse)
+            local text = Kit.label(b, 0.6, TEXT_JUSTIFY_CENTER, TEXT_JUSTIFY_BOTTOM)
             sells[i] = {b = b, img = img, text = text}
-            event(b, function(p) Shop.sell(p, i) end)
+            event(b, function(p) Shop.sell(p, i) end, "sell" .. i)
         end
     end
 

@@ -1,0 +1,43 @@
+{
+ "abilities": {
+  "courier_burst": {
+   "cooldown": 120,
+   "values": {
+    "duration": 6,
+    "movement_speed": 50
+   }
+  },
+  "courier_go_to_secretshop": {
+   "cooldown": 0,
+   "values": {}
+  },
+  "courier_return_stash_items": {
+   "cooldown": 0,
+   "values": {}
+  },
+  "courier_shield": {
+   "cooldown": 200,
+   "values": {
+    "duration": 2
+   }
+  },
+  "courier_take_stash_items": {
+   "cooldown": 0,
+   "values": {}
+  },
+  "courier_transfer_items": {
+   "cooldown": 0,
+   "values": {}
+  }
+ },
+ "unit": {
+  "gold": 35,
+  "hp": 6,
+  "move_speed": 290,
+  "turn_rate": 0.5,
+  "vision": {
+   "day": 200,
+   "night": 200
+  }
+ }
+}

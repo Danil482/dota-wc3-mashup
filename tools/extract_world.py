@@ -11,10 +11,12 @@ world.json (read by tools/gen_objects.py world() and by Lua as use("data.world")
                    gold_min, gold_max, xp, level, ancient, move_speed
                    (name = npc_dota_neutral_<name>)
   neutral_upgrade  neutral_upgrade ability: interval and per-step bonuses
-  lane[kind]       melee/ranged/siege lane creep bounty: gold_min, gold_max, xp
+  lane[kind]       melee/ranged/siege lane creep bounty: gold_min, gold_max, xp;
+                   day and night vision
   roshan           unit numbers plus bash, slam and spell_block values
   backdoor         backdoor_protection: radius, activation_time, regen
-  towers[tier]     attack range per tier (true sight radius)
+  towers[tier]     attack range per tier (true sight radius); day and night vision
+  buildings[key]   rax_melee, rax_ranged, fort (the Ancient): day and night vision
   aegis, cheese    item values
   notes            what is not in the KV files and lives in Lua instead
 
@@ -68,6 +70,10 @@ def values(block):
     return out
 
 
+def vision(u):
+    return {"day": first(u.get("VisionDaytimeRange")), "night": first(u.get("VisionNighttimeRange"))}
+
+
 def unit(u, title):
     return {
         "title": title,
@@ -109,8 +115,8 @@ def main(data_dir, out_path):
     for kind, key in (("melee", "npc_dota_creep_goodguys_melee"), ("ranged", "npc_dota_creep_goodguys_ranged"),
                       ("siege", "npc_dota_goodguys_siege")):
         u = units[key]
-        lane[kind] = {"gold_min": first(u.get("BountyGoldMin")), "gold_max": first(u.get("BountyGoldMax")),
-                      "xp": first(u.get("BountyXP"))}
+        lane[kind] = dict(vision(u), gold_min=first(u.get("BountyGoldMin")), gold_max=first(u.get("BountyGoldMax")),
+                          xp=first(u.get("BountyXP")))
 
     r = units["npc_dota_roshan"]
     roshan = unit(r, title("npc_dota_roshan"))
@@ -126,7 +132,10 @@ def main(data_dir, out_path):
     towers = {}
     for tier, key in ((1, "npc_dota_goodguys_tower1_top"), (2, "npc_dota_goodguys_tower2_top"),
                       (3, "npc_dota_goodguys_tower3_top"), (4, "npc_dota_goodguys_tower4")):
-        towers[str(tier)] = {"range": first(units[key].get("AttackRange"), 700)}
+        towers[str(tier)] = dict(vision(units[key]), range=first(units[key].get("AttackRange"), 700))
+    buildings = {key: vision(units[name]) for key, name in (
+        ("rax_melee", "npc_dota_goodguys_melee_rax_top"), ("rax_ranged", "npc_dota_goodguys_range_rax_top"),
+        ("fort", "npc_dota_goodguys_fort"))}
 
     cheese = items["item_cheese"]
     out = {
@@ -136,6 +145,7 @@ def main(data_dir, out_path):
         "roshan": roshan,
         "backdoor": backdoor,
         "towers": towers,
+        "buildings": buildings,
         "aegis": values(items["item_aegis"]),
         "cheese": dict(values(cheese), cooldown=first(cheese.get("AbilityCooldown"))),
         "notes": NOTES,

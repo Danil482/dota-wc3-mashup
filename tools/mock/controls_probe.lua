@@ -1,9 +1,9 @@
 -- Offline exercise for the controls probe (src/ui/controls_probe.lua). The
 -- engine's answers are modelled: a unit takes an order, by string or by id,
 -- when one of its abilities has that order and its Channel target type takes
--- that form (0 instant, 1 unit, 2 point, 3 unit or point). Checks: a line for
--- every probe Channel with the model's answers, an all-refused control, a
--- line for every hero Channel without a unit target (its mana cost zeroed),
+-- that form (0 instant, 1 unit, 2 point, 3 unit or point). Checks: no probe
+-- Channels left in the build data, a line for every hero Channel without a
+-- unit target (its mana cost zeroed),
 -- the acquisition line a second later, a stop after every order, every
 -- footman removed and the acquisition one hidden, the table in log.txt (not
 -- on screen) and in controls_probe.txt.
@@ -37,12 +37,10 @@ do
                 Log.error("controls_probe exercise: " .. name .. (detail ~= nil and (" - " .. tostring(detail)) or ""))
             end
         end
-        local probe = ids.order_probe or {}
-        check("build data: probe Channels", #probe == 18, #probe)
+        check("build data: no probe Channels", ids.order_probe == nil)
 
         -- ability id -> its order and Channel target type
         local abil = {}
-        for _, c in ipairs(probe) do abil[FourCC(c.code)] = {order = c.order, target = c.target} end
         local heroLines = 0
         for name, t in pairs(ids.ability_targets or {}) do
             local code, order = ids.abilities[name], ids.orders[name]
@@ -135,25 +133,9 @@ do
         for name, fn in pairs(saved) do _G[name] = fn end
 
         local lines = P.lines or {}
-        check("one line per probe Channel, the control, each hero Channel and the acquisition",
-            #lines == 1 + #probe + 1 + heroLines + 1, #lines)
-        local function want(t, form)
-            if form == "instant" then return t == 0 and "++" or "--" end
-            if form == "unit" then return (t == 1 or t == 3) and "++" or "--" end
-            return (t == 2 or t == 3) and "++" or "--"
-        end
-        for i, c in ipairs(probe) do
-            local line = lines[1 + i] or ""
-            local expect = string.format("instant %s, unit %s, point %s", want(c.target, "instant"),
-                want(c.target, "unit"), want(c.target, "point"))
-            check("probe Channel " .. c.target .. "/" .. c.order .. "/" .. c.options .. ": " .. expect,
-                string.find(line, "order " .. c.order, 1, true) ~= nil and line:sub(-#expect) == expect, line)
-        end
-        local refused = "instant --, unit --, point --"
-        check("the control is refused in every form", (lines[2 + #probe] or ""):sub(-#refused) == refused,
-            lines[2 + #probe])
+        check("one line per hero Channel and the acquisition", #lines == 1 + heroLines + 1, #lines)
         local heroOk = 0
-        for i = 3 + #probe, 2 + #probe + heroLines do
+        for i = 2, 1 + heroLines do
             local line = lines[i] or ""
             if line:sub(1, 3) == "B: " and (line:sub(-10) == "instant ++" or line:sub(-8) == "point ++") then
                 heroOk = heroOk + 1
@@ -177,7 +159,7 @@ do
         check("every footman removed", #created > 0 and left == 0, left)
         check("the acquisition footman hidden", created[#created] ~= nil and created[#created].shown == false)
         local file = __mock.files[FILE] or ""
-        check("table saved to its own file", string.find(file, "A: Channel target 2 (point), options 3", 1, true)
+        check("table saved to its own file", string.find(file, "B: ", 1, true)
             and string.find(file, "worker type", 1, true), #file)
         local log = __mock.files["DotaVsCommander\\log.txt"] or ""
         check("table in the log", string.find(log, "controls probe: order by string and by id", 1, true), #log)

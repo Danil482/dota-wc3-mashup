@@ -188,27 +188,19 @@ define("item_passives", function()
 
     -- ------------------------------------------------------------ cast range
 
-    local baseRange = {}      -- unit -> {abil -> {level -> base range}}
     local rangeBonus = {}     -- unit -> bonus last applied
 
     -- Aether Lens / Dagon: adds `bonus` to the cast range of the unit's hero
-    -- abilities (every learned level), restoring the base when it drops.
+    -- abilities, as the "items" source of abilities.lua's range bonuses
+    -- (talents and hero passives add theirs there too).
     function P.castRange(u, bonus)
         if bonus == (rangeBonus[u] or 0) and bonus == 0 then return end
         rangeBonus[u] = bonus
-        local cache = baseRange[u] or {}
-        baseRange[u] = cache
+        local A = use("abilities")
         for _, code in pairs(use("data.ids").abilities) do
             local id = FourCC(code)
-            local level = GetUnitAbilityLevel(u, id)
-            local ab = level > 0 and BlzGetUnitAbility(u, id)
-            if ab then
-                local base = cache[id] or {}
-                cache[id] = base
-                for l = 0, level - 1 do
-                    if base[l] == nil then base[l] = BlzGetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, l) end
-                    if base[l] > 0 then BlzSetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, l, base[l] + bonus) end
-                end
+            if GetUnitAbilityLevel(u, id) > 0 and A.rangeBonus(u, id, "items") ~= bonus then
+                A.setRangeBonus(u, id, "items", bonus)
             end
         end
     end
@@ -222,6 +214,8 @@ define("item_passives", function()
     local function roll(chance) return chance > 0 and GetRandomReal(0, 1) < chance end
 
     local function dodged(source, target)
+        -- "no_evade" on the target: attacks on it always hit (Meepo's Earthbind talent)
+        if Mods.flag(target, "no_evade") then return false end
         local keep = 1
         for _, e in ipairs(Mods.values(target, "evasion")) do keep = keep * (1 - e) end
         for _, m in ipairs(Mods.values(source, "miss")) do keep = keep * (1 - m) end

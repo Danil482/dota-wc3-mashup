@@ -1,6 +1,9 @@
 -- Morphling (npc_dota_hero_morphling): Waveform, Adaptive Strike, Attribute
 -- Shift (Agility / Strength Gain), Morph with Morph Replicate, and the Ebb and
--- Flow innate, with the Dota 2 values from data.heroes.
+-- Flow innate, with the Dota 2 values from data.heroes. Copied spells take
+-- Morphling's own Aghanim's upgrades, never the target's talents. Not done:
+-- the Scepter's Morph illusion and switching Attribute Shift while stunned
+-- (Shard; its halved mana cost is in).
 -- WC3 objects: specs/heroes/morphling.json.
 --
 -- Morph design: the target hero's basic (non-ultimate) hero abilities are read
@@ -114,25 +117,11 @@ define("hero_morphling", function()
         return math.max(0, BlzGetUnitAbilityCooldownRemaining(u, abil), own)
     end
 
-    -- Per-unit cast range bonus (Ebb and Flow) ---------------------------------------
-    local rangeBase = {}      -- unit -> {abilId -> {levelIndex -> object cast range}}
+    -- Per-unit cast range bonus (Ebb and Flow): abilities.lua sums it with the
+    -- item and talent bonuses ----------------------------------------------------------
     local function applyRange(u, abil, bonus)
-        local lvl = GetUnitAbilityLevel(u, abil)
-        if lvl <= 0 then return end
-        local ab = BlzGetUnitAbility(u, abil)
-        if not ab then return end
-        local per = rangeBase[u]
-        if not per then per = {}; rangeBase[u] = per end
-        local lv = per[abil]
-        if not lv then lv = {}; per[abil] = lv end
-        local li = lvl - 1
-        if lv[li] == nil then lv[li] = BlzGetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, li) end
-        local base = lv[li]
-        if base and base > 0 then
-            local want = base + bonus
-            if math.abs(BlzGetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, li) - want) > 0.5 then
-                BlzSetAbilityRealLevelField(ab, ABILITY_RLF_CAST_RANGE, li, want)
-            end
+        if GetUnitAbilityLevel(u, abil) > 0 and A.rangeBonus(u, abil, "ebb") ~= bonus then
+            A.setRangeBonus(u, abil, "ebb", bonus)
         end
     end
 
@@ -282,7 +271,7 @@ define("hero_morphling", function()
             end
             local str, agi = GetHeroStr(u, false), GetHeroAgi(u, false)
             if (mode == "agi" and str <= 1) or (mode == "str" and agi <= 1) then return false end
-            local cost = A.value(AGI, "mana_cost", lvl) * dt
+            local cost = A.value(AGI, "mana_cost", lvl, u) * dt       -- halved by Aghanim's Shard
             local mana = GetUnitState(u, UNIT_STATE_MANA)
             if mana < cost then
                 shift[u] = nil
@@ -590,7 +579,9 @@ define("hero_morphling", function()
         end
 
         if not s or s.form == "own" then
-            local range = math.floor((e.baseRange or 350) + agiBonus(u, "attack_range_per_agi") + 0.5)
+            -- + the level 15 attack range talent (talents.lua "attack_range")
+            local range = math.floor((e.baseRange or 350) + Mods.sum(u, "attack_range")
+                + agiBonus(u, "attack_range_per_agi") + 0.5)
             if e.range ~= range then
                 e.range = range
                 setAttackRange(u, range)

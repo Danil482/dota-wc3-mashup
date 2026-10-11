@@ -106,8 +106,16 @@ define("hero_pudge", function()
                 Damage.deal(u, t, GetWidgetLife(t) + 1, Damage.PURE, {noAmp = true, pierce = true})
                 if U.alive(t) then Damage.deal(u, t, 1000000, Damage.PURE, {noAmp = true, pierce = true}) end
             else
-                Damage.deal(u, t, h.damage, Damage.PURE, {pierce = true})
+                -- Aghanim's Shard: + distance_to_damage % of the distance the
+                -- hook flew ("hit distance to damage factor 0.2",
+                -- https://liquipedia.net/dota2/Pudge#Meat_Hook)
+                Damage.deal(u, t, h.damage + h.travel * h.distanceDamage / 100, Damage.PURE, {pierce = true})
             end
+        elseif h.allyCooldown > 0 then
+            -- Aghanim's Shard: hooking an ally shortens the cooldown (timed
+            -- here: the remaining-cooldown read can be 0 for Channel abilities)
+            local left = BlzGetUnitAbilityCooldown(u, h.id, h.level - 1) - (Timer.now() - h.castAt)
+            if left > 0 then BlzStartUnitAbilityCooldown(u, h.id, left * (1 - h.allyCooldown / 100)) end
         end
         if U.alive(t) then
             h.victim = t
@@ -182,6 +190,9 @@ define("hero_pudge", function()
             local h = {caster = u, owner = ctx.owner, x0 = x0, y0 = y0, x = x0, y = y0, angle = angle,
                        range = range, speed = speed, width = ctx.v("hook_width"), damage = ctx.v("damage"),
                        vision = ctx.v("vision_radius"), visionTime = ctx.v("vision_duration"),
+                       distanceDamage = ctx.v("distance_to_damage"),
+                       allyCooldown = ctx.v("cooldown_reduction_pct_allied_hook"), id = ctx.castId,
+                       level = ctx.level, castAt = Timer.now(),
                        travel = 0, frames = 0, out = true}
             local z = groundZ(x0, y0) + 70
             h.fx = AddSpecialEffect(FX.hook, x0, y0)
@@ -213,9 +224,11 @@ define("hero_pudge", function()
             stopRot(u)
             return
         end
-        local dmg = A.value(ROT, "rot_damage", lvl) * tick
-        local slow = A.value(ROT, "rot_slow", lvl) / 100
-        local radius = A.value(ROT, "rot_radius", lvl)
+        local dmg = A.value(ROT, "rot_damage", lvl, u) * tick
+        local slow = A.value(ROT, "rot_slow", lvl, u) / 100
+        local radius = A.value(ROT, "rot_radius", lvl, u)
+        -- Aghanim's Scepter: enemies in Rot heal less
+        local healCut = -A.value(ROT, "scepter_rot_regen_reduction_pct", lvl, u) / 100
         local x, y = GetUnitX(u), GetUnitY(u)
         -- The bot driver only switches toggles on; a bot Pudge turns Rot off
         -- after a second without enemies close by.
@@ -236,10 +249,11 @@ define("hero_pudge", function()
             if not U.isMagicImmune(e) then
                 Damage.deal(u, e, dmg, Damage.MAGICAL)
                 local m = Mods.get(e, "pudge_rot")
-                if m and m.props.move_pct == slow then
+                if m and m.props.move_pct == slow and (m.props.heal_amp or 0) == healCut then
                     m.expires = Timer.now() + 0.3          -- refresh without rebuilding
                 else
-                    Mods.add(e, "pudge_rot", {duration = 0.3, source = u, props = {move_pct = slow}, debuff = true})
+                    Mods.add(e, "pudge_rot", {duration = 0.3, source = u, debuff = true,
+                                              props = {move_pct = slow, heal_amp = healCut ~= 0 and healCut or nil}})
                 end
             end
         end
@@ -300,8 +314,11 @@ define("hero_pudge", function()
         local n = stacks[u] or 0
         if n <= 0 then return end
         Mods.add(u, "pudge_graft_flesh", {source = u, persist = true, dispel = "none",
-                                         props = {str = n * A.value(HEAP, "flesh_heap_strength_buff_amount", 1)}})
+                                         props = {str = n * A.value(HEAP, "flesh_heap_strength_buff_amount", 1, u)}})
     end
+
+    -- the level 25 talent raises every stack at once
+    Events.on("talent", function(u) if M.units[u] then applyHeap(u) end end)
 
     function M.stacks(u) return stacks[u] or 0 end
 
@@ -356,8 +373,8 @@ define("hero_pudge", function()
                     endDismember(u, true)
                     return true
                 end
-                local dps = A.value(DISMEMBER, "dismember_damage", lvl)
-                    + A.value(DISMEMBER, "strength_damage", lvl) * GetHeroStr(u, true)
+                local dps = A.value(DISMEMBER, "dismember_damage", lvl, u)
+                    + A.value(DISMEMBER, "strength_damage", lvl, u) * GetHeroStr(u, true)
                 local dealt = Damage.deal(u, t, dps * share, Damage.MAGICAL, {pierce = true})
                 Damage.heal(u, dealt)
                 DestroyEffect(AddSpecialEffectTarget(FX.feed, u, "origin"))

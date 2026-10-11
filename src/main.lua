@@ -2,15 +2,18 @@
 -- when the game starts. Slot layout:
 --   0..4  user slots, force "Dota" (hero players; empty slots get bots)
 --   5     user slot, force "Commander"
---   6     computer "The Ancients": Dota structures and lane creeps
+--   6     computer "The Ancients": Dota lane creeps
 --   7     computer "Commander AI": plays the commander when no human does
 --   8     computer "Horde": the commander's uncontrollable creep waves
+--   10    outside the lobby: the Dota buildings, left alone by the neutral
+--         camps that lane creeps fight (roles.lua)
 PLAYER_COUNT = 9
 SLOT_DOTA_MAX = 4
 SLOT_COMMANDER = 5
 SLOT_ANCIENTS = 6
 SLOT_COMMANDER_AI = 7
 SLOT_HORDE = 8
+SLOT_BUILDINGS = 10
 
 local function startLocations()
     local m = use("data.mapdata")

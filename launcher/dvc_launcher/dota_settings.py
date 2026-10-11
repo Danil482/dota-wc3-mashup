@@ -22,6 +22,8 @@ The string is ';'-separated key=value pairs of letters, digits, '.' and '-':
     v       format version (1)
     a1..a6  Dota's ability slots Q W E D F R (Primary1-3, Secondary1-2, Ultimate)
     i1..i6  inventory slots; tp TP scroll; sh shop; hs select hero
+    cs, cv  select the courier, deliver items; cb, ch the courier's Speed
+            Burst and Shield; gs the stash's Grab All
             "<vk>[-<meta>][q]": Windows virtual-key code (the WC3 oskeytype),
             WC3 meta bits (1 shift, 2 ctrl, 4 alt), q quick cast; empty: unbound
     aa      auto attack: 0 never, 1 standard, 2 always
@@ -46,7 +48,11 @@ from pathlib import Path
 FILE_NAME = "dota_settings.txt"
 VERSION = "1"
 STASH = 1095656547          # FourCC('ANdc'), Dark Conversion: not in the map
-MAX_DATA = 250
+# The launcher writes the Preload file itself, so the game's cut of long
+# Preload lines does not apply; the part of the string the map sends to the
+# other players (src/ui/dota_settings.lua syncPayload) stays within
+# BlzSendSyncData's 255 bytes even when every key has modifiers.
+MAX_DATA = 300
 
 # map field -> Dota's normal action, quick-cast action
 KEY_FIELDS = {
@@ -65,6 +71,11 @@ KEY_FIELDS = {
     "tp": ("InventoryTP", "InventoryTPQuickCast"),
     "sh": ("ShopToggle", None),
     "hs": ("HeroSelect", None),
+    "cs": ("CourierSelect", None),
+    "cv": ("CourierDeliver", None),
+    "cb": ("CourierBurst", None),
+    "ch": ("CourierShield", None),
+    "gs": ("GrabStashItems", None),
 }
 # Names and labels as in Dota's settings panel (panorama popup_settings_reborn)
 FLAGS = {"dt": "dota_ability_quick_cast",            # "Double Tap Ability to Self Cast", not quick cast
@@ -84,7 +95,7 @@ STEAMID64_BASE = 76561197960265728
 ARROW = {"AbilityPrimary1": "Q", "AbilityPrimary2": "W", "AbilityPrimary3": "E", "AbilitySecondary1": "D",
          "AbilitySecondary2": "F", "AbilityUltimate": "R", "Inventory1": "Z", "Inventory2": "X",
          "Inventory3": "C", "Inventory4": "V", "Inventory5": "B", "Inventory6": "N", "InventoryTP": "T",
-         "ShopToggle": "F4", "HeroSelect": "F1"}
+         "ShopToggle": "F4", "HeroSelect": "F1", "CourierSelect": "F2", "CourierDeliver": "F3"}
 
 # Dota (Source 2) key names -> Windows virtual-key codes. Enter, Escape, mouse
 # buttons and lone modifiers are left out: the map never binds them.
