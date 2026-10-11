@@ -28,13 +28,22 @@ the game.
 The first guess, unforced start locations, was wrong: the start location was already right. The
 `ForcePlayerStartLocation` call added in `main.lua` stays; it is harmless.
 
-## Fix (next session)
+## Fix (2026-10-11, not yet confirmed in game)
 
-In `roles.lua`, give the AI commander a computer slot that is actually playing:
-- slot 5 if it is a computer;
-- otherwise any playing computer among the user slots, such as slot 1 here;
+`roles.lua` `aiSlot()` gives the AI commander a computer slot that is actually playing:
+- slot 5 if it is a playing computer;
+- then slot 7 if it is one (a lobby with that slot filled);
+- then any playing computer among the user slots, such as slot 1 here;
 - slot 7 only as a last resort, with a warning.
 
 The role swap already handles alliances, because any user slot can end up commanding.
+
+A user slot starts at the Dota fountain, and the melee AI builds around its start location. So
+`Cmd.setup` moves the commander's start location to the base with `DefineStartLocation` (logged
+as "start location N moved to the base"). Whether the engine honours that at run time shows in
+the next test's diagnostics.
+
+The mock can mark computers as playing (`__mock.computers`), and `tools/mock/commander.lua` checks
+the slot choice.
 
 Related: [[The AI commander starts with a starter base of stock WC3 structures]]

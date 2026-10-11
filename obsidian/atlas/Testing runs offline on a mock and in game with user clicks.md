@@ -14,6 +14,8 @@ date: 2026-10-10
   check the effects. The build fails unless it prints `MOCK RESULT: OK`.
 - Autotest lines like "tier protection" or "heroes gain experience" print FAIL on the mock.
   That is expected: the mock has no real units or combat.
+- `__mock.humans` and `__mock.computers` (slot → true) set who is playing, so an exercise can try
+  lobby setups such as a game started straight from the map.
 
 ## In game
 

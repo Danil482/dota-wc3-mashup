@@ -5,7 +5,12 @@ date: 2026-10-10
 
 # Towers, buildings and lane waves ignore neutrals
 
-## Decision
+> **Partly superseded (2026-10-11):** the buildings moved to slot 10, outside the lobby, and
+> only that slot is passive with neutrals now. Towers and buildings still ignore the camps, but
+> lane creeps on both sides fight them, so creep pulls work. See
+> [[Dota buildings live in slot 10 outside the lobby so creeps can be pulled]].
+
+## Decision (2026-10-10)
 
 `roles.lua` sets `ALLIANCE_PASSIVE` both ways between Neutral Hostile and:
 - `SLOT_ANCIENTS` (Dota towers, buildings, shops, lane creeps);

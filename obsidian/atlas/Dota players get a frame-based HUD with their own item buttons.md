@@ -24,12 +24,19 @@ date: 2026-10-10
   - hides the console bars and reparents the command card;
   - portrait, stats, HP and mana, ability row with "+" learn buttons;
   - item buttons with cooldown sweeps and charges (`F.slots`), gold and the SHOP button;
+  - since 2026-10-11, the 0.170-wide item block also has a backpack row, the TP slot, a stash
+    row with Grab All, and the courier's select and Deliver buttons;
   - selected-units bar with Dota Tab cycling;
   - top bar with heroes, the clock and the commander.
 - `dota_shop` – two tabs, 12 categories, recipes on hover, a sell row, F4. Purchases run
-  through `Items.purchase` inside synced frame events.
-- `dota_items` – item use from the HUD buttons and keys; see
-  [[Items are used through HUD buttons, not the WC3 inventory]].
+  through `Items.purchase` inside synced frame events and land where Dota puts them; see
+  [[Items live in Lua slots – main, backpack, TP, stash and courier]].
+- `dota_items` – item use from the HUD buttons and keys, and drag and drop between slots, onto
+  the ground or onto an ally; see [[Items are used through HUD buttons, not the WC3 inventory]].
+- `dota_talents` – the talent tree left of the ability row and Aghanim's sign right of it; see
+  [[Talents, Scepter and Shard reach abilities through one value lookup]].
+- `dota_glyph` – Glyph and Scan by the minimap, the buyback button while the hero is dead, and
+  Dota's red error line; see [[Lane rules run in lane.lua on top of WC3 combat]].
 - `dota_settings` – the player's Dota keys, quick cast, auto-attack, camera and right-click
   hold; see [[Dota settings reach the game through a local file, never the map]].
 

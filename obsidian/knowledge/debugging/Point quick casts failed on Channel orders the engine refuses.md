@@ -35,7 +35,7 @@ Quick cast at the ground never fired Pudge's Meat Hook. Every press logged
 
 ## Still open
 
-- Poof and Sticky Bomb keep spec orders (`blink`, `acidbomb`) that the engine refuses as point
-  orders. Give them orders from the probe's accepted list.
+- Fixed on 2026-10-11, not yet confirmed in game: Poof has `massteleport` and Sticky Bomb has
+  `blizzard`, both from the probe's accepted list.
 - Why some orders are refused isn't known. The order's native target kind alone doesn't explain
   it: `raisedead` (instant) and `ensnare` (unit) were accepted as point orders.

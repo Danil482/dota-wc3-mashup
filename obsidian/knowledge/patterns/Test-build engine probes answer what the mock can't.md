@@ -14,9 +14,10 @@ build a probe that asks the engine itself, and read its answer from one in-game 
   [[UI probe logs show which frames get the mouse]]. Variants 9 and 10 test blockers with child
   buttons.
 - **Controls probe** (`src/ui/controls_probe.lua`). At game start in test builds:
-  - it gives neutral footmen probe Channel abilities;
-  - it issues instant, unit and point orders by string and by id, each followed by a stop;
-  - it issues every hero Channel's real order;
+  - it gave neutral footmen 18 synthetic probe Channels and issued instant, unit and point
+    orders by string and by id, each followed by a stop. That part answered and was removed on
+    2026-10-11, along with its objects in `gen_objects.py`;
+  - it issues every hero Channel's real order, so the next run checks new orders such as Poof's;
   - it reads back acquisition range writes and tests adding the worker type.
 
   The table goes to `CustomMapData\DotaVsCommander\controls_probe.txt`, which survives the

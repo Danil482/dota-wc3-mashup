@@ -35,8 +35,12 @@ player's PC:
    [[Trees stay WC3 destructables with Dota models swapped in]].
 6. Converts item icons (`src/data/items.json` "icons") and the HUD art (`specs/hud_assets.json`).
 7. Repacks the map with StormLib and verifies the archive.
-8. Writes the player's Dota settings next to the map, never into it (`dota_settings.py`); see
+8. Writes the player's Dota settings next to the map, never into it (`dota_settings.py`),
+   including the courier keys since 2026-10-11; see
    [[Dota settings reach the game through a local file, never the map]].
+
+Planned: filling `data.strings` from the player's own Dota localization
+([[Player-facing strings are keyed by Dota localization tokens]]).
 
 Models: 71 units, including static portraits for neutrals, Roshan, summons and wards, plus
 wards and runes ([[Neutral portraits are static palette models]]).

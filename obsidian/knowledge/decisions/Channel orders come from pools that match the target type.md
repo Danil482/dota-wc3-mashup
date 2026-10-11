@@ -32,9 +32,16 @@ user's cast through the command card worked. See
 
 ## Known gaps
 
-- Spec orders the engine refuses as point orders stay until fixed by hand:
-  - Meepo's Poof (`blink`);
-  - Techies' Sticky Bomb (`acidbomb`).
+- Fixed on 2026-10-11:
+  - Meepo's Poof went from `blink` to `massteleport`, a spec order that the engine takes as a
+    point order (Teleportation) and as a unit order (Chen's Zealot);
+  - Techies' Sticky Bomb lost its spec order (`acidbomb`) and gets the point pool's
+    `blizzard`.
+  Neither is confirmed in game yet.
+- Naming a pool order in a spec takes it out of every pool, so a fix by hand should reuse an
+  order that is already spec-named. Otherwise Meat Hook and others move to untested orders.
+- Rubick's stolen-spell slots (`stasistrap`, `web`, `rejuvination`, `innerfire`) have no
+  `ability_targets` entry and were never probed, so quick cast of stolen spells may fail.
 - Item actives still have orders that ignore the target type, such as Blink's `ambush`. They are
   cast with `UnitUseItemPoint`, not with orders.
 

@@ -47,3 +47,7 @@ assets, models, world systems, the HUD.
   lead rebuilds `dist`.
 - When an agent stops early, its research goes into the next brief and the session note, so the
   next agent starts where it stopped.
+- An agent's context can fill up on a long task. The talents agent (11 heroes) died with "Prompt
+  is too long" at its eighth hero (2026-10-11) and returned no report or hook lines. Split such
+  work into batches of at most four heroes. Have each module document its own init line in its
+  header, as `talents.lua` did: the lead could integrate from that alone.

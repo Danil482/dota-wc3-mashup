@@ -19,6 +19,9 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[Dota content reaches the map only through the launcher]]
 - [[Testing runs offline on a mock and in game with user clicks]]
 - [[Dota players get a frame-based HUD with their own item buttons]]
+- [[Lane rules run in lane.lua on top of WC3 combat]]
+- [[Items live in Lua slots – main, backpack, TP, stash and courier]]
+- [[Talents, Scepter and Shard reach abilities through one value lookup]]
 
 ## Decisions
 
@@ -35,7 +38,8 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[Dota settings reach the game through a local file, never the map]]
 - [[Neutral portraits are static palette models]]
 - [[Stolen spells use D-cell copies of their objects]]
-- [[Towers, buildings and lane waves ignore neutrals]]
+- [[Towers, buildings and lane waves ignore neutrals]] (partly superseded)
+- [[Dota buildings live in slot 10 outside the lobby so creeps can be pulled]]
 - [[The Dota side aims at full parity with Dota 2]]
 - [[Channel orders come from pools that match the target type]]
 - [[Auto-attack is held off with the worker unit type]]
@@ -43,6 +47,7 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[Blocked ground rises into cliffs only over Dota-blocked cells]]
 - [[Trees stay WC3 destructables with Dota models swapped in]]
 - [[The AI commander starts with a starter base of stock WC3 structures]]
+- [[Player-facing strings are keyed by Dota localization tokens]]
 
 ## Debugging
 
@@ -76,6 +81,7 @@ Status and next tasks: [[Current priorities for October 2026]]
 
 `sessions/` holds one note per working session, named `YYYY-MM-DD <slug>.md`.
 
+- [[2026-10-11 Lane rules, inventory with courier, talents and the AI commander slot]]
 - [[2026-10-11 Dota parity wave – terrain, audio, controls and the AI commander]]
 - [[2026-10-10 Dota terrain, working HUD and imported Dota settings]]
 - [[2026-10-10 Mashup skeleton from an empty folder to Dota models in game]]

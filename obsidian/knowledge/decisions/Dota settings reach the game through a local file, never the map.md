@@ -36,10 +36,15 @@ settings.
 - right-click semantics;
 - camera distance and zoom lock;
 - right-click hold to move, with WC3's move marker shown to the holder only;
-- Dota's "not yet" and "no mana" lines when an ability key fails.
+- Dota's "not yet" and "no mana" lines when an ability key fails;
+- since 2026-10-11: the TP key uses the TP slot, and the courier keys (select F2, deliver F3,
+  Speed Burst, Shield, Grab All) drive the courier
+  ([[Items live in Lua slots – main, backpack, TP, stash and courier]]). The launcher's
+  `MAX_DATA` grew from 250 to 300 characters; the part synced between players stays under 255.
+  The launcher dist must be rebuilt before a personalized test picks these keys up.
 
 ## Not possible
 
 - Keys that clash with native hotkeys are skipped: WC3 can't turn a native hotkey off.
 - Edge-pan and camera speed can't be set.
-- There is no courier.
+- Glyph and Scan have no hotkeys yet.

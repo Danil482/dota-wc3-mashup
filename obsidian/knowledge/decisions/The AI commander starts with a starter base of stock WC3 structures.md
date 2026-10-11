@@ -35,8 +35,10 @@ it off.
 ## Notes
 
 - Undead start with 40 food, the others with 30: Spirit Towers count as supply.
-- Each destroyed commander structure pays the Dota side 150 gold (`economy.lua`).
-- The AI itself still doesn't run in single player; see
-  [[The AI commander idles because its computer slot is empty in single player]].
+- Each destroyed commander structure pays 150 gold to the Dota hero who last hit it
+  (`economy.lua`).
+- Since 2026-10-11 the AI commander takes a playing computer slot, slot 1 in single player, and
+  its start location moves to the base. Whether the melee AI then plays isn't confirmed in game
+  yet; see [[The AI commander idles because its computer slot is empty in single player]].
 
 Related: [[Up to five Dota heroes fight one Warcraft commander]]
