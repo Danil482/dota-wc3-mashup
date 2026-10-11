@@ -56,5 +56,14 @@ rule. Bots buy the Scepter and Shard where their item builds have them.
 - Aghanim's Blessing (from Roshan) is out of scope.
 
 Related: [[The map script is split into define and use modules]],
-[[Up to five Dota heroes fight one Warcraft commander]],
+[[Up to five Dota heroes fight one Warcraft player]],
 [[Dota players get a frame-based HUD with their own item buttons]]
+
+## Update (2026-10-11, night)
+
+All 11 heroes now have their unique talents, Scepter and Shard. Techies, Ogre Magi and Shadow Fiend
+read every value with the caster (timers, mines, Requiem lines included); Techies' Shard M.A.D. and
+Detonate are granted objects from `GRANT_FORMS` in `gen_objects.py`; Anti-Mage was checked against the
+7.41 data. Rules taken from the wiki and still unconfirmed are marked in the code. The talent tree UI
+still draws rectangles; a Dota-art redesign is queued. `-item shard` and `-item scepter` give the
+upgrades in test builds.

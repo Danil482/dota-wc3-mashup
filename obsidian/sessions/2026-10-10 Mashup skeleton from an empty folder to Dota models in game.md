@@ -11,9 +11,9 @@ personalized map and a public repo.
 ## What was done
 
 - **Design** agreed with the user, see
-  [[Up to five Dota heroes fight one Warcraft commander]]:
+  [[Up to five Dota heroes fight one Warcraft player]]:
   - WC3 is the host;
-  - an asymmetric match of up to 5 Dota heroes against 1 commander;
+  - an asymmetric match of up to 5 Dota heroes against 1 Warcraft player;
   - 11 heroes;
   - MIT with remixes allowed.
 - **Build pipeline and map format** for Reforged 2.0.1 (see

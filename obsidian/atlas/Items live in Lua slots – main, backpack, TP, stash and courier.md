@@ -75,3 +75,14 @@ fountain.
 Related: [[Items are used through HUD buttons, not the WC3 inventory]],
 [[Dota players get a frame-based HUD with their own item buttons]],
 [[Dota settings reach the game through a local file, never the map]]
+
+## Update (2026-10-11, night)
+
+- Cooldowns are enforced in Lua: `Items.ready(hero, it, via)` refuses a recharging item on every path
+  (HUD clicks and keys, target clicks, quick cast, the TP slot, cast start in `item_actives.lua` for bots
+  and the rest) with Dota's "Recharging..." line and the cooldown beep. `Items.used` also starts WC3's
+  own cooldown.
+- Drag and drop: mouse events over the HUD report the ground under it (jassdoc), not 0,0, so a press
+  counts as on the HUD by the synced hovers; a release still over the source waits 0.2 s for a late
+  hover. A click mode swaps backpack, stash and courier slots without a held button. Confirmed working
+  in game.

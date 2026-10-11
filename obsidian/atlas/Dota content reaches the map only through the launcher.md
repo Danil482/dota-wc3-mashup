@@ -8,8 +8,8 @@ date: 2026-10-10
 Neither the repo nor a release contains Dota or WC3 models, textures or sounds. The base map
 only references paths. The launcher fills those paths from the Dota 2 install on the
 player's PC:
-- source: `launcher/dvc_launcher`;
-- PyInstaller build: `dist\DotaVsCommander\DotaVsCommander.exe`.
+- source: `launcher/dvw_launcher`;
+- PyInstaller build: `dist\DotaVsWarcraft\DotaVsWarcraft.exe`.
 
 ## What the launcher does
 
@@ -45,11 +45,11 @@ Planned: filling `data.strings` from the player's own Dota localization
 Models: 71 units, including static portraits for neutrals, Roshan, summons and wards, plus
 wards and runes ([[Neutral portraits are static palette models]]).
 
-The output is cached per Dota build in `%LOCALAPPDATA%\DotaVsCommander\cache`. A cold run takes
+The output is cached per Dota build in `%LOCALAPPDATA%\DotaVsWarcraft\cache`. A cold run takes
 about a minute; a warm run takes about 10 s. On 2026-10-11 the personalized map was about 69 MB,
 mostly sounds (37 MB).
 
-For development, `DVC_USER_DIR` moves the cache, logs and work folders, so parallel runs from
+For development, `DVW_USER_DIR` moves the cache, logs and work folders, so parallel runs from
 source don't share a cache. The PyInstaller exe is a windowed app: in PowerShell, run it with
 `Start-Process -Wait`, or the shell returns before the map is written.
 
@@ -57,8 +57,21 @@ source don't share a cache. The PyInstaller exe is a windowed app: in PowerShell
 
 ```
 .venv\Scripts\python.exe -I tools\build.py --test --dota-models --work build\work_e2e
-dist\DotaVsCommander\DotaVsCommander.exe --dota "<dota 2 beta folder>" --map build\work_e2e\DotaVsCommander_test.w3x --out build\work_e2e\personal\DotaVsCommander_test.w3x --prepare-only --quiet
+dist\DotaVsWarcraft\DotaVsWarcraft.exe --dota "<dota 2 beta folder>" --map build\work_e2e\DotaVsWarcraft_test.w3x --out build\work_e2e\personal\DotaVsWarcraft_test.w3x --prepare-only --quiet
 ```
 
 Related: [[Dota models are converted to MDX 800 for both graphics modes]],
 [[Invisible units mean the map points to Dota models without the launcher]]
+
+## Update (2026-10-11, night)
+
+- Package `launcher/dvw_launcher`, exe `dist\DotaVsWarcraft\DotaVsWarcraft.exe`, cache and logs in
+  `%LOCALAPPDATA%\DotaVsWarcraft`, `DVW_USER_DIR` for parallel source runs
+  ([[The WC3 side is called Warcraft, never commander]]).
+- Effects: 39 Dota particle systems become MDX 800 (`effects.py`, `mdx/particles.py`,
+  `mdx/fxtextures.py`, `specs/effects.json`), cached per Dota build; spell effects fill `data.effects`,
+  missiles go into object data
+  ([[Dota spell effects reach the map through data.effects, missiles through object data]]).
+- Hero models carry per-ability cast sequences ([[Each Dota ability plays its own cast animation through Spell tags]]).
+- The terrain step plants the Warcraft grove ([[The Warcraft base has a grove of 51 Dire trees with triple lumber]]).
+- A personalized test map is about 70 MB; a cold launcher run takes about 2.5 min.

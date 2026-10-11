@@ -20,13 +20,13 @@ build a probe that asks the engine itself, and read its answer from one in-game 
   - it issues every hero Channel's real order, so the next run checks new orders such as Poof's;
   - it reads back acquisition range writes and tests adding the worker type.
 
-  The table goes to `CustomMapData\DotaVsCommander\controls_probe.txt`, which survives the
+  The table goes to `CustomMapData\DotaVsWarcraft\controls_probe.txt`, which survives the
   log's 600-line rollover. It settled two questions in one run:
   [[Point quick casts failed on Channel orders the engine refuses]] and
   [[SetUnitAcquireRange ignores 0, so a zero range can't stop auto-attacks]].
-- **Diagnostic summaries.** The AI commander logs its state every 30 s in test builds, which
+- **Diagnostic summaries.** The Warcraft AI logs its state every 30 s in test builds, which
   showed at once that its slot was empty
-  ([[The AI commander idles because its computer slot is empty in single player]]).
+  ([[The Warcraft AI idles because its computer slot is empty in single player]]).
 
 ## Rules
 

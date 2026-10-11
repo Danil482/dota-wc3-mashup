@@ -25,7 +25,7 @@ date: 2026-10-10
 - On the user's WC3 2.0.1 a VPN notice and an offline screen appear on every launch, and the
   user clicks "OK" and "Play offline" ("Играть вне сети") themselves. Never simulate input,
   and never capture the whole screen.
-- The log is in `Documents\Warcraft III\CustomMapData\DotaVsCommander\log.txt`. Documents may
+- The log is in `Documents\Warcraft III\CustomMapData\DotaVsWarcraft\log.txt`. Documents may
   be redirected, for example to OneDrive.
 - Test builds start a human's hero at level 30 with every skill learned.
 - Chat cheats:
@@ -51,6 +51,19 @@ date: 2026-10-10
 - **The log keeps only the last 600 lines.** Answers that must survive go into their own
   CustomMapData file.
 - **A test map needs a matching launcher.** After launcher changes, rebuild `dist`
-  (`launcher\build.ps1`) or run the launcher from source with `DVC_USER_DIR`.
+  (`launcher\build.ps1`) or run the launcher from source with `DVW_USER_DIR`.
 
 Related: [[The map is built from source with one build.py command]]
+
+## Update (2026-10-11, night)
+
+- Test builds end the game like release builds; `-noend` keeps a decided game going
+  ([[Test builds end the game like release builds]]).
+- More chat cheats: `-noend`, `-item NAME` (`shard`, `scepter`, or any item name), `-log` (log lines on
+  screen; by default they go to the file only), and the audio agent's `-sfx`, `-sfxch`, `-wc3ui`.
+- The mock fails on ERROR lines that left the log's 600-line window, and `run_test.ps1` only on the
+  log's level tags ([[The mock missed ERROR lines that left the log's 600-line window]]).
+- Live tests without the user's clicks: allowed only when the user says so in that session, through
+  `run_test.ps1 -AutoStart` (the click positions still need calibrating); agents never launch WC3.
+- A freeze is diagnosed from Windows' Application Hang event (1002) plus the log's last lines; a
+  black box file is planned ([[A freeze is suspected from own lane creeps with animated portraits and WC3 voices]]).

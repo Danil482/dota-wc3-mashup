@@ -33,4 +33,4 @@ no seat from anyone.
 - The camp leash (`world_camps` `C.LEASH`, 800) is still too short for real pulls.
 
 Related: [[Lane rules run in lane.lua on top of WC3 combat]],
-[[Up to five Dota heroes fight one Warcraft commander]]
+[[Up to five Dota heroes fight one Warcraft player]]

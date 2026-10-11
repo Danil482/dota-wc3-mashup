@@ -14,9 +14,9 @@ date: 2026-10-10
 
 `roles.lua` sets `ALLIANCE_PASSIVE` both ways between Neutral Hostile and:
 - `SLOT_ANCIENTS` (Dota towers, buildings, shops, lane creeps);
-- `SLOT_HORDE` (the commander's waves).
+- `SLOT_HORDE` (the Warcraft creep waves).
 
-Heroes and the commander's own army still fight neutrals.
+Heroes and the Warcraft player's own army still fight neutrals.
 
 ## Why
 

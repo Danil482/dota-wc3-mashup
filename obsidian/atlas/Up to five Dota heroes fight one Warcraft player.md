@@ -3,7 +3,7 @@ tags: [atlas, game-design]
 date: 2026-10-10
 ---
 
-# Up to five Dota heroes fight one Warcraft commander
+# Up to five Dota heroes fight one Warcraft player
 
 The design was agreed with the user before the build started, on 2026-10-10.
 
@@ -11,15 +11,15 @@ The design was agreed with the user before the build started, on 2026-10-10.
 
 - **Dota**: up to five heroes; bots take the empty slots. Humans pick from a dialog first, and
   bots pick after them or after 45 s.
-- **Commander**: one player with a full WC3 race of their choice: altar, heroes, buildings
+- **Warcraft**: one player with a full WC3 race of their choice: altar, heroes, buildings
   and their own army.
-  - Uncontrollable creep waves leave the commander base every 30 s.
-  - An AI commander plays when no human takes the slot. It starts with a starter base
-    ([[The AI commander starts with a starter base of stock WC3 structures]]). It takes a
+  - Uncontrollable creep waves leave the Warcraft base every 30 s.
+  - The Warcraft AI plays when no human takes the slot. It starts with a starter base
+    ([[The Warcraft AI starts with a starter base of stock WC3 structures]]). It takes a
     computer that is actually playing (slot 5, slot 7, or a playing computer in a user slot,
     such as slot 1 in single player), and its start location moves to the base
-    ([[The AI commander idles because its computer slot is empty in single player]]).
-- **Slots**: 9 in the lobby. Dota force mask `0b001011111`, commander force `0b110100000`.
+    ([[The Warcraft AI idles because its computer slot is empty in single player]]).
+- **Slots**: 9 in the lobby. Dota force mask `0b001011111`, Warcraft force `0b110100000`.
   Outside the lobby, slot 9 holds the test dummies and slot 10 the Dota buildings
   ([[Dota buildings live in slot 10 outside the lobby so creeps can be pulled]]).
 
@@ -32,8 +32,8 @@ Scan, buyback, kill gold, and day and night. See [[Lane rules run in lane.lua on
 
 ## Win conditions
 
-The Dota side wins by destroying every commander town hall; the commander wins by destroying
-the Ancient.
+The Dota side wins by destroying every town hall of the Warcraft player; the Warcraft side wins
+by destroying the Ancient.
 
 ## Heroes in v1
 
@@ -69,3 +69,11 @@ follows a main ability. That is how Shadow Fiend's razes freed a slot for the ul
 
 Related: [[Warcraft III is the host game, not Dota 2]],
 [[The map script is split into define and use modules]]
+
+## Update (2026-10-11, night)
+
+- The Warcraft base has a grove behind the hall
+  ([[The Warcraft base has a grove of 51 Dire trees with triple lumber]]).
+- Planned (the user's request): 11 Warcraft towers at the Dire tower spots with Dota's tower numbers and
+  Dota's tier protection, and the neutral buildings of a WC3 melee map in the base (Tavern, fountains,
+  Goblin Merchant and Laboratory, Mercenary Camp, Marketplace), closed to Dota players.

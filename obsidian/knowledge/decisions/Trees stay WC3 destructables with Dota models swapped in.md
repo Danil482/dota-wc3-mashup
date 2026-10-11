@@ -8,7 +8,7 @@ date: 2026-10-11
 ## Decision
 
 The personalized map keeps WC3 tree destructables. `war3map.w3b` points three standard tree
-types at 24 converted Dota models (`launcher/dvc_launcher/terrain/trees.py`):
+types at 24 converted Dota models (`launcher/dvw_launcher/terrain/trees.py`):
 - `LTlt`, 10 variations: Radiant trees in their default material (pines, oaks, bamboo);
 - `FTtw`, 10 variations: oaks in their other materials (autumn, white, pink and red blossom);
 - `BTtw`, 4 variations: Dire trees.

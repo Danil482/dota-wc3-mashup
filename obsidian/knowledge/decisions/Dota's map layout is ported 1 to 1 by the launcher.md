@@ -8,10 +8,10 @@ date: 2026-10-10
 ## Decision
 
 The personalized map gets Dota 2's own layout, read from the player's `game\dota\maps\dota.vpk`
-by `launcher\dvc_launcher\terrain\`. It replaces these files in the base map:
+by `launcher\dvw_launcher\terrain\`. It replaces these files in the base map:
 - `w3e`, `wpm`, `doo`, units doo, `w3i`;
 - the minimap;
-- the `data.mapdata` module in `war3map.lua`, between `-- @dvc-data-begin/end` markers
+- the `data.mapdata` module in `war3map.lua`, between `-- @dvw-data-begin/end` markers
   written by `tools\build_lua.py`.
 
 The base map keeps the hand-made layout as a fallback.
@@ -25,9 +25,9 @@ The base map keeps the hand-made layout as a fallback.
   ground 4, fountains 5.
 - **Converted:** 91 of 93 ramps, shallow water, 1957 trees, Lordaeron tiles, pathing from the
   gridnav plus WC3 cliff rules.
-- **The Dire base is flattened and buildable** for the commander:
-  - his town hall stands at the Dire Ancient's spot;
-  - his mine is 700 units away;
+- **The Dire base is flattened and buildable** for the Warcraft player:
+  - their town hall stands at the Dire Ancient's spot;
+  - their mine is 700 units away;
   - two expansions sit near the Dire T2 towers.
 - **Reachability:** 94.4% of Dota's walkable area is walkable in WC3. All 92 key points can
   be reached from the fountain.

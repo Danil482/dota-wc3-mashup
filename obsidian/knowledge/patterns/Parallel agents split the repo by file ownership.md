@@ -11,7 +11,7 @@ assets, models, world systems, the HUD.
 ## Rules for agents
 
 - **Own files.** Each brief names the files the agent owns. Shared files (`tools/gen_objects.py`,
-  `launcher/dvc_launcher/cli.py`, `launcher/build.ps1`, `launcher/tests/test_dist.py`) are
+  `launcher/dvw_launcher/cli.py`, `launcher/build.ps1`, `launcher/tests/test_dist.py`) are
   re-read right before every edit, and the edits stay small and local.
 - **Own build folders.** Each agent builds into its own `--work build\work_<name>`.
 - **Hook lines.** Agents return the init and hook lines for `game.lua`; the lead pastes them in
@@ -43,7 +43,7 @@ assets, models, world systems, the HUD.
   so a dead agent never leaves a half-made edit in a shared file.
 - Some library agents (Senior Python Developer) have no SendMessage tool. They can't report
   mid-task, so an "early report" request makes them stop at their hand-back.
-- Parallel launcher runs need separate caches: each agent sets `DVC_USER_DIR`, and only the
+- Parallel launcher runs need separate caches: each agent sets `DVW_USER_DIR`, and only the
   lead rebuilds `dist`.
 - When an agent stops early, its research goes into the next brief and the session note, so the
   next agent starts where it stopped.

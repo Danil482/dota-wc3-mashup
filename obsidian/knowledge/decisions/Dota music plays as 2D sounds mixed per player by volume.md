@@ -14,14 +14,14 @@ client sets the volumes for its own player's state, with crossfades.
 States:
 - pre-game countdown;
 - laning tracks with silences between them;
-- battle music when the player's hero fights the commander's own units or heroes (not his creep
-  waves);
+- battle music when the player's hero fights the Warcraft player's own units or heroes (not
+  their creep waves);
 - Roshan;
 - death and respawn;
 - buyback;
 - Radiant win or lose.
 
-The commander keeps Warcraft's music.
+The Warcraft player keeps the WC3 music.
 
 `src/game/announcer.lua` plays Dota's default announcer for Dota players. Lines queue by
 priority, never overlap, and duck the music:
@@ -54,7 +54,7 @@ priority, never overlap, and duck the music:
   "audio" section, `src/data/audio.json`).
 - Audio adds about 28.7 MB to the personalized map.
 - The multi-kill window (18 s) is from the Dota 2 wiki.
-- Test commands: `-music`, `-musicgain`, `-ann <line>`, `-horn`, `-gg dota|commander`.
+- Test commands: `-music`, `-musicgain`, `-ann <line>`, `-horn`, `-gg dota|warcraft`.
 
 Related: [[A sound for one player is created for all and muted by volume]],
 [[Hero responses are Dota voice lines played from Lua]]

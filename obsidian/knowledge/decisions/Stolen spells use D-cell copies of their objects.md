@@ -13,7 +13,7 @@ Rubick's Spell Steal works in two ways:
 
 `gen_objects` writes these copies (`data.ids.rubick_copies`, 82 of them) for:
 - every non-Channel Dota hero ability;
-- every hero spell of the four commander races (from `abilitydata.slk`).
+- every hero spell of the four Warcraft races (from `abilitydata.slk`).
 
 `abilities.lua` maps each copy to its ability's handlers:
 - `A.copyId`;

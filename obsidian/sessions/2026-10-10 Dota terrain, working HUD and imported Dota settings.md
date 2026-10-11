@@ -89,7 +89,7 @@ was the evening session after the repo went public.
 
 ## Next session – entry points
 
-1. Build and launch `build\work_play\personal\DotaVsCommander_test.w3x`:
+1. Build and launch `build\work_play\personal\DotaVsWarcraft_test.w3x`:
    - `tools\build.py --test --dota-models --work build\work_play`;
    - then the launcher with `--prepare-only`.
 2. Check, in classic and HD graphics:

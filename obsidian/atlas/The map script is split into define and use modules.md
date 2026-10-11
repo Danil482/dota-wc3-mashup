@@ -21,10 +21,10 @@ its first `use(name)`, and `defined(name)` checks whether a module exists. That 
   - `abilities`: the ability registry over Channel objects, with `onCast`, `onChannel`,
     `onEndCast` and `onLearn`
   - `sound`: sounds and hero voice lines
-  - `log`: the log in `CustomMapData\DotaVsCommander\log.txt`
+  - `log`: the log in `CustomMapData\DotaVsWarcraft\log.txt`
 - `game/`
   - `game`: the init order
-  - match setup: `roles`, `commander`, `structures`, `heroes`, `creeps`, `economy`, `victory`
+  - match setup: `roles`, `warcraft`, `structures`, `heroes`, `creeps`, `economy`, `victory`
   - items: `items`, `item_actives`, `item_passives`, `inventory` (backpack, stash, TP slot)
     and `courier`; see [[Items live in Lua slots – main, backpack, TP, stash and courier]]
   - `lane`: Dota's lane rules, with the Glyph in `structures` and kill gold and buyback in
@@ -33,7 +33,7 @@ its first `use(name)`, and `defined(name)` checks whether a module exists. That 
     [[Talents, Scepter and Shard reach abilities through one value lookup]]
   - `voice`, plus Dota's `music`, `announcer` and `gamesounds` for Dota players (see
     [[Dota music plays as 2D sounds mixed per player by volume]])
-  - `commander_base`: the AI commander's starter structures
+  - `warcraft_base`: the Warcraft AI's starter structures
   - `world*`: camps, runes, Roshan, towers
   - test-only: `cheats`, `dummy`, `autotest`
 - `ui/`: the Dota players' HUD, shop, item use and settings (`hud_kit`, `dota_hud`,
@@ -59,3 +59,11 @@ its first `use(name)`, and `defined(name)` checks whether a module exists. That 
   string from `data.ids.orders` ([[Channel orders come from pools that match the target type]]).
 
 Related: [[The map is built from source with one build.py command]]
+
+## Update (2026-10-11, night)
+
+- `core/fx`: `Fx.model(key, wc3Fallback)` picks the launcher's Dota effect when `data.effects` has it.
+- `core/sound`: sounds are warmed up at start and freed by synced timers; Warcraft's UI volume group is
+  muted on human Dota players' clients.
+- `game/warcraft` and `game/warcraft_base` (renamed from the old side's modules) set up the Warcraft side,
+  its starter base and the grove's lumber.

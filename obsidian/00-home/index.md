@@ -3,17 +3,17 @@ tags: [home, navigation]
 date: 2026-10-11
 ---
 
-# Dota vs Commander – a Dota 2 × Warcraft III mashup
+# Dota vs Warcraft – a Dota 2 × Warcraft III mashup
 
-A Warcraft III Reforged Lua map: up to five Dota heroes fight one commander who plays a full
-Warcraft race. The Dota models, icons and voice lines come from the player's own Dota 2
+A Warcraft III Reforged Lua map: up to five Dota heroes fight one Warcraft player who plays a
+full WC3 race. The Dota models, icons and voice lines come from the player's own Dota 2
 install, and the launcher puts them into the map. Published on Melty under MIT.
 
 Status and next tasks: [[Current priorities for October 2026]]
 
 ## How it is built
 
-- [[Up to five Dota heroes fight one Warcraft commander]]
+- [[Up to five Dota heroes fight one Warcraft player]]
 - [[The map is built from source with one build.py command]]
 - [[The map script is split into define and use modules]]
 - [[Dota content reaches the map only through the launcher]]
@@ -46,8 +46,13 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[Dota music plays as 2D sounds mixed per player by volume]]
 - [[Blocked ground rises into cliffs only over Dota-blocked cells]]
 - [[Trees stay WC3 destructables with Dota models swapped in]]
-- [[The AI commander starts with a starter base of stock WC3 structures]]
+- [[The Warcraft AI starts with a starter base of stock WC3 structures]]
 - [[Player-facing strings are keyed by Dota localization tokens]]
+- [[The WC3 side is called Warcraft, never commander]]
+- [[Test builds end the game like release builds]]
+- [[Dota spell effects reach the map through data.effects, missiles through object data]]
+- [[The Warcraft base has a grove of 51 Dire trees with triple lumber]]
+- [[Each Dota ability plays its own cast animation through Spell tags]]
 
 ## Debugging
 
@@ -60,8 +65,11 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[Selecting some Dota neutrals hung the game]]
 - [[Point quick casts failed on Channel orders the engine refuses]]
 - [[SetUnitAcquireRange ignores 0, so a zero range can't stop auto-attacks]]
-- [[The AI commander idles because its computer slot is empty in single player]]
+- [[The Warcraft AI idles because its computer slot is empty in single player]]
 - [[HUD art detection broke when one voice line was missing]]
+- [[Quick cast sent no order for native abilities without a Channel target kind]]
+- [[The mock missed ERROR lines that left the log's 600-line window]]
+- [[A freeze is suspected from own lane creeps with animated portraits and WC3 voices]] (open)
 
 ## Patterns
 
@@ -81,7 +89,8 @@ Status and next tasks: [[Current priorities for October 2026]]
 
 `sessions/` holds one note per working session, named `YYYY-MM-DD <slug>.md`.
 
-- [[2026-10-11 Lane rules, inventory with courier, talents and the AI commander slot]]
-- [[2026-10-11 Dota parity wave – terrain, audio, controls and the AI commander]]
+- [[2026-10-11 Night wave – effects, cast animations, sounds, grove and the Dota vs Warcraft rename]]
+- [[2026-10-11 Lane rules, inventory with courier, talents and the Warcraft AI slot]]
+- [[2026-10-11 Dota parity wave – terrain, audio, controls and the Warcraft AI]]
 - [[2026-10-10 Dota terrain, working HUD and imported Dota settings]]
 - [[2026-10-10 Mashup skeleton from an empty folder to Dota models in game]]

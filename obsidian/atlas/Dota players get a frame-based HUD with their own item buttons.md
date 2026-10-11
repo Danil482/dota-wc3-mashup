@@ -5,7 +5,7 @@ date: 2026-10-10
 
 # Dota players get a frame-based HUD with their own item buttons
 
-`src/ui/` replaces the Warcraft console for Dota players. The commander keeps the WC3 UI.
+`src/ui/` replaces the Warcraft console for Dota players. The Warcraft player keeps the WC3 UI.
 
 ## Modules
 
@@ -27,7 +27,7 @@ date: 2026-10-10
   - since 2026-10-11, the 0.170-wide item block also has a backpack row, the TP slot, a stash
     row with Grab All, and the courier's select and Deliver buttons;
   - selected-units bar with Dota Tab cycling;
-  - top bar with heroes, the clock and the commander.
+  - top bar with heroes, the clock and the Warcraft player.
 - `dota_shop` – two tabs, 12 categories, recipes on hover, a sell row, F4. Purchases run
   through `Items.purchase` inside synced frame events and land where Dota puts them; see
   [[Items live in Lua slots – main, backpack, TP, stash and courier]].
@@ -53,3 +53,13 @@ date: 2026-10-10
   full-panel blocker (`BLOCK_BOTTOM_CLICKS`) swallowed our buttons.
 
 Related: [[The map script is split into define and use modules]]
+
+## Update (2026-10-11, night)
+
+- The ability row shows any selected unit: Dota heroes from build data (unlearned dimmed), other units
+  from their actual abilities, read in a synced `EVENT_PLAYER_UNIT_SELECTED` handler; no learn buttons
+  or hotkeys for units the player doesn't control.
+- Top-bar hero portraits are buttons: a click selects the hero (allies always, enemies when visible), a
+  double click centres the camera.
+- `Kit.blocker` fades its template's additive hover highlight, which flared over whole panels.
+- Keys find the ability that holds a cell (`dota_hud.abilityIn`): granted forms and Rubick's copies.

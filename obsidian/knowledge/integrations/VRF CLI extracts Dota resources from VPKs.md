@@ -20,7 +20,7 @@ Dota 2 VPKs.
 ## Packaging
 
 - The CLI is downloaded into `launcher/vendor`, which git ignores.
-- `launcher/build.ps1` copies it to `dist\DotaVsCommander\vrf`.
+- `launcher/build.ps1` copies it to `dist\DotaVsWarcraft\vrf`.
 - Its license is in `launcher/licenses/ValveResourceFormat-LICENSE.txt`.
 - Downloads and extracted files are untrusted data: Python that reads them runs with `-I`.
 

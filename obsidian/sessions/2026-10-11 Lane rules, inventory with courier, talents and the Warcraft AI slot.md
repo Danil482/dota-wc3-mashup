@@ -1,11 +1,11 @@
 ---
-tags: [session, agents, lane, inventory, talents, commander, controls]
+tags: [session, agents, lane, inventory, talents, warcraft, controls]
 date: 2026-10-11
 ---
 
-# Lane rules, inventory with courier, talents and the AI commander slot
+# Lane rules, inventory with courier, talents and the Warcraft AI slot
 
-Continues [[2026-10-11 Dota parity wave – terrain, audio, controls and the AI commander]] on the
+Continues [[2026-10-11 Dota parity wave – terrain, audio, controls and the Warcraft AI]] on the
 same day. The session picked up the plan: the lead made the small fixes, and three agents ran at
 once (talents, inventory, lane). The user asked to wrap up once the three had reported, without
 starting new agents.
@@ -13,11 +13,11 @@ starting new agents.
 ## What was done
 
 - **Small fixes by the lead:**
-  - The AI commander now takes a computer that is actually playing. The order is slot 5, slot 7,
+  - The Warcraft AI now takes a computer that is actually playing. The order is slot 5, slot 7,
     then any playing computer among the user slots (slot 1 in a game started straight from the
     map). If none plays, slot 7 with a warning. `Cmd.setup` moves that slot's start location to
-    the commander base, because the melee AI builds around its start location. See
-    [[The AI commander idles because its computer slot is empty in single player]].
+    the Warcraft base, because the melee AI builds around its start location. See
+    [[The Warcraft AI idles because its computer slot is empty in single player]].
   - Poof got `massteleport`, and Sticky Bomb a pool order (`blizzard`). The probe saw the engine
     accept both as point orders on other heroes
     ([[Channel orders come from pools that match the target type]]).
@@ -25,8 +25,8 @@ starting new agents.
     teleports only after a full channel ([[Channels never lock the command card]]).
   - The 18 synthetic probe Channels are gone. The controls probe keeps its hero Channel and
     acquisition parts ([[Test-build engine probes answer what the mock can't]]).
-  - The mock runtime can mark computers as playing (`__mock.computers`), and the commander
-    exercise checks the slot choice.
+  - The mock runtime can mark computers as playing (`__mock.computers`), and the mock exercise
+    in `tools/mock/warcraft.lua` checks the slot choice.
 - **lane** finished all seven items of its plan; see
   [[Lane rules run in lane.lua on top of WC3 combat]]:
   - a 600 s day: night before the horn, dawn with the horn, Dota vision for buildings and creeps;
@@ -77,7 +77,7 @@ starting new agents.
 
 - [[Dota buildings live in slot 10 outside the lobby so creeps can be pulled]]
 - [[Player-facing strings are keyed by Dota localization tokens]]
-- The AI commander takes a playing computer slot and moves its start location to the base.
+- The Warcraft AI takes a playing computer slot and moves its start location to the base.
 - Lane numbers that Dota's files don't hold come from cited third-party pages and stay marked
   as unverified (the list below).
 
@@ -98,13 +98,13 @@ starting new agents.
   - Secret Shop range 900;
   - courier bounty (35 in `npc_units`, 25 + 5 per level on the wiki);
   - courier speed capped by `MaxUnitSpeed` 550.
-- Does the melee AI play once the AI commander runs in slot 1?
+- Does the melee AI play once the Warcraft AI runs in slot 1?
 - Do towers on slot 10 still shoot?
 
 ## Next session – entry points
 
 1. Rebuild the launcher dist, then an in-game test (the user clicks):
-   - the AI commander in slot 1;
+   - the Warcraft AI in slot 1;
    - Poof, Sticky Bomb and the TP interrupt;
    - towers on slot 10, the 600 s day, the Glyph, Scan and buyback buttons, Scan on the minimap;
    - drag and drop, the TP slot, the item block at 4:3, 16:9 and 21:9, the courier with F2 and F3;

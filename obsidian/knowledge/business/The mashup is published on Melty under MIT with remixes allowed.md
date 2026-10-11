@@ -17,7 +17,7 @@ date: 2026-10-10
   - companion dota-2, required as the content source.
 - **Package:** the base map and the launcher. No Dota or WC3 content.
 - **Multiplayer:**
-  - up to 6 players: 5 Dota plus 1 commander;
+  - up to 6 players: 5 Dota players plus 1 Warcraft player;
   - players join through WC3's own lobby by hand;
   - so `recipe.multiplayer` gets `maxPlayers: 6` and no `connect`.
 - **Media:** a real gameplay screenshot from the personalized map.

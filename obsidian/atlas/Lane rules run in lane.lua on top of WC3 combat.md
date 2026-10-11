@@ -48,15 +48,15 @@ Dota's own files hold some of the numbers:
 - vision.
 
 The rest come from third-party pages cited in the code, and they are unverified. The list is in
-[[2026-10-11 Lane rules, inventory with courier, talents and the AI commander slot]].
+[[2026-10-11 Lane rules, inventory with courier, talents and the Warcraft AI slot]].
 
 ## Not done yet
 
 - Streak gold, assist gold and Dota's hero-kill XP formula.
 - Illusion bounties: an illusion kill still pays full hero gold.
-- Bounties for the commander's WC3 buildings.
+- Bounties for the Warcraft player's buildings.
 - The camp leash (`world_camps` `C.LEASH`, 800) is too short for pulls.
 - Dota's Glyph and Scan hotkeys.
 
-Related: [[Up to five Dota heroes fight one Warcraft commander]],
+Related: [[Up to five Dota heroes fight one Warcraft player]],
 [[The Dota side aims at full parity with Dota 2]]

@@ -9,7 +9,7 @@ date: 2026-10-11
 
 The user's goal, set on 2026-10-11: a Dota player who joins the Dota side must not notice any
 difference from regular Dota 2. That covers the look, the sound, the controls and the rules.
-The Warcraft commander side stays as it is.
+The Warcraft side stays as it is.
 
 Work is ranked by what a Dota player notices first:
 - the ground, trees, music and HUD in the first minute;
@@ -25,7 +25,7 @@ The v1 exclusions are back on the roadmap:
 - neutral items;
 - facets.
 
-See [[Up to five Dota heroes fight one Warcraft commander]].
+See [[Up to five Dota heroes fight one Warcraft player]].
 
 ## Limits
 

@@ -7,7 +7,7 @@ date: 2026-10-11
 
 ## Decision
 
-The launcher's terrain port (`launcher/dvc_launcher/terrain/convert.py`) raises a corner only
+The launcher's terrain port (`launcher/dvw_launcher/terrain/convert.py`) raises a corner only
 when all four tiles around it are fully unwalkable in Dota. Every cliff tile it creates sits on
 blocked cells only, so the pathing stays byte for byte the same.
 
@@ -19,7 +19,7 @@ blocked cells only, so the pathing stays byte for byte the same.
 - Kept clear:
   - Radiant structures and the fountain;
   - shops, camps, runes, Roshan;
-  - lotus pools, ramps and the commander base.
+  - lotus pools, ramps and the Warcraft base.
 
 ## Result (2026-10-11)
 

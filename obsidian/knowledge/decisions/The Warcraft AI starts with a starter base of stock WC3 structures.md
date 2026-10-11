@@ -1,13 +1,13 @@
 ---
-tags: [decision, commander, ai]
+tags: [decision, warcraft, ai]
 date: 2026-10-11
 ---
 
-# The AI commander starts with a starter base of stock WC3 structures
+# The Warcraft AI starts with a starter base of stock WC3 structures
 
 ## Decision
 
-`src/game/commander_base.lua` gives the AI commander finished stock structures around its hall
+`src/game/warcraft_base.lua` gives the Warcraft AI finished stock structures around its hall
 at game start:
 
 | Race | Towers | Production | Supply |
@@ -23,7 +23,7 @@ How the spots are found:
   exits, and apart from other structures;
 - towers face the Dota side, production stands to the sides, supply behind.
 
-`B.FOR = "ai"` is the default; `"all"` gives the base to a human commander too, `"none"` turns
+`B.FOR = "ai"` is the default; `"all"` gives the base to a human Warcraft player too, `"none"` turns
 it off.
 
 ## Why
@@ -35,10 +35,10 @@ it off.
 ## Notes
 
 - Undead start with 40 food, the others with 30: Spirit Towers count as supply.
-- Each destroyed commander structure pays 150 gold to the Dota hero who last hit it
+- Each destroyed Warcraft structure pays 150 gold to the Dota hero who last hit it
   (`economy.lua`).
-- Since 2026-10-11 the AI commander takes a playing computer slot, slot 1 in single player, and
+- Since 2026-10-11 the Warcraft AI takes a playing computer slot, slot 1 in single player, and
   its start location moves to the base. Whether the melee AI then plays isn't confirmed in game
-  yet; see [[The AI commander idles because its computer slot is empty in single player]].
+  yet; see [[The Warcraft AI idles because its computer slot is empty in single player]].
 
-Related: [[Up to five Dota heroes fight one Warcraft commander]]
+Related: [[Up to five Dota heroes fight one Warcraft player]]

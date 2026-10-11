@@ -7,7 +7,7 @@ date: 2026-10-10
 
 ## Decision
 
-The launcher's converter (`launcher/dvc_launcher/mdx/`) writes classic MDX version 800:
+The launcher's converter (`launcher/dvw_launcher/mdx/`) writes classic MDX version 800:
 1. VRF exports the player's Dota models to glTF.
 2. The converter turns them into MDX with BLP1 textures (JPEG content).
 

@@ -7,13 +7,13 @@ date: 2026-10-10
 
 ## Decision
 
-The launcher (`launcher\dvc_launcher\dota_settings.py`) reads the player's Dota settings:
+The launcher (`launcher\dvw_launcher\dota_settings.py`) reads the player's Dota settings:
 - keys from `Steam\userdata\<account>\570\remote\cfg\dotakeys_personal.lst`, over the VPK's
   `cfg/dotakeys.lst`;
 - convars from `remote\user_convars.vcfg`.
 
 The account is Steam's active user, then `loginusers.vdf` (AutoLogin, newest login). The
-launcher writes `Documents\Warcraft III\CustomMapData\DotaVsCommander\dota_settings.txt`, a
+launcher writes `Documents\Warcraft III\CustomMapData\DotaVsWarcraft\dota_settings.txt`, a
 Preload script that stores a compact string in an unused ability's tooltip.
 `src/ui/dota_settings.lua` loads it with Preloader after the game starts and syncs what game
 state needs.

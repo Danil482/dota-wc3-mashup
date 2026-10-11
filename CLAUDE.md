@@ -5,9 +5,10 @@ overrides default behaviour. Read it before touching files.
 
 ## Project at a glance
 
-- **What**: Dota vs Commander, a Warcraft III Reforged Lua map. Up to five Dota 2 heroes
-  (bots fill empty slots) fight one commander who plays a full WC3 race, with creep waves
-  from the base.
+- **What**: Dota vs Warcraft, a Warcraft III Reforged Lua map. Up to five Dota 2 heroes
+  (bots fill empty slots) fight one Warcraft player who plays a full WC3 race, with creep
+  waves from the base.
+- **Naming**: the WC3 side is called Warcraft (the Warcraft player, the Warcraft AI). Never "commander".
 - **Content**: the Dota models, icons and voice lines come from the player's own Dota 2
   install through the launcher in `launcher/`. The repo and every release contain no Dota or
   WC3 assets.
@@ -43,7 +44,10 @@ overrides default behaviour. Read it before touching files.
 3. **In-game tests.**
    - The user clicks the start dialogs ("OK", then "Play offline") on every launch. Tell the
      user before launching.
-   - Never simulate mouse or keyboard input.
+   - Exception: when the user says in the current session that the lead may start the game
+     alone, `tools/run_test.ps1 -AutoStart` clicks those two dialogs and nothing else. The
+     permission lasts until the session ends or the user withdraws it. Agents never launch WC3.
+   - Apart from that exception, never simulate mouse or keyboard input.
    - Screenshots capture only the game window (PrintWindow), never the whole screen.
 4. **Git.**
    - Commit only when the user asks.
@@ -56,7 +60,7 @@ overrides default behaviour. Read it before touching files.
 
 ```
 .venv\Scripts\python.exe -I tools\build.py --test --work build\work_<name>
-powershell -ExecutionPolicy Bypass -File tools\run_test.ps1 -Map build\work_<name>\DotaVsCommander_test.w3x -Timeout 3000 -Keep
+powershell -ExecutionPolicy Bypass -File tools\run_test.ps1 -Map build\work_<name>\DotaVsWarcraft_test.w3x -Timeout 3000 -Keep
 ```
 
 - A build is good only if it prints `MOCK RESULT: OK`. Autotest FAIL lines on the mock (towers,
@@ -64,10 +68,11 @@ powershell -ExecutionPolicy Bypass -File tools\run_test.ps1 -Map build\work_<nam
 - `--test` uses WC3 stand-in models. `--dota-models` uses the paths that only a personalized
   map has.
 - To get a personalized map, rebuild the launcher with `launcher\build.ps1`, then run
-  `dist\DotaVsCommander\DotaVsCommander.exe --dota "<dota 2 beta>" --map <w3x> --out <w3x> --prepare-only --quiet`.
-- In-game log: `Documents\Warcraft III\CustomMapData\DotaVsCommander\log.txt`. Documents may
+  `dist\DotaVsWarcraft\DotaVsWarcraft.exe --dota "<dota 2 beta>" --map <w3x> --out <w3x> --prepare-only --quiet`.
+- In-game log: `Documents\Warcraft III\CustomMapData\DotaVsWarcraft\log.txt`. Documents may
   be redirected.
-- Test chat cheats: `-lvl N`, `-gold N`, `-refresh`, `-wtf`, `-respawn`, `-spells`.
+- Test chat cheats: `-lvl N`, `-gold N`, `-refresh`, `-wtf`, `-respawn`, `-spells`, `-noend`
+  (test builds end the game like release builds; `-noend` keeps a decided game going).
 
 ## Engine invariants – do not break without discussion
 
@@ -100,7 +105,7 @@ powershell -ExecutionPolicy Bypass -File tools\run_test.ps1 -Map build\work_<nam
 - At most three agents run at the same time. Queue the rest, and start the next one when a
   running agent finishes.
 - Shared files are re-read right before each edit and changed in small, local edits:
-  `tools/gen_objects.py`, `launcher/dvc_launcher/cli.py`, `launcher/build.ps1` and
+  `tools/gen_objects.py`, `launcher/dvw_launcher/cli.py`, `launcher/build.ps1` and
   `launcher/tests/test_dist.py`.
 - Each agent builds into its own `--work build\work_<name>`. Agents never launch WC3 and
   never commit.
@@ -122,7 +127,7 @@ The library lives in `~/.claude/agents/`. Prefer these over `general-purpose`.
 | Launcher (Python, PyInstaller, VRF, StormLib) | `Senior Python Developer` |
 | Fixes from the user's in-game reports | `Minimal Change Engineer` |
 | Mechanics and balance (asymmetric match, economy, waves) | `Game Designer` |
-| Map layout, lanes, commander base area | `Level Designer` |
+| Map layout, lanes, Warcraft base area | `Level Designer` |
 | Dota → MDX/BLP conversion, VFX, model and texture budgets | `Technical Artist` |
 | Converter and exporter tooling | `Blender Add-on Engineer` |
 | Voice lines and sound selection | `Game Audio Engineer` |

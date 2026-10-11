@@ -44,3 +44,10 @@ A map without a minimap crashes, see
 Related: [[Map archives are packed with StormLib, not mdx-m3-viewer]],
 [[Test builds use WC3 stand-in models]],
 [[Testing runs offline on a mock and in game with user clicks]]
+
+## Update (2026-10-11, night)
+
+A clean clone builds after `tools/fetch_research.py`: it fills `research/jass` (jassdoc at a pinned
+commit), `research/slk` (from WC3's CASC through `tools/casc.py`), `tools/vendor/stormlib` (pinned
+StormLib) and `tools/node_modules` (`npm ci`), with `--dota` also the Dota data; Python packages are in
+`tools/requirements.txt`. `build.py` stops early with a hint when `research/` is incomplete.
