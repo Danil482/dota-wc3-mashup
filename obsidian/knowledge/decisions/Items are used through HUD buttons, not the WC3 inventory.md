@@ -26,4 +26,10 @@ even after they were looked up by name; see [[Native inventory buttons die under
 
 - Items are always used by the player's main hero.
 - There is no drag and drop or drop-on-ground yet.
-- There is no cooldown sweep on the item icons yet.
+- Since 2026-10-11 the item buttons show a cooldown sweep and charges. Item cooldowns live in Lua
+  on the item (`Items.startCooldown`, `cdLeft`), because WC3's remaining-cooldown read can return
+  0 for Channel abilities.
+- Backpack, stash, TP slot and courier storage exist in `src/game/inventory.lua` but are not
+  wired yet.
+- A pending point item may be cast at (0,0) when the targeting click lands on a frame, because
+  frame clicks report 0,0 (finding, 2026-10-11).

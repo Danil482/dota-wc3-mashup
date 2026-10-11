@@ -28,6 +28,9 @@ were already in the map, but only spawn and cast events played them.
 ## Notes
 
 - `src/data/sounds.json` lists the lines per hero and event, and the launcher extracts them.
+- Since 2026-10-11 there are 648 lines. New events cover failed casts ("not yet", "no mana"),
+  runes, the Aegis, respawn, the battle start and first blood. Music, the announcer and gameplay
+  sounds are separate modules ([[Dota music plays as 2D sounds mixed per player by volume]]).
 - Lines don't overlap per unit (2.5 s).
 - Owner-only playback must stay multiplayer-safe; see
   [[A sound for one player is created for all and muted by volume]].

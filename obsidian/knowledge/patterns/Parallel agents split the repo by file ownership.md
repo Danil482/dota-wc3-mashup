@@ -29,6 +29,9 @@ assets, models, world systems, the HUD.
 - **When limits run low, ask agents to wrap up** instead of killing them. A killed agent can
   leave half-edited shared files. A wrap-up asks them to finish or revert within a couple of
   steps and report.
+- **At most three agents at a time** (2026-10-11). The rest wait in a queue, and the next one
+  starts when a running agent finishes. The seven wave 1 agents started that day were allowed
+  to finish.
 
 ## Lessons
 
@@ -36,3 +39,11 @@ assets, models, world systems, the HUD.
   Dota paths, test builds turned invisible. Make such switches opt-in build flags.
 - An agent's partial edit can break someone else's build. Before integrating, check that the
   agent printed `MOCK RESULT: OK`.
+- A network drop kills every running agent (2026-10-11). Briefs ask for small, complete steps,
+  so a dead agent never leaves a half-made edit in a shared file.
+- Some library agents (Senior Python Developer) have no SendMessage tool. They can't report
+  mid-task, so an "early report" request makes them stop at their hand-back.
+- Parallel launcher runs need separate caches: each agent sets `DVC_USER_DIR`, and only the
+  lead rebuilds `dist`.
+- When an agent stops early, its research goes into the next brief and the session note, so the
+  next agent starts where it stopped.

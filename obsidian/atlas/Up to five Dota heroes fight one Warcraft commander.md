@@ -14,7 +14,9 @@ The design was agreed with the user before the build started, on 2026-10-10.
 - **Commander**: one player with a full WC3 race of their choice: altar, heroes, buildings
   and their own army.
   - Uncontrollable creep waves leave the commander base every 30 s.
-  - An AI commander plays when no human takes the slot.
+  - An AI commander plays when no human takes the slot. It starts with a starter base
+    ([[The AI commander starts with a starter base of stock WC3 structures]]). In single player
+    its slot is still empty ([[The AI commander idles because its computer slot is empty in single player]]).
 - **Slots**: 9 in total. Dota force mask `0b001011111`, commander force `0b110100000`.
   Slot 9 holds the test dummies.
 
@@ -45,7 +47,8 @@ The v1 roster has 11 heroes:
 - Shadow Fiend (`nevermore`)
 
 Each one has its current Dota kit with the innate, and the shop sells the core items.
-Talents, Aghanim's, facets and neutral items are out of v1.
+Talents, Aghanim's, facets and neutral items were left out of v1. Since 2026-10-11 they are on
+the roadmap: [[The Dota side aims at full parity with Dota 2]].
 
 ## Engine limit
 

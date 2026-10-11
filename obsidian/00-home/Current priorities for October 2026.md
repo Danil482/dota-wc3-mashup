@@ -1,46 +1,79 @@
 ---
 tags: [priorities, status]
-date: 2026-10-10
+date: 2026-10-11
 ---
 
 # Current priorities – October 2026
 
-The project started on 2026-10-10. By the end of the day:
-- the personalized map runs on Dota 2's own layout, with Dota models, icons, voice lines, HUD
-  art, wards and runes;
-- Dota players get a working Dota-style HUD and shop, items used from the HUD, a
-  selected-units bar with Tab, and their own Dota keys and settings.
+The project started on 2026-10-10. By the end of 2026-10-11 the personalized map has:
+- Dota 2's own layout, with cliffs where Dota blocks the ground;
+- Dota trees and ground tiles; they show in Reforged graphics, and classic graphics are broken;
+- Dota models, icons and voice lines, plus Dota's music, announcer and gameplay sounds;
+- a Dota HUD and shop with item cooldown sweeps;
+- quick cast and Dota auto-attack, both confirmed in game.
 
-Neutral hangs got a universal mitigation that is not yet tested in game. Melty publishing is
-still blocked by the VPN (see [[Melty cannot check the token while a VPN is on]]). Design:
+The AI commander starts with a base but still idles in single player: its computer slot is empty
+([[The AI commander idles because its computer slot is empty in single player]]). Melty
+publishing hasn't started; the last attempt was blocked by the VPN (see
+[[Melty cannot check the token while a VPN is on]]). Design:
 [[Up to five Dota heroes fight one Warcraft commander]].
+
+## North star (2026-10-11)
+
+[[The Dota side aims at full parity with Dota 2]]: a Dota player must not notice any difference
+from regular Dota 2. The WC3 commander side is fine as it is.
 
 ## Check in game first
 
-Build `tools\build.py --test --dota-models --work build\work_play`, then run the launcher with
-`--prepare-only`. Then check:
+Build `tools\build.py --test --dota-models --work build\work_play<N>`, then run
+`dist\DotaVsCommander\DotaVsCommander.exe ... --prepare-only` (from PowerShell with
+`Start-Process -Wait`). In-game tests on 2026-10-11:
 
-- [ ] Clicking neutrals: static portraits, no hang ([[Selecting some Dota neutrals hung the game]])
-- [ ] Classic graphics: models, textures, HUD
-- [ ] Quick cast at the ground (Pudge's hook), and that the targeting cursor closes
-- [ ] Auto-attack after a move: the hero stays idle; the log may show "took a new target ... stopped"
-- [ ] Right-click hold to move, while dragging
-- [ ] Ward and rune models; runes spin and are picked up
-- [ ] Aegis, runes, Roshan's spell block, camp leash, backdoor
+- [x] Quick cast at the ground (Pudge's hook), and at a unit (Dismember)
+- [x] Auto-attack after a move or a stop: the hero stays idle in Standard mode
+- [x] Right-click hold with the move marker; denies; failed-cast "not yet" line
+- [x] Ward and rune models; runes spin and are picked up
+- [x] Aegis, runes, Roshan's spell block, camp leash, backdoor
+- [x] Dota trees and ground tiles in Reforged graphics; Dota HUD art; music plays
+- [ ] Classic graphics: the ground textures are broken; ask the user what exactly shows
+- [ ] Clicking neutrals: static portraits, no hang ([[Selecting some Dota neutrals hung the game]]);
+      still not tested
+- [ ] The announcer, battle music, last-hit coin and rune sounds: not yet confirmed by ear
+- [ ] Item cooldown sweep and HUD click blocking: not yet confirmed in game
+- [ ] The AI commander plays once its slot is fixed
+- [ ] Bots cast abilities: zero casts in two runs
 
-## Next work
+## Next – small fixes (no agent needed)
 
-- [ ] **Blocked ground** that looks walkable: raise about 52k gridnav cells into cliffs and add
-      rocks for the strips. The plan is in the Level Designer's report (2026-10-10).
-- [ ] **Dota music:** laning layers, battle loops, win/lose stingers, about 15–17 MB.
-      PlayMusic is risky in Reforged.
-- [ ] **Item UX:** cooldown sweep on item buttons, drag and drop, dropping items.
-- [ ] **World clicks on HUD gaps:** clicks on empty HUD space reach the world. Block them
-      without blocking our buttons.
-- [ ] **Creep pulls:** neutrals vs lane waves; the passivity covers towers too.
-- [ ] **Ability effects:** Dota-like approximations from Dota meshes and textures, 1–2 per
-      hero.
-- [ ] **`research/`** is not in git: add a script that downloads jassdoc and the SLK metadata.
+- [ ] `roles.lua`: give the AI commander a playing computer slot (slot 5, then any playing
+      computer user slot, then slot 7 with a warning)
+- [ ] Kind-matched orders for Meepo's Poof (`blink`) and Techies' Sticky Bomb (`acidbomb`)
+      ([[Point quick casts failed on Channel orders the engine refuses]])
+- [ ] Start the day at 6:00 with a 600 s cycle (the moon shows at 1:57)
+- [ ] `Ncl5 = 0` for channelled items such as the TP scroll ([[Channels never lock the command card]])
+- [ ] Remove the 18 inert probe Channels from `gen_objects.py` now that the probe has answered
+- [ ] Classic tile format, once the user describes the bug
+- [ ] Find out why the AI's base vanished at 4:00 in the Reforged run without "game over"
+
+## Next – agents, at most three at a time (paused on 2026-10-11: usage limits)
+
+- [ ] **talents**: the talent tree, Aghanim's Scepter and Shard for all 11 heroes
+- [ ] **lane**: denies, creep pulls, aggro, Glyph and Scan, day/night, buyback, kill gold. Its
+      plan is in [[2026-10-11 Dota parity wave – terrain, audio, controls and the AI commander]]
+- [ ] **inventory**, tasks 3–6: stash and buying anywhere, backpack and TP slot, drag and drop,
+      courier (`src/game/inventory.lua` exists but is not wired; plan in the same session note)
+- [ ] **vfx**: Dota attack projectiles and 1–2 signature spell effects per hero
+      (`build\work_vfx\x_attacks` holds decompiled attack particles from a failed run)
+- [ ] **bootstrap**: `tools/fetch_research.py`, so a clean clone can build (`tools/casc.py`
+      already reads the WC3 CASC storage)
+
+## Next – wave 2
+
+- [ ] Current Dota map features: Tormentors, Lotus Pools, Twin Gates, Watchers, Wisdom Shrines
+- [ ] Neutral items and their slot
+- [ ] Facets
+- [ ] Dota polish: cursor, fonts, health bars, minimap hero icons, cliff textures
+- [ ] Multiplayer test with two clients
 
 ## Publishing on Melty
 
@@ -56,6 +89,24 @@ Build `tools\build.py --test --dota-models --work build\work_play`, then run the
   7. `submit_release`
   8. publish with the user's go-ahead
 - [ ] Say honestly that multiplayer was not tested with two clients
+- [ ] The personalized map is about 69 MB; the 128 MB limit is from patch 1.29's notes and
+      untested on 2.0.1
+
+## Done (2026-10-11)
+
+- [x] Blocked ground rises into cliffs over Dota-blocked cells
+      ([[Blocked ground rises into cliffs only over Dota-blocked cells]])
+- [x] Dota trees and ground tiles ([[Trees stay WC3 destructables with Dota models swapped in]])
+- [x] Dota music, announcer and gameplay sounds
+      ([[Dota music plays as 2D sounds mixed per player by volume]])
+- [x] Quick cast from build data; Channel orders from pools that match the target type
+      ([[Channel orders come from pools that match the target type]])
+- [x] Auto-attack held off with the worker unit type ([[Auto-attack is held off with the worker unit type]])
+- [x] Right-click hold marker; failed-cast lines; sturdier HUD art detection
+- [x] The AI commander's starter base ([[The AI commander starts with a starter base of stock WC3 structures]])
+- [x] Item cooldown sweep and charges; HUD click blockers
+- [x] Launcher dist rebuilt; `DVC_USER_DIR` for parallel source runs
+- [x] CLAUDE.md: at most three agents at the same time
 
 ## Done (2026-10-10)
 

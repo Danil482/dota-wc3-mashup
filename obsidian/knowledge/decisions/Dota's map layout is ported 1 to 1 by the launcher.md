@@ -40,7 +40,9 @@ from their own install keeps both the look and the rule.
 
 ## Known gaps
 
-- Blocked ground with no visible reason, such as behind the fountains, looks walkable. The
-  fix is planned: raise it into cliffs and add rocks.
-- No Dota ground textures or tree models yet.
+- Fixed on 2026-10-11: blocked ground rises into cliffs
+  ([[Blocked ground rises into cliffs only over Dota-blocked cells]]), and the map has Dota trees
+  and ground tiles ([[Trees stay WC3 destructables with Dota models swapped in]]).
+- Classic graphics show broken ground textures (2026-10-11; details pending). Cliff faces still
+  use WC3 textures.
 - The world mock asserts the base layout's counts.

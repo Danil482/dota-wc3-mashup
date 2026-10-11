@@ -44,5 +44,11 @@ date: 2026-10-10
   See [[UI probe logs show which frames get the mouse]].
 - **A freeze vs a crash:** WC3 writes no log for a freeze. Windows' Application event log
   separates Application Hang (1002) from a crash.
+- **Engine probes:** `-uiprobe` and the controls probe (`controls_probe.txt`) answer what the
+  mock can't; see [[Test-build engine probes answer what the mock can't]].
+- **The log keeps only the last 600 lines.** Answers that must survive go into their own
+  CustomMapData file.
+- **A test map needs a matching launcher.** After launcher changes, rebuild `dist`
+  (`launcher\build.ps1`) or run the launcher from source with `DVC_USER_DIR`.
 
 Related: [[The map is built from source with one build.py command]]

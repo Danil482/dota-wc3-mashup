@@ -59,4 +59,9 @@ and mdx-m3-viewer's sanity test.
 - Neutrals, Roshan, summons and wards also get static portrait models; see
   [[Neutral portraits are static palette models]].
 
+## Update (2026-10-11)
+
+The terrain package converts 24 Dota tree models with the same converter, each with its stump.
+See [[Trees stay WC3 destructables with Dota models swapped in]].
+
 Related: [[Dota content reaches the map only through the launcher]]

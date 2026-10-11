@@ -97,6 +97,8 @@ powershell -ExecutionPolicy Bypass -File tools\run_test.ps1 -Map build\work_<nam
 
 - Run independent pieces in parallel background agents. Each brief names the files the agent
   owns.
+- At most three agents run at the same time. Queue the rest, and start the next one when a
+  running agent finishes.
 - Shared files are re-read right before each edit and changed in small, local edits:
   `tools/gen_objects.py`, `launcher/dvc_launcher/cli.py`, `launcher/build.ps1` and
   `launcher/tests/test_dist.py`.

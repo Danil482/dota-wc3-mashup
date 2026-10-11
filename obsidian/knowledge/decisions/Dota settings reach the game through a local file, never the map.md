@@ -27,13 +27,16 @@ settings.
 ## What is applied
 
 - ability, item, TP, shop and select-hero keys;
-- per-key quick cast at the cursor (from synced mouse moves; `BlzGetMouseWorldX/Y` don't exist
-  in 2.0.1);
+- per-key quick cast at the cursor, from synced mouse moves (`BlzGetMouseWorldX/Y` don't exist
+  in 2.0.1). The cast uses string orders from build data
+  ([[Channel orders come from pools that match the target type]]);
 - double-tap self cast;
-- auto-attack modes 0/1/2 with a target-acquired guard;
+- auto-attack modes 0/1/2, held off with the worker unit type
+  ([[Auto-attack is held off with the worker unit type]]);
 - right-click semantics;
 - camera distance and zoom lock;
-- right-click hold to move.
+- right-click hold to move, with WC3's move marker shown to the holder only;
+- Dota's "not yet" and "no mana" lines when an ability key fails.
 
 ## Not possible
 

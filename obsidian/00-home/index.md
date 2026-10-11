@@ -1,6 +1,6 @@
 ---
 tags: [home, navigation]
-date: 2026-10-10
+date: 2026-10-11
 ---
 
 # Dota vs Commander – a Dota 2 × Warcraft III mashup
@@ -36,6 +36,13 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[Neutral portraits are static palette models]]
 - [[Stolen spells use D-cell copies of their objects]]
 - [[Towers, buildings and lane waves ignore neutrals]]
+- [[The Dota side aims at full parity with Dota 2]]
+- [[Channel orders come from pools that match the target type]]
+- [[Auto-attack is held off with the worker unit type]]
+- [[Dota music plays as 2D sounds mixed per player by volume]]
+- [[Blocked ground rises into cliffs only over Dota-blocked cells]]
+- [[Trees stay WC3 destructables with Dota models swapped in]]
+- [[The AI commander starts with a starter base of stock WC3 structures]]
 
 ## Debugging
 
@@ -46,6 +53,10 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[Text labels on custom buttons swallow the mouse even when disabled]]
 - [[Native inventory buttons die under the Dota HUD]]
 - [[Selecting some Dota neutrals hung the game]]
+- [[Point quick casts failed on Channel orders the engine refuses]]
+- [[SetUnitAcquireRange ignores 0, so a zero range can't stop auto-attacks]]
+- [[The AI commander idles because its computer slot is empty in single player]]
+- [[HUD art detection broke when one voice line was missing]]
 
 ## Patterns
 
@@ -53,6 +64,7 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[A sound for one player is created for all and muted by volume]]
 - [[Dota sub-abilities share the main ability cell via BlzUnitHideAbility]]
 - [[UI probe logs show which frames get the mouse]]
+- [[Test-build engine probes answer what the mock can't]]
 
 ## Integrations and publishing
 
@@ -64,5 +76,6 @@ Status and next tasks: [[Current priorities for October 2026]]
 
 `sessions/` holds one note per working session, named `YYYY-MM-DD <slug>.md`.
 
+- [[2026-10-11 Dota parity wave – terrain, audio, controls and the AI commander]]
 - [[2026-10-10 Dota terrain, working HUD and imported Dota settings]]
 - [[2026-10-10 Mashup skeleton from an empty folder to Dota models in game]]
