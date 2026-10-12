@@ -1,6 +1,6 @@
 ---
 tags: [priorities, status]
-date: 2026-10-11
+date: 2026-10-12
 ---
 
 # Current priorities – October 2026
@@ -16,6 +16,9 @@ In-game test 2 (2026-10-11 night): every autotest check passed, item cooldowns a
 the Warcraft AI harvests its grove, but the game **froze** at about 230 s
 ([[A freeze is suspected from own lane creeps with animated portraits and WC3 voices]]). Session:
 [[2026-10-11 Night wave – effects, cast animations, sounds, grove and the Dota vs Warcraft rename]].
+
+On 2026-10-12 only the launch video changed. It was rebuilt on HyperFrames with Dota's own sound, and no
+game code changed ([[2026-10-12 Launch video rebuilt on HyperFrames with Dota's own sound]]).
 
 ## North star
 
@@ -90,7 +93,17 @@ regular Dota 2. The Warcraft side keeps Warcraft's look and sound.
       remixes allowed), uploads, a real screenshot, `submit_release`, publish with the user's go-ahead
 - [ ] Say honestly that multiplayer was not tested with two clients
 - [ ] The personalized map is about 70 MB; the 128 MB limit is from patch 1.29's notes, untested on 2.0.1
-- [ ] A 21 s launch video exists in `build\brag-output\` (not in git)
+- [ ] Launch video v2 (HyperFrames, Dota's own sound, 21 s) is in `build\brag-output-2026-10-12-100410\`
+      (not in git). The user watches it first, then decides whether it may go into the listing, since it
+      carries Dota music and art ([[The launch video uses Dota's own sound and stays out of git]]).
+
+## Done (2026-10-12)
+
+- [x] Launch video rebuilt on HyperFrames 0.8.149 through `hf.sh`
+      ([[HyperFrames renders the launch video through the pinned hf.sh wrapper]]):
+      - the sound is Dota's horn, battle music, announcer and Radiant victory stinger, cut on the music's
+        bar grid;
+      - the voice-line count is corrected to 648.
 
 ## Done (2026-10-11, night)
 

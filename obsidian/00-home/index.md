@@ -1,6 +1,6 @@
 ---
 tags: [home, navigation]
-date: 2026-10-11
+date: 2026-10-12
 ---
 
 # Dota vs Warcraft – a Dota 2 × Warcraft III mashup
@@ -84,11 +84,14 @@ Status and next tasks: [[Current priorities for October 2026]]
 - [[Melty publishes the mashup and checks one-click play]]
 - [[VRF CLI extracts Dota resources from VPKs]]
 - [[The mashup is published on Melty under MIT with remixes allowed]]
+- [[HyperFrames renders the launch video through the pinned hf.sh wrapper]]
+- [[The launch video uses Dota's own sound and stays out of git]]
 
 ## Session log
 
 `sessions/` holds one note per working session, named `YYYY-MM-DD <slug>.md`.
 
+- [[2026-10-12 Launch video rebuilt on HyperFrames with Dota's own sound]]
 - [[2026-10-11 Night wave – effects, cast animations, sounds, grove and the Dota vs Warcraft rename]]
 - [[2026-10-11 Lane rules, inventory with courier, talents and the Warcraft AI slot]]
 - [[2026-10-11 Dota parity wave – terrain, audio, controls and the Warcraft AI]]
